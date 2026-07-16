@@ -101,7 +101,7 @@
         max-width: calc(100% - 8px) !important;
       }
 
-      /* ── Card "Certificado de Conclusão": destaque premium, vidro/blur, largura total ── */
+      /* ── Card "Certificado de Conclusão": borda dourada premium ── */
       [class*="col-span-2 rounded-2xl overflow-hidden shadow-xl transition-transform"] {
         background: rgba(42, 26, 64, 0.45) !important;
         backdrop-filter: blur(18px) !important;
@@ -109,14 +109,17 @@
         border: 1px solid rgba(212, 175, 55, 0.3) !important;
         box-shadow: 0 0 30px rgba(212, 175, 55, 0.12), 0 12px 32px rgba(0, 0, 0, 0.35) !important;
       }
+
+      /* ── Seção de texto abaixo da capa: compacta ── */
       [class*="p-4 flex flex-col justify-center items-center bg-[#1a1025] text-center"] {
         background: rgba(26, 16, 37, 0.35) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
-        padding: 26px 24px !important;
-        gap: 12px !important;
+        padding: 14px 20px !important;
+        gap: 8px !important;
       }
-      /* Ícones do certificado um pouco maiores, para preencher melhor o espaço */
+
+      /* ── Ícones do certificado ── */
       [class*="w-14 h-14 text-[#d4af37]"] {
         width: 68px !important;
         height: 68px !important;
@@ -131,6 +134,43 @@
       [class*="z-[9999]"] {
         display: none !important;
       }
+
+      /* ── Certificado: capa landscape (proporção 2 módulos lado a lado) ── */
+      #pq-cert-img-wrap {
+        aspect-ratio: 2 / 1.1 !important;
+        height: auto !important;
+      }
     </style>
+
+    <!-- Corrigir aspect-ratio do certificado via JS (React usa classes hasheadas que não são acessíveis por CSS simples) -->
+    <script>
+      (function() {
+        function fixCertCard() {
+          // Encontrar o card col-span-2 (certificado)
+          var cards = document.querySelectorAll('[class*="col-span-2"]');
+          cards.forEach(function(card) {
+            if (card.dataset.pqFixed) return;
+            // Verificar se é o card do certificado (contém imagem capa7.png)
+            var img = card.querySelector('img[src*="capa7"]');
+            if (!img) return;
+            card.dataset.pqFixed = '1';
+            // Encontrar o wrapper da imagem (tem aspect-ratio square via Tailwind)
+            var wrap = img.closest('[class*="aspect-square"]') || img.parentElement;
+            if (wrap) {
+              wrap.id = 'pq-cert-img-wrap';
+              wrap.style.aspectRatio = '2 / 1.1';
+              wrap.style.height = 'auto';
+              // Remover classe aspect-square se existir para não conflitar
+              wrap.className = wrap.className.replace(/aspect-square/g, '').trim();
+            }
+          });
+        }
+
+        var obs = new MutationObserver(fixCertCard);
+        obs.observe(document.body || document.documentElement, { childList: true, subtree: true });
+        if (document.body) fixCertCard();
+        document.addEventListener('DOMContentLoaded', fixCertCard);
+      })();
+    </script>
   </body>
 </html>
