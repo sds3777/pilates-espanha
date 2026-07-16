@@ -103,15 +103,20 @@
       + '<p style="color:#fff;font-size:16px;font-weight:700;margin:0 0 8px;">Instalar o app na tela inicial?</p>'
       + '<p style="color:#c9a8f0;font-size:14px;line-height:1.5;margin:0 0 24px;">Acesse suas aulas de Pilates com um toque, direto da tela do seu celular.</p>'
       + '<div style="display:flex;gap:12px;">'
-      + '<button id="pq-install-depois" style="flex:1;padding:12px;background:transparent;border:2px solid #3a2560;color:#9b7ec8;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;">Agora não</button>'
-      + '<button id="pq-install-sim" style="flex:1;padding:12px;background:#d4af37;border:none;color:#0d1a1f;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Instalar</button>'
+      + '<button id="pq-install-depois" style="flex:1;padding:12px;background:transparent;border:2px solid #3a2560;color:#9b7ec8;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;">Não, agora</button>'
+      + '<button id="pq-install-sim" style="flex:1;padding:12px;background:#d4af37;border:none;color:#0d1a1f;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Sim, instalar</button>'
       + '</div></div>';
     document.body.appendChild(modal);
 
+    // "Não, agora": fecha o popup e mantém o FAB visível para instalar depois
     document.getElementById('pq-install-depois').addEventListener('click', function () {
-      marcarPopupInstalarRespondido();
+      marcarPopupInstalarRespondido(); // evita reexibir o popup
       fecharPopupInstalar();
+      // Reabilita o FAB para que o usuário possa instalar depois
+      atualizarBotaoInstalar();
     });
+
+    // "Sim, instalar": abre o processo de instalação e oculta o FAB após instalar
     document.getElementById('pq-install-sim').addEventListener('click', function () {
       marcarPopupInstalarRespondido();
       fecharPopupInstalar();
@@ -287,5 +292,41 @@
   } else {
     mostrarLogin();
   }
+
+  // ─── Injetar cadeado grande sobre a capa do certificado (estado bloqueado) ──
+  // Usa MutationObserver para aguardar o React renderizar o card
+  (function injetarCadeadoCertificado() {
+    var LOCK_SVG =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+      + '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>'
+      + '<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>'
+      + '</svg>';
+
+    function tentarInjetar() {
+      // Selecionar o card do certificado bloqueado (col-span-2 + cursor-not-allowed)
+      var cards = document.querySelectorAll('[class*="col-span-2"][class*="cursor-not-allowed"]');
+      cards.forEach(function(card) {
+        if (card.querySelector('#pq-cert-lock')) return; // já injetado
+        // Encontrar o container da imagem (aspect-square)
+        var imgWrap = card.querySelector('[class*="aspect-square"]');
+        if (!imgWrap) return;
+        // Encontrar o div de sobreposição central
+        var overlay = imgWrap.querySelector('[class*="absolute inset-0 flex flex-col items-center justify-center z-10"]');
+        if (!overlay) return;
+        // Limpar conteúdo existente e injetar cadeado grande
+        overlay.innerHTML =
+          '<div id="pq-cert-lock" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">'
+          + LOCK_SVG
+          + '<p style="color:#d4af37;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0;text-shadow:0 1px 4px rgba(0,0,0,0.6);">Bloqueado</p>'
+          + '</div>';
+      });
+    }
+
+    // Observar mudanças no DOM para reagir ao React renderizar o card
+    var obs = new MutationObserver(function() { tentarInjetar(); });
+    obs.observe(document.body, { childList: true, subtree: true });
+    // Tentar imediatamente caso já esteja renderizado
+    tentarInjetar();
+  })();
 
 })();
