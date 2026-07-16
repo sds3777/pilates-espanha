@@ -5,12 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pilates em Casa</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1025">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <script type="module" crossorigin src="/assets/index-VrPcdrUj.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-BQ8LcfVF.css">
   </head>
   <body>
     <div id="root"></div>
     <script src="/quiz.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
 
     <style>
       /* ── Popup social proof: reduzir ~50% no mobile ── */
@@ -80,27 +90,40 @@
         margin-right: -0.75rem !important;
       }
 
-      /* ── Faixa "MÓDULO X": mais discreta e elegante sobre a capa ── */
+      /* ── Faixa "MÓDULO X": ~20% menor, alinhada ao canto da capa, sem ultrapassar a borda ── */
       [class*="top-1.5 left-1.5 bg-[#d4af37]"][class*="rounded-full"] {
-        padding: 2px 7px !important;
-        font-size: 7px !important;
+        top: 4px !important;
+        left: 4px !important;
+        padding: 1.5px 5px !important;
+        font-size: 6px !important;
         line-height: 1.2 !important;
         letter-spacing: 0.5px !important;
+        max-width: calc(100% - 8px) !important;
       }
 
-      /* ── Card "Certificado de Conclusão": efeito vidro/blur, ocupando a linha toda ── */
+      /* ── Card "Certificado de Conclusão": destaque premium, vidro/blur, largura total ── */
       [class*="col-span-2 rounded-2xl overflow-hidden shadow-xl transition-transform"] {
         background: rgba(42, 26, 64, 0.45) !important;
         backdrop-filter: blur(18px) !important;
         -webkit-backdrop-filter: blur(18px) !important;
-        border: 1px solid rgba(212, 175, 55, 0.25) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        box-shadow: 0 0 30px rgba(212, 175, 55, 0.12), 0 12px 32px rgba(0, 0, 0, 0.35) !important;
       }
       [class*="p-4 flex flex-col justify-center items-center bg-[#1a1025] text-center"] {
         background: rgba(26, 16, 37, 0.35) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
-        padding: 22px 20px !important;
-        gap: 10px !important;
+        padding: 26px 24px !important;
+        gap: 12px !important;
+      }
+      /* Ícones do certificado um pouco maiores, para preencher melhor o espaço */
+      [class*="w-14 h-14 text-[#d4af37]"] {
+        width: 68px !important;
+        height: 68px !important;
+      }
+      [class*="w-20 h-20 text-[#d4af37] drop-shadow-md"] {
+        width: 88px !important;
+        height: 88px !important;
       }
 
       /* ── Remover completamente a tela de login antiga (nome + senha) ── */
