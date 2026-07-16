@@ -28,23 +28,58 @@
     } catch (e) { return false; }
   }
 
-  // Atualiza visibilidade/estado do botão "Instalar App" (chamado ao renderizar e quando o prompt fica disponível)
+  // ─── Botão flutuante "Instalar App": só aparece DEPOIS que o usuário já entrou no app ──
+  function criarBotaoInstalarFlutuante() {
+    if (document.getElementById('pq-install-fab')) return;
+    var fab = document.createElement('button');
+    fab.id = 'pq-install-fab';
+    fab.style.cssText = 'display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:9998;align-items:center;justify-content:center;gap:8px;padding:12px 20px;background:#d4af37;color:#0d1a1f;border:none;border-radius:999px;font-family:Inter,system-ui,sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.35);';
+    fab.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>'
+      + 'Instalar App';
+    fab.addEventListener('click', function () {
+      if (deferredInstallPrompt) {
+        fab.disabled = true;
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.finally(function () {
+          deferredInstallPrompt = null;
+          fab.disabled = false;
+          atualizarBotaoInstalar();
+        });
+      } else if (isIOS()) {
+        mostrarInstrucaoIOS();
+      }
+    });
+    document.body.appendChild(fab);
+  }
+
+  // Atualiza visibilidade/estado do botão "Instalar App" (chamado quando o prompt fica disponível,
+  // logo após o login, e quando o app é instalado)
   function atualizarBotaoInstalar() {
-    var btn = document.getElementById('pq-install-btn');
-    if (!btn) return;
-    if (isStandaloneApp()) {
-      btn.style.display = 'none';
+    var fab = document.getElementById('pq-install-fab');
+    if (!fab) return;
+
+    var authAtual = null;
+    try { authAtual = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch (e) {}
+    var logado = !!(authAtual && authAtual.loggedIn);
+
+    if (!logado || isStandaloneApp()) {
+      fab.style.display = 'none';
       return;
     }
     if (deferredInstallPrompt || isIOS()) {
-      btn.style.display = 'flex';
-      btn.disabled = false;
+      fab.style.display = 'flex';
+      fab.disabled = false;
     } else {
-      btn.style.display = 'none';
+      fab.style.display = 'none';
     }
   }
 
-  // Se já tem auth salvo, não faz nada
+  // O botão flutuante existe sempre (sua visibilidade é controlada por atualizarBotaoInstalar)
+  criarBotaoInstalarFlutuante();
+  atualizarBotaoInstalar();
+
+  // Se já tem auth salvo, apenas garante o botão de instalar e encerra (usuária já logada)
   var auth = null;
   try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
   if (auth && auth.loggedIn) return;
@@ -95,10 +130,6 @@
       + '<p id="pq-email-erro" style="color:#f87171;font-size:13px;margin:6px 0 0;min-height:18px;display:none;"></p>'
       + '</div>'
       + '<button id="pq-email-btn" style="width:100%;padding:16px;background:#d4af37;color:#0d1a1f;border:none;border-radius:14px;font-size:18px;font-weight:700;cursor:pointer;font-family:Cinzel,serif;letter-spacing:1px;">Entrar</button>'
-      + '<button id="pq-install-btn" style="display:none;width:100%;padding:13px;background:transparent;color:#d4af37;border:2px solid rgba(212,175,55,0.5);border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;align-items:center;justify-content:center;gap:8px;">'
-      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>'
-      + 'Instalar App'
-      + '</button>'
       + '</div>'
       + '<div style="height:3px;background:linear-gradient(90deg,transparent,#d4af37,transparent);"></div>'
       + '</div>';
@@ -108,23 +139,6 @@
     var input = document.getElementById('pq-email-input');
     var btn = document.getElementById('pq-email-btn');
     var erroEl = document.getElementById('pq-email-erro');
-    var installBtn = document.getElementById('pq-install-btn');
-
-    atualizarBotaoInstalar();
-
-    installBtn.addEventListener('click', function () {
-      if (deferredInstallPrompt) {
-        installBtn.disabled = true;
-        deferredInstallPrompt.prompt();
-        deferredInstallPrompt.userChoice.finally(function () {
-          deferredInstallPrompt = null;
-          installBtn.disabled = false;
-          atualizarBotaoInstalar();
-        });
-      } else if (isIOS()) {
-        mostrarInstrucaoIOS();
-      }
-    });
 
     function mostrarErro(msg) { erroEl.textContent = msg; erroEl.style.display = 'block'; }
     function esconderErro() { erroEl.style.display = 'none'; }
@@ -151,7 +165,7 @@
             localStorage.setItem(AUTH_KEY, JSON.stringify({ loggedIn: true, nome: '', email: email }));
           } catch(e) {}
           overlay.remove();
-          overlay.remove();
+          atualizarBotaoInstalar();
         } else if (res.motivo === 'OUTRO_DISPOSITIVO') {
           mostrarConfirmacao(res.mensagem, function() { tentarEntrar(true); }, function() {
             btn.disabled = false; btn.textContent = 'Entrar';
