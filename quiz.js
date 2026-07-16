@@ -2,6 +2,7 @@
   var QUIZ_KEY = 'pilates_quiz_done';
   var AUTH_KEY = 'pilates_auth';
   var LANG_KEY = 'pilates_lang';
+  var INSTALL_PROMPT_KEY = 'pilates_install_prompt_seen';
 
   // ─── PWA: capturar o prompt de instalação o quanto antes ─────────────────
   var deferredInstallPrompt = null;
@@ -12,6 +13,8 @@
   });
   window.addEventListener('appinstalled', function () {
     deferredInstallPrompt = null;
+    try { localStorage.setItem(INSTALL_PROMPT_KEY, '1'); } catch (e) {}
+    fecharPopupInstalar();
     atualizarBotaoInstalar();
   });
 
@@ -75,14 +78,67 @@
     }
   }
 
+  // ─── Pop-up único perguntando se deseja instalar (some para sempre após a 1ª resposta) ──
+  function jaRespondeuPopupInstalar() {
+    try { return localStorage.getItem(INSTALL_PROMPT_KEY) === '1'; } catch (e) { return true; }
+  }
+  function marcarPopupInstalarRespondido() {
+    try { localStorage.setItem(INSTALL_PROMPT_KEY, '1'); } catch (e) {}
+  }
+  function fecharPopupInstalar() {
+    var el = document.getElementById('pq-install-popup');
+    if (el) el.remove();
+  }
+  function mostrarPopupInstalar() {
+    if (isStandaloneApp()) { marcarPopupInstalarRespondido(); return; }
+    if (jaRespondeuPopupInstalar()) return;
+    if (document.getElementById('pq-install-popup')) return;
+
+    var modal = document.createElement('div');
+    modal.id = 'pq-install-popup';
+    modal.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Inter,system-ui,sans-serif;';
+    modal.innerHTML =
+      '<div style="background:#2a1a40;border:1px solid rgba(212,175,55,0.4);border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;">'
+      + '<p style="font-size:32px;margin:0 0 12px;">📲</p>'
+      + '<p style="color:#fff;font-size:16px;font-weight:700;margin:0 0 8px;">Instalar o app na tela inicial?</p>'
+      + '<p style="color:#c9a8f0;font-size:14px;line-height:1.5;margin:0 0 24px;">Acesse suas aulas de Pilates com um toque, direto da tela do seu celular.</p>'
+      + '<div style="display:flex;gap:12px;">'
+      + '<button id="pq-install-depois" style="flex:1;padding:12px;background:transparent;border:2px solid #3a2560;color:#9b7ec8;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;">Agora não</button>'
+      + '<button id="pq-install-sim" style="flex:1;padding:12px;background:#d4af37;border:none;color:#0d1a1f;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Instalar</button>'
+      + '</div></div>';
+    document.body.appendChild(modal);
+
+    document.getElementById('pq-install-depois').addEventListener('click', function () {
+      marcarPopupInstalarRespondido();
+      fecharPopupInstalar();
+    });
+    document.getElementById('pq-install-sim').addEventListener('click', function () {
+      marcarPopupInstalarRespondido();
+      fecharPopupInstalar();
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.finally(function () {
+          deferredInstallPrompt = null;
+          atualizarBotaoInstalar();
+        });
+      } else if (isIOS()) {
+        mostrarInstrucaoIOS();
+      }
+    });
+  }
+
   // O botão flutuante existe sempre (sua visibilidade é controlada por atualizarBotaoInstalar)
   criarBotaoInstalarFlutuante();
   atualizarBotaoInstalar();
+  if (isStandaloneApp()) { marcarPopupInstalarRespondido(); }
 
-  // Se já tem auth salvo, apenas garante o botão de instalar e encerra (usuária já logada)
+  // Se já tem auth salvo, garante o botão/pop-up de instalar (se ainda não respondido) e encerra
   var auth = null;
   try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
-  if (auth && auth.loggedIn) return;
+  if (auth && auth.loggedIn) {
+    setTimeout(mostrarPopupInstalar, 800);
+    return;
+  }
 
   // ─── Gerar ou recuperar deviceId ─────────────────────────────────────────
   function getDeviceId() {
@@ -166,6 +222,7 @@
           } catch(e) {}
           overlay.remove();
           atualizarBotaoInstalar();
+          setTimeout(mostrarPopupInstalar, 800);
         } else if (res.motivo === 'OUTRO_DISPOSITIVO') {
           mostrarConfirmacao(res.mensagem, function() { tentarEntrar(true); }, function() {
             btn.disabled = false; btn.textContent = 'Entrar';
