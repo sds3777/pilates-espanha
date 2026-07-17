@@ -211,12 +211,13 @@
     try { localStorage.setItem(INSTALL_DONE_KEY, '1'); } catch(e) {}
   }
 
-  // Se já tem auth salvo, mostrar popup (se ainda não viu) e encerrar
+  // Se já tem auth salvo, pular a tela de login mas continuar o script
+  // (nav bar e card do certificado precisam rodar sempre, inclusive no refresh)
   var auth = null;
   try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
-  if (auth && auth.loggedIn) {
+  var jaEstaLogado = !!(auth && auth.loggedIn);
+  if (jaEstaLogado) {
     setTimeout(mostrarPopupInstalar, 800);
-    return;
   }
 
   // ─── deviceId ─────────────────────────────────────────────────────────────
@@ -327,11 +328,13 @@
     origSetItem(key, value);
   };
 
-  // ─── Mostrar login ────────────────────────────────────────────────────────
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mostrarLogin);
-  } else {
-    mostrarLogin();
+  // ─── Mostrar login (apenas se ainda não estiver autenticado) ─────────────
+  if (!jaEstaLogado) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', mostrarLogin);
+    } else {
+      mostrarLogin();
+    }
   }
 
   // ─── Sistema de abas: Aulas / Bônus ─────────────────────────────────────
