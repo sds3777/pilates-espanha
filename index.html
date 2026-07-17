@@ -165,8 +165,123 @@
         font-size: 14.5px;
         cursor: pointer;
       }
+
+      /* ── Popup de instalação automático (exibido após login) ── */
+      #pq-install-popup {
+        position: fixed;
+        inset: 0;
+        z-index: 999997;
+        background: rgba(13, 7, 24, 0.72);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      #pq-install-popup.pq-visible {
+        display: flex;
+        animation: pq-fade-in 0.2s ease;
+      }
+      #pq-install-popup .pq-ip-card {
+        width: 100%;
+        max-width: 400px;
+        background: linear-gradient(160deg, rgba(42,26,64,0.98) 0%, rgba(26,16,37,0.99) 100%);
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 0 60px rgba(212, 175, 55, 0.15), 0 32px 64px rgba(0, 0, 0, 0.6);
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        text-align: center;
+        animation: pq-slide-up 0.25s ease;
+      }
+      #pq-install-popup .pq-ip-bar {
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #d4af37, transparent);
+      }
+      #pq-install-popup .pq-ip-body {
+        padding: 36px 28px 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+      #pq-install-popup .pq-ip-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: rgba(212, 175, 55, 0.12);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+      }
+      #pq-install-popup h2 {
+        color: #d4af37;
+        font-family: 'Cinzel', serif;
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        margin: 0;
+        text-shadow: 0 0 16px rgba(212, 175, 55, 0.2);
+      }
+      #pq-install-popup p {
+        color: #c9a8f0;
+        font-size: 14.5px;
+        line-height: 1.5;
+        margin: 0 0 6px;
+      }
+      #pq-install-popup .pq-ip-actions {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 6px;
+      }
+      #pq-install-popup-aceitar {
+        width: 100%;
+        padding: 14px 18px;
+        border-radius: 999px;
+        background: #d4af37;
+        border: none;
+        color: #1a0a20;
+        font-weight: 700;
+        font-family: 'Cinzel', serif;
+        letter-spacing: 1px;
+        font-size: 14.5px;
+        cursor: pointer;
+      }
+      #pq-install-popup-recusar {
+        width: 100%;
+        padding: 14px 18px;
+        border-radius: 999px;
+        background: transparent;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        color: #9b7ec8;
+        font-weight: 700;
+        font-family: 'Cinzel', serif;
+        letter-spacing: 1px;
+        font-size: 14px;
+        cursor: pointer;
+      }
     </style>
     <button id="pq-install-btn" type="button">⬇ Instalar App</button>
+    <div id="pq-install-popup">
+      <div class="pq-ip-card">
+        <div class="pq-ip-bar"></div>
+        <div class="pq-ip-body">
+          <div class="pq-ip-icon">📲</div>
+          <h2>Instalar o Pilates em Casa</h2>
+          <p>Adicione o app à sua tela de início para acessar suas aulas com um toque, sempre à mão.</p>
+          <div class="pq-ip-actions">
+            <button id="pq-install-popup-aceitar" type="button">Instalar agora</button>
+            <button id="pq-install-popup-recusar" type="button">Agora não</button>
+          </div>
+        </div>
+        <div class="pq-ip-bar"></div>
+      </div>
+    </div>
     <div id="pq-ios-install-modal">
       <div class="pq-ios-sheet">
         <div class="pq-ios-handle"></div>
@@ -307,6 +422,63 @@
         if (!isAppInstalled()) {
           showInstallBtn();
         }
+
+        // ── Popup automático de instalação após login ──────────────────────
+        // Some(o gancho): quiz.js chama window.__pqTriggerInstallAfterLogin()
+        // assim que um login é concluído com sucesso (manual ou revalidação).
+        var SESSION_DISMISS_KEY = 'pq_install_popup_dismissed';
+        var popupOverlay = document.getElementById('pq-install-popup');
+        var popupAceitar = document.getElementById('pq-install-popup-aceitar');
+        var popupRecusar = document.getElementById('pq-install-popup-recusar');
+
+        function foiRecusadoNestaSessao() {
+          try { return sessionStorage.getItem(SESSION_DISMISS_KEY) === '1'; } catch (e) { return false; }
+        }
+        function marcarRecusadoNestaSessao() {
+          try { sessionStorage.setItem(SESSION_DISMISS_KEY, '1'); } catch (e) {}
+        }
+
+        function esconderPopupInstalacao() {
+          popupOverlay.classList.remove('pq-visible');
+        }
+
+        function mostrarPopupInstalacao() {
+          // Nunca mostra se já instalado, se o usuário já recusou nesta
+          // sessão, ou se outra tela de instalação (modal iOS) já está aberta.
+          if (isAppInstalled() || foiRecusadoNestaSessao() || iosModal.classList.contains('pq-visible')) return;
+          popupOverlay.classList.add('pq-visible');
+        }
+
+        popupAceitar.addEventListener('click', function () {
+          esconderPopupInstalacao();
+          // Inicia a instalação de verdade. Se o usuário aceitar o prompt
+          // nativo (ou seguir o passo a passo no iOS), o botão "Instalar App"
+          // só some quando o evento 'appinstalled' confirmar a instalação —
+          // igual ao clique direto no botão inferior.
+          triggerInstallPrompt(showInstallBtn);
+        });
+
+        popupRecusar.addEventListener('click', function () {
+          esconderPopupInstalacao();
+          // Não mostra o popup de novo nesta sessão, mas o botão "Instalar
+          // App" continua disponível na parte inferior para instalação manual.
+          marcarRecusadoNestaSessao();
+        });
+
+        popupOverlay.addEventListener('click', function (e) {
+          if (e.target === popupOverlay) {
+            esconderPopupInstalacao();
+            marcarRecusadoNestaSessao();
+          }
+        });
+
+        // Se a instalação for concluída enquanto o popup estiver aberto
+        // (ex.: usuário aceitou o prompt nativo), some com o popup também.
+        window.addEventListener('appinstalled', esconderPopupInstalacao);
+
+        window.__pqTriggerInstallAfterLogin = function () {
+          mostrarPopupInstalacao();
+        };
 
       })();
     </script>

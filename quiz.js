@@ -3,6 +3,19 @@
   var AUTH_KEY = 'pilates_auth';
   var LANG_KEY = 'pilates_lang';
 
+  // window.__pq_auth_ok só vira true depois que o backend confirma o acesso
+  // (login manual OU revalidação automática) nesta sessão de página.
+  window.__pq_auth_ok = false;
+
+  // ─── Bloquear login antigo do app (nome+senha) ───────────────────────────
+  // Definido logo no início: origSetItem precisa existir antes de qualquer
+  // função que possa gravar AUTH_KEY (revalidação, login, logout).
+  var origSetItem = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(key, value) {
+    if (key === AUTH_KEY && !window.__pq_auth_ok) return;
+    origSetItem(key, value);
+  };
+
   // ─── Idioma: lê o mesmo valor salvo pelo app React em localStorage ────────
   var IDIOMAS_VALIDOS = ['pt-BR', 'pt-PT', 'es', 'en', 'fr'];
   function getLangAtual() {
@@ -127,13 +140,87 @@
     document.getElementById('pq-nao').addEventListener('click', function() { modal.remove(); onNao(); });
   }
 
-  // Se já tem auth salvo, a barra inferior (Aulas/Bônus) precisa ser
-  // recriada ao atualizar a página já estando logado.
-  // IMPORTANTE: não usar "return" aqui — isso encerraria o script inteiro.
-  // O restante do script continua normalmente; apenas a tela de login
-  // (mostrarLogin) é pulada mais abaixo quando já há sessão ativa.
+  // Se já tem auth salvo no localStorage, ele NUNCA é usado sozinho para
+  // liberar acesso — serve apenas de "atalho" (evita pedir e-mail de novo)
+  // e para a nav bar poder ser recriada de forma otimista enquanto a
+  // revalidação abaixo está em andamento. A decisão real de liberar ou
+  // bloquear o app é sempre tomada consultando o backend em
+  // revalidarAcessoNoBackend(), chamada a cada carregamento/retorno ao app.
   var auth = null;
   try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
+
+  function limparAuthLocal() {
+    window.__pq_auth_ok = false;
+    try { origSetItem(AUTH_KEY, JSON.stringify({ loggedIn: false })); } catch(e) {}
+  }
+
+  // ─── Revalidação obrigatória do acesso no backend ─────────────────────────
+  // Chamada sempre que o app é aberto, atualizado, ou volta a ficar visível
+  // (troca de aba/app e retorno). Nunca confia apenas no que está salvo no
+  // navegador: sempre confirma no Supabase, através de /api/verificar-acesso,
+  // se o e-mail salvo continua com status ATIVO antes de liberar o app.
+  var revalidando = false;
+  function revalidarAcessoNoBackend() {
+    var emailSalvo = (auth && auth.email) ? auth.email : '';
+
+    if (!emailSalvo) {
+      // Nunca logou neste navegador/dispositivo: exige login.
+      limparAuthLocal();
+      mostrarLogin();
+      return;
+    }
+
+    if (revalidando) return;
+    revalidando = true;
+
+    fetch('/api/verificar-acesso', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: emailSalvo, deviceId: getDeviceId(), transferirDispositivo: false })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        revalidando = false;
+        if (res.acesso) {
+          // E-mail confirmado ATIVO no backend agora sim: libera de fato.
+          window.__pq_auth_ok = true;
+          try {
+            origSetItem(AUTH_KEY, JSON.stringify({ loggedIn: true, nome: res.nome || (auth && auth.nome) || '', email: emailSalvo }));
+          } catch (e) {}
+          auth = { loggedIn: true, nome: res.nome || (auth && auth.nome) || '', email: emailSalvo };
+          var loginAberto = document.getElementById('pq-email-login');
+          if (loginAberto) loginAberto.remove();
+          injetarNavBar();
+        } else {
+          // Inválido, inexistente, bloqueado, cancelado, reembolsado, ou
+          // vinculado a outro dispositivo (motivo OUTRO_DISPOSITIVO): nunca
+          // libera automaticamente. Remove a sessão salva e mostra a tela
+          // de bloqueio/login existente, com a mensagem vinda do backend.
+          limparAuthLocal();
+          var nav = document.getElementById('pq-bottom-nav');
+          if (nav) nav.remove();
+          ocultarTelaBonus();
+          var root = document.getElementById('root');
+          if (root) root.style.display = 'none';
+          mostrarLogin(res.mensagem);
+        }
+      })
+      .catch(function () {
+        revalidando = false;
+        // Falha de conexão: por segurança, não libera acesso silenciosamente
+        // com base apenas no localStorage. Mantém/mostra a tela de login,
+        // cujo próprio botão "Entrar" já trata erro de rede.
+        if (!document.getElementById('pq-email-login')) {
+          limparAuthLocal();
+          var navErr = document.getElementById('pq-bottom-nav');
+          if (navErr) navErr.remove();
+          ocultarTelaBonus();
+          var rootErr = document.getElementById('root');
+          if (rootErr) rootErr.style.display = 'none';
+          mostrarLogin();
+        }
+      });
+  }
 
   // ─── deviceId ─────────────────────────────────────────────────────────────
   function getDeviceId() {
@@ -154,7 +241,12 @@
   }
 
   // ─── Tela de login por e-mail ─────────────────────────────────────────────
-  function mostrarLogin() {
+  function mostrarLogin(mensagemBloqueio) {
+    // Evita empilhar overlays duplicados caso a função seja chamada mais
+    // de uma vez (ex.: revalidação em andamento + retorno de visibilidade).
+    var existente = document.getElementById('pq-email-login');
+    if (existente) existente.remove();
+
     var emailUrl = getEmailFromUrl();
 
     var overlay = document.createElement('div');
@@ -215,6 +307,14 @@
       });
     }
 
+    // Se a revalidação automática (ao abrir/atualizar o app) já identificou
+    // que o acesso não está disponível, mostra a tela de bloqueio direto,
+    // sem obrigar o usuário a digitar o e-mail e clicar em "Entrar" de novo.
+    if (mensagemBloqueio) {
+      mostrarBloqueado(mensagemBloqueio);
+      return;
+    }
+
     function tentarEntrar(transferir) {
       var email = input.value.trim().toLowerCase();
       if (!email || !email.includes('@')) { mostrarErro('Digite um e-mail válido.'); return; }
@@ -233,10 +333,18 @@
         if (res.acesso) {
           window.__pq_auth_ok = true;
           try {
-            localStorage.setItem(AUTH_KEY, JSON.stringify({ loggedIn: true, nome: '', email: email }));
+            origSetItem(AUTH_KEY, JSON.stringify({ loggedIn: true, nome: res.nome || '', email: email }));
           } catch(e) {}
+          auth = { loggedIn: true, nome: res.nome || '', email: email };
           overlay.remove();
           injetarNavBar();
+          // Login concluído com sucesso: dispara o popup de instalação do
+          // PWA automaticamente (definido no index.html). Se o usuário já
+          // tiver o app instalado, ou o navegador não suportar o prompt
+          // nesse momento, a própria função trata isso e não faz nada.
+          if (typeof window.__pqTriggerInstallAfterLogin === 'function') {
+            window.__pqTriggerInstallAfterLogin();
+          }
         } else if (res.motivo === 'OUTRO_DISPOSITIVO') {
           mostrarConfirmacao(res.mensagem, function() { tentarEntrar(true); }, function() {
             btn.disabled = false; btn.textContent = 'Entrar';
@@ -258,24 +366,35 @@
     input.addEventListener('keydown', function(e) { if (e.key === 'Enter') tentarEntrar(false); });
   }
 
-  // ─── Bloquear login antigo do app (nome+senha) ───────────────────────────
-  var origSetItem = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function(key, value) {
-    if (key === AUTH_KEY && !window.__pq_auth_ok) return;
-    origSetItem(key, value);
-  };
-
-  // ─── Mostrar login ────────────────────────────────────────────────────────
-  // Só exibe a tela de login quando ainda não há sessão ativa. Se já estiver
-  // logado (ex.: após atualizar a página), pulamos direto para a inicialização
-  // da barra inferior (Aulas/Bônus) mais abaixo.
-  if (!(auth && auth.loggedIn)) {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', mostrarLogin);
-    } else {
-      mostrarLogin();
-    }
+  // ─── Revalidar acesso ao abrir o app ───────────────────────────────────
+  // Nunca decide com base apenas no localStorage: a cada carregamento da
+  // página, é feita uma checagem real no backend (revalidarAcessoNoBackend).
+  // Enquanto isso, se já havia sessão salva, a barra inferior é mantida/
+  // recriada de forma otimista (evita "piscar" a tela de login à toa numa
+  // rede rápida); caso o backend não confirme o acesso, tudo é desfeito e
+  // a tela de bloqueio/login é exibida — ver revalidarAcessoNoBackend().
+  function iniciarRevalidacao() {
+    revalidarAcessoNoBackend();
   }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciarRevalidacao);
+  } else {
+    iniciarRevalidacao();
+  }
+
+  // Revalida novamente sempre que o usuário volta ao app: troca de aba,
+  // troca de app no celular e retorna, ou reabre o PWA instalado.
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) revalidarAcessoNoBackend();
+  });
+
+  // Cobre o caso de navegação por cache do navegador (bfcache), em que o
+  // evento 'load'/'DOMContentLoaded' não dispara de novo, mas a página
+  // volta a ficar visível para o usuário (ex.: botão "voltar").
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) revalidarAcessoNoBackend();
+  });
 
   // ─── Sistema de abas: Aulas / Bônus ─────────────────────────────────────
   var BONUS_PDFS = [
@@ -498,19 +617,20 @@
 
   // Injetar nav bar após login
   function iniciarNavBar() {
-    var auth = null;
-    try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
-    if (auth && auth.loggedIn) {
-      injetarNavBar();
-    }
+    // NÃO injeta a nav bar aqui com base no localStorage: quem decide se o
+    // acesso é válido é sempre revalidarAcessoNoBackend() (chamada acima,
+    // no carregamento da página). Esta função apenas arma, uma única vez,
+    // os observadores que MANTÊM a nav bar visível depois que o acesso já
+    // foi confirmado pelo backend e injetarNavBar() foi chamada por ele.
     // Observador permanente: garante que a nav bar volte a aparecer caso seja
     // removida por engano (ex: re-renderizações) e injeta assim que o login
     // (overlay de e-mail) for concluído.
     // subtree:true para pegar remoções em qualquer nível, não só filhos diretos do body.
     function garantirNavBar() {
-      var a = null;
-      try { a = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
-      var logado = !!(a && a.loggedIn);
+      // window.__pq_auth_ok só fica true depois que o backend confirmou o
+      // acesso (login manual OU revalidação automática) nesta mesma sessão
+      // de página — nunca é lido do localStorage diretamente aqui.
+      var logado = window.__pq_auth_ok === true;
       var login = document.getElementById('pq-email-login');
       if (logado && !login && !document.getElementById('pq-bottom-nav')) {
         injetarNavBar();
