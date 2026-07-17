@@ -90,14 +90,14 @@
         margin-right: -0.75rem !important;
       }
 
-      /* ── Faixa "MÓDULO X": ~20% menor, alinhada ao canto da capa, sem ultrapassar a borda ── */
+      /* ── Faixa "MÓDULO X": aumentada ~25% para melhor legibilidade, mesma posição ── */
       [class*="top-1.5 left-1.5 bg-[#d4af37]"][class*="rounded-full"] {
         top: 4px !important;
         left: 4px !important;
-        padding: 1.5px 5px !important;
-        font-size: 6px !important;
+        padding: 2px 6.5px !important;
+        font-size: 7.5px !important;
         line-height: 1.2 !important;
-        letter-spacing: 0.5px !important;
+        letter-spacing: 0.6px !important;
         max-width: calc(100% - 8px) !important;
       }
 
@@ -142,6 +142,14 @@
       #pq-cert-img-wrap {
         aspect-ratio: 2 / 1.1 !important;
         height: auto !important;
+      }
+
+      /* ── Cabeçalho: remover comportamento fixo/sticky ── */
+      /* Seletor restrito à tag <header> com sticky+top-0+z-50 para não afetar
+         outros elementos sticky/fixed do app (ex: barra de progresso da aula) */
+      header[class*="sticky"][class*="top-0"][class*="z-50"] {
+        position: static !important;
+        top: auto !important;
       }
     </style>
 
