@@ -559,12 +559,15 @@
           // Se o app já estiver instalado, ignora o evento (não guarda o prompt).
           if (isAppInstalled()) return;
           deferredPrompt = e;
-          // Se o botão de fallback já estava visível aguardando, mantém disponível.
+          // O navegador sinalizou que a instalação está disponível: exibe o botão
+          // imediatamente (independe de ter feito login ainda).
+          showInstallBtn();
         });
 
         window.addEventListener('appinstalled', function () {
           installed = true;
           deferredPrompt = null;
+          // Só agora, com a instalação de fato concluída, o botão some.
           hideInstallBtn();
           hideIOSModal();
         });
@@ -578,6 +581,8 @@
           // iOS Safari não suporta beforeinstallprompt: mostra o passo a passo manual.
           if (isIOSSafari()) {
             showIOSModal();
+            // O botão continua disponível para o usuário abrir o passo a passo de novo.
+            if (onDismiss) onDismiss();
             return;
           }
           if (!deferredPrompt) {
@@ -589,9 +594,10 @@
           var promptEvent = deferredPrompt;
           promptEvent.prompt();
           promptEvent.userChoice.then(function (choice) {
-            if (choice.outcome === 'accepted') {
-              hideInstallBtn();
-            } else if (onDismiss) {
+            // Independentemente de aceitar ou recusar, o botão só desaparece de fato
+            // quando o evento "appinstalled" confirmar a instalação. Se o usuário
+            // recusar, garantimos que o botão continue visível.
+            if (choice.outcome !== 'accepted' && onDismiss) {
               onDismiss();
             }
             // Cada evento só pode ser usado uma vez; aguarda o navegador
@@ -604,28 +610,22 @@
           triggerInstallPrompt(showInstallBtn);
         });
 
+        // Ao carregar a página, se o app ainda não estiver instalado, o botão
+        // já fica disponível (não depende de aguardar o login para aparecer).
+        // Em iOS Safari, mostramos direto (não há beforeinstallprompt).
+        // Nos demais navegadores, mostramos como fallback manual enquanto
+        // aguardamos (ou não) o beforeinstallprompt — que, se disparar, também
+        // chama showInstallBtn() acima.
+        if (!isAppInstalled()) {
+          showInstallBtn();
+        }
+
         // Chamado pelo gate de acesso assim que o e-mail é validado com sucesso.
+        // Mantido por compatibilidade: reforça a exibição do botão pós-login.
         window.pilatesOnAccessGranted = function () {
-          // Se o app já estiver instalado, não exibe nenhuma opção de instalação.
           if (isAppInstalled()) return;
-          // Pequeno atraso para não competir com a transição de saída do gate.
           setTimeout(function () {
-            if (isAppInstalled()) return;
-            if (isIOSSafari()) {
-              // iOS não suporta prompt automático: mostra direto o botão,
-              // que ao ser tocado abre o passo a passo manual.
-              showInstallBtn();
-              return;
-            }
-            if (deferredPrompt) {
-              // Prompt automático disponível: tenta abrir direto.
-              triggerInstallPrompt(showInstallBtn);
-            } else {
-              // O navegador não disponibilizou (ou não vai disponibilizar) o prompt
-              // automático agora — não há tentativa condicionada a esperar; mostramos
-              // o botão de instalação manual imediatamente.
-              showInstallBtn();
-            }
+            if (!isAppInstalled()) showInstallBtn();
           }, 600);
         };
       })();
@@ -933,11 +933,31 @@
           applyComingSoonTexts();
         }
 
-        // Atualiza os textos do card sempre que o idioma do app mudar
+        // Atualiza os textos do card sempre que o idioma do app mudar.
+        // O evento 'storage' só dispara em outras abas/janelas (comportamento
+        // padrão do navegador), então para refletir a troca na MESMA aba
+        // interceptamos o localStorage.setItem da própria chave 'pilates_lang'
+        // e emitimos o evento 'pilates:lang' — a mesma fonte/sistema de idioma
+        // já usado pelo app, sem criar nada novo.
         window.addEventListener('storage', function (e) {
           if (e.key === LANG_STORAGE_KEY) applyComingSoonTexts();
         });
         window.addEventListener('pilates:lang', applyComingSoonTexts);
+
+        try {
+          if (!window.__pqLangPatchApplied) {
+            window.__pqLangPatchApplied = true;
+            var _origSetItem = Storage.prototype.setItem;
+            Storage.prototype.setItem = function (key, value) {
+              _origSetItem.apply(this, arguments);
+              if (key === LANG_STORAGE_KEY) {
+                try {
+                  window.dispatchEvent(new CustomEvent('pilates:lang', { detail: value }));
+                } catch {}
+              }
+            };
+          }
+        } catch {}
 
         var obs = new MutationObserver(fixCertCard);
         obs.observe(document.body || document.documentElement, { childList: true, subtree: true });
