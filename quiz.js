@@ -201,12 +201,16 @@
     try { localStorage.setItem(INSTALL_DONE_KEY, '1'); } catch(e) {}
   }
 
-  // Se já tem auth salvo, mostrar popup (se ainda não viu) e encerrar
+  // Se já tem auth salvo, mostrar popup (se ainda não viu).
+  // IMPORTANTE: não usar "return" aqui — isso encerrava o script inteiro e
+  // impedia que a barra inferior (Aulas/Bônus) fosse recriada ao atualizar
+  // a página já estando logado. O restante do script continua normalmente;
+  // apenas a tela de login (mostrarLogin) é pulada mais abaixo quando já
+  // há sessão ativa.
   var auth = null;
   try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
   if (auth && auth.loggedIn) {
     setTimeout(mostrarPopupInstalar, 800);
-    return;
   }
 
   // ─── deviceId ─────────────────────────────────────────────────────────────
@@ -319,10 +323,15 @@
   };
 
   // ─── Mostrar login ────────────────────────────────────────────────────────
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mostrarLogin);
-  } else {
-    mostrarLogin();
+  // Só exibe a tela de login quando ainda não há sessão ativa. Se já estiver
+  // logado (ex.: após atualizar a página), pulamos direto para a inicialização
+  // da barra inferior (Aulas/Bônus) mais abaixo.
+  if (!(auth && auth.loggedIn)) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', mostrarLogin);
+    } else {
+      mostrarLogin();
+    }
   }
 
   // ─── Sistema de abas: Aulas / Bônus ─────────────────────────────────────
@@ -372,7 +381,11 @@
   var ROOT_EL = null;
 
   function injetarNavBar() {
-    if (document.getElementById('pq-bottom-nav')) return;
+    if (document.getElementById('pq-bottom-nav')) {
+      // Já existe: apenas garante que o estado visual (aba ativa) está correto.
+      atualizarAbas();
+      return;
+    }
 
     var nav = document.createElement('div');
     nav.id = 'pq-bottom-nav';
@@ -392,8 +405,11 @@
       'font-family:Inter,system-ui,sans-serif'
     ].join(';');
 
+    // Sem estado ativo fixo no HTML: o estado real (Aulas ou Bônus) é sempre
+    // aplicado logo depois via atualizarAbas(), para nunca ficar dessincronizado
+    // com a tela que está de fato visível.
     nav.innerHTML =
-      '<button id="pq-tab-aulas" onclick="window.__pqMudarAba(\'aulas\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#d4af37;border-top:2px solid #d4af37;">'
+      '<button id="pq-tab-aulas" onclick="window.__pqMudarAba(\'aulas\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#9b7ec8;border-top:2px solid transparent;">'
       + '<span style="font-size:20px">🧘‍♀️</span>'
       + '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;">Aulas</span>'
       + '</button>'
@@ -407,6 +423,16 @@
     // Ajustar padding inferior do app para não sobrepor a nav
     var root = document.getElementById('root');
     if (root) root.style.paddingBottom = '64px';
+
+    // Aplica o estado real da aba (evita a barra "nascer" sempre em Aulas
+    // mesmo quando o usuário estava em Bônus no momento da recriação).
+    atualizarAbas();
+
+    // Se a barra precisou ser recriada enquanto a tela de bônus estava aberta
+    // e essa tela também sumiu junto, restaura ela também.
+    if (abaAtiva === 'bonus' && !document.getElementById('pq-bonus-screen')) {
+      mostrarTelaBonus();
+    }
   }
 
   function atualizarAbas() {
