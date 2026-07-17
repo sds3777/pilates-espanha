@@ -158,12 +158,14 @@
   // Chamada sempre que o app é aberto, atualizado, ou volta a ficar visível
   // (troca de aba/app e retorno). Nunca confia apenas no que está salvo no
   // navegador: sempre confirma no Supabase, através de /api/verificar-acesso,
-  // se o e-mail salvo continua com status ATIVO antes de liberar o app.
+  // se o e-mail (ou nome, quando o login foi feito por nome) salvo continua
+  // com status ATIVO antes de liberar o app.
   var revalidando = false;
   function revalidarAcessoNoBackend() {
     var emailSalvo = (auth && auth.email) ? auth.email : '';
+    var nomeSalvoLogin = (!emailSalvo && auth && auth.loginPorNome && auth.nome) ? auth.nome : '';
 
-    if (!emailSalvo) {
+    if (!emailSalvo && !nomeSalvoLogin) {
       // Nunca logou neste navegador/dispositivo: exige login.
       limparAuthLocal();
       mostrarLogin();
@@ -176,18 +178,24 @@
     fetch('/api/verificar-acesso', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailSalvo, deviceId: getDeviceId(), transferirDispositivo: false })
+      body: JSON.stringify({
+        email: emailSalvo,
+        nome: nomeSalvoLogin,
+        deviceId: getDeviceId(),
+        transferirDispositivo: false
+      })
     })
       .then(function (r) { return r.json(); })
       .then(function (res) {
         revalidando = false;
         if (res.acesso) {
-          // E-mail confirmado ATIVO no backend agora sim: libera de fato.
+          // Confirmado ATIVO no backend agora sim: libera de fato.
           window.__pq_auth_ok = true;
-          try {
-            origSetItem(AUTH_KEY, JSON.stringify({ loggedIn: true, nome: res.nome || (auth && auth.nome) || '', email: emailSalvo }));
-          } catch (e) {}
-          auth = { loggedIn: true, nome: res.nome || (auth && auth.nome) || '', email: emailSalvo };
+          var novoAuth = emailSalvo
+            ? { loggedIn: true, nome: res.nome || (auth && auth.nome) || '', email: emailSalvo }
+            : { loggedIn: true, nome: res.nome || nomeSalvoLogin, email: '', loginPorNome: true };
+          try { origSetItem(AUTH_KEY, JSON.stringify(novoAuth)); } catch (e) {}
+          auth = novoAuth;
           var loginAberto = document.getElementById('pq-email-login');
           if (loginAberto) loginAberto.remove();
           injetarNavBar();
@@ -267,7 +275,10 @@
       + '<p style="color:#9b7ec8;font-size:13px;margin:0;">Digite o e-mail usado na sua compra</p>'
       + '</div>'
       + '<div style="width:100%;">'
-      + '<label style="color:#d4af37;font-size:14px;font-weight:600;display:block;margin-bottom:8px;">E-mail</label>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+      + '<label id="pq-login-label" style="color:#d4af37;font-size:14px;font-weight:600;margin:0;">E-mail</label>'
+      + '<button id="pq-login-toggle" type="button" style="background:none;border:none;color:#9b7ec8;font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer;padding:0;">Entrar com nome</button>'
+      + '</div>'
       + '<input id="pq-email-input" type="email" placeholder="seuemail@email.com" value="' + emailUrl + '" autocomplete="email" style="width:100%;box-sizing:border-box;background:#1a1025;border:2px solid #3a2560;border-radius:12px;padding:14px 16px;color:#fff;font-size:16px;outline:none;">'
       + '<p id="pq-email-erro" style="color:#f87171;font-size:13px;margin:6px 0 0;min-height:18px;display:none;"></p>'
       + '</div>'
@@ -281,9 +292,42 @@
     var input = document.getElementById('pq-email-input');
     var btn = document.getElementById('pq-email-btn');
     var erroEl = document.getElementById('pq-email-erro');
+    var labelEl = document.getElementById('pq-login-label');
+    var toggleEl = document.getElementById('pq-login-toggle');
 
     function mostrarErro(msg) { erroEl.textContent = msg; erroEl.style.display = 'block'; }
     function esconderErro() { erroEl.style.display = 'none'; }
+
+    // ─── Alternância E-mail / Nome ─────────────────────────────────────────
+    // Apenas troca o rótulo, o placeholder e o tipo do campo já existente.
+    // Não cria uma tela nova nem um sistema de autenticação paralelo: o
+    // mesmo botão "Entrar" e o mesmo /api/verificar-acesso continuam sendo
+    // usados, apenas enviando { nome } no lugar de { email } quando ativo.
+    var modoLogin = 'email'; // 'email' (padrão) ou 'nome'
+
+    function alternarModoLogin() {
+      esconderErro();
+      if (modoLogin === 'email') {
+        modoLogin = 'nome';
+        labelEl.textContent = 'Nome';
+        input.type = 'text';
+        input.placeholder = 'Seu nome completo';
+        input.autocomplete = 'name';
+        input.value = '';
+        toggleEl.textContent = 'Entrar com e-mail';
+      } else {
+        modoLogin = 'email';
+        labelEl.textContent = 'E-mail';
+        input.type = 'email';
+        input.placeholder = 'seuemail@email.com';
+        input.autocomplete = 'email';
+        input.value = emailUrl;
+        toggleEl.textContent = 'Entrar com nome';
+      }
+      input.focus();
+    }
+
+    toggleEl.addEventListener('click', alternarModoLogin);
 
     // ─── Tela de bloqueio (status diferente de ATIVO) ────────────────────────
     // Substitui o conteúdo do mesmo overlay já aberto — não é uma tela nova
@@ -316,8 +360,17 @@
     }
 
     function tentarEntrar(transferir) {
-      var email = input.value.trim().toLowerCase();
-      if (!email || !email.includes('@')) { mostrarErro('Digite um e-mail válido.'); return; }
+      var valor = input.value.trim();
+      var email = '';
+      var nome = '';
+
+      if (modoLogin === 'email') {
+        email = valor.toLowerCase();
+        if (!email || !email.includes('@')) { mostrarErro('Digite um e-mail válido.'); return; }
+      } else {
+        nome = valor;
+        if (!nome || nome.length < 3) { mostrarErro('Digite seu nome completo.'); return; }
+      }
 
       btn.disabled = true;
       btn.textContent = 'Verificando…';
@@ -326,16 +379,19 @@
       fetch('/api/verificar-acesso', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, deviceId: getDeviceId(), transferirDispositivo: !!transferir })
+        body: JSON.stringify({ email: email, nome: nome, deviceId: getDeviceId(), transferirDispositivo: !!transferir })
       })
       .then(function(r) { return r.json(); })
       .then(function(res) {
         if (res.acesso) {
           window.__pq_auth_ok = true;
+          var novoAuth = modoLogin === 'email'
+            ? { loggedIn: true, nome: res.nome || '', email: email }
+            : { loggedIn: true, nome: res.nome || nome, email: '', loginPorNome: true };
           try {
-            origSetItem(AUTH_KEY, JSON.stringify({ loggedIn: true, nome: res.nome || '', email: email }));
+            origSetItem(AUTH_KEY, JSON.stringify(novoAuth));
           } catch(e) {}
-          auth = { loggedIn: true, nome: res.nome || '', email: email };
+          auth = novoAuth;
           overlay.remove();
           injetarNavBar();
           // Login concluído com sucesso: dispara o popup de instalação do
