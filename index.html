@@ -8,7 +8,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1a1025">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-    <script type="module" crossorigin src="/assets/index-Dk7Fq3Ln.js"></script>
+    <script type="module" crossorigin src="/assets/index-91e6fbd2.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-BQ8LcfVF.css">
   </head>
   <body>
@@ -298,6 +298,27 @@
           triggerInstallPrompt(showInstallBtn);
         });
 
+<<<<<<< HEAD
+=======
+        // ── API exposta para o app React (popup pós-primeiro-login) ──
+        // Permite ao React dar prompt() a partir do popup e checar se o
+        // app já está instalado, reaproveitando toda a lógica acima.
+        window.pqInstall = {
+          isInstalled: isAppInstalled,
+          canPrompt: function () {
+            return !isAppInstalled() && (isIOSSafari() || !!deferredPrompt);
+          },
+          prompt: function (onDismiss) {
+            triggerInstallPrompt(onDismiss);
+          },
+          onChange: function (cb) {
+            // Notifica o React sempre que o estado de instalação/disponibilidade mudar.
+            window.addEventListener('appinstalled', cb);
+            window.addEventListener('beforeinstallprompt', cb);
+          }
+        };
+
+>>>>>>> 1bd5297 (Adiciona novos arquivos)
         // Ao carregar a página, se o app ainda não estiver instalado, o botão
         // já fica disponível (não depende de aguardar o login para aparecer).
         // Em iOS Safari, mostramos direto (não há beforeinstallprompt).
