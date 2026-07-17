@@ -3,6 +3,114 @@
   var AUTH_KEY = 'pilates_auth';
   var LANG_KEY = 'pilates_lang';
 
+  // ─── Idioma: lê o mesmo valor salvo pelo app React em localStorage ────────
+  var IDIOMAS_VALIDOS = ['pt-BR', 'pt-PT', 'es', 'en', 'fr'];
+  function getLangAtual() {
+    try {
+      var v = localStorage.getItem(LANG_KEY);
+      if (v && IDIOMAS_VALIDOS.indexOf(v) !== -1) return v;
+    } catch (e) {}
+    return 'pt-BR';
+  }
+
+  // ─── Traduções da tela de Bônus ────────────────────────────────────────────
+  var BONUS_I18N = {
+    'pt-BR': {
+      titulo: '🎁 Bônus Exclusivos',
+      chamada: 'Esses bônus vão te ajudar a acelerar seus resultados 🚀',
+      subtitulo: 'Materiais extras inclusos no seu acesso',
+      tabLabel: 'Bônus'
+    },
+    'pt-PT': {
+      titulo: '🎁 Bónus Exclusivos',
+      chamada: 'Estes bónus vão ajudar a acelerar os seus resultados 🚀',
+      subtitulo: 'Materiais extra incluídos no seu acesso',
+      tabLabel: 'Bónus'
+    },
+    'es': {
+      titulo: '🎁 Bonos Exclusivos',
+      chamada: 'Estos bonos te ayudarán a acelerar tus resultados 🚀',
+      subtitulo: 'Materiales extra incluidos en tu acceso',
+      tabLabel: 'Bonos'
+    },
+    'en': {
+      titulo: '🎁 Exclusive Bonuses',
+      chamada: 'These bonuses will help you speed up your results 🚀',
+      subtitulo: 'Extra materials included in your access',
+      tabLabel: 'Bonuses'
+    },
+    'fr': {
+      titulo: '🎁 Bonus Exclusifs',
+      chamada: 'Ces bonus vont vous aider à accélérer vos résultats 🚀',
+      subtitulo: 'Documents supplémentaires inclus dans votre accès',
+      tabLabel: 'Bonus'
+    }
+  };
+
+  // Traduções apenas dos títulos dos PDFs (os PDFs em si continuam os mesmos)
+  var BONUS_TITULOS_I18N = {
+    'Guia Xô, Ansiedade': {
+      'pt-PT': 'Guia Adeus, Ansiedade',
+      'es': 'Guía Chao, Ansiedad',
+      'en': 'Bye Anxiety Guide',
+      'fr': 'Guide Adieu Anxiété'
+    },
+    'Doces e Sobremesas Zero': {
+      'pt-PT': 'Doces e Sobremesas Zero Açúcar',
+      'es': 'Dulces y Postres Sin Azúcar',
+      'en': 'Zero Sugar Sweets & Desserts',
+      'fr': 'Desserts et Sucreries Zéro Sucre'
+    },
+    'Chá Caseiro Mounjaro Natural': {
+      'pt-PT': 'Chá Caseiro Mounjaro Natural',
+      'es': 'Té Casero Mounjaro Natural',
+      'en': 'Natural Homemade Mounjaro Tea',
+      'fr': 'Thé Maison Mounjaro Naturel'
+    },
+    'Sucos Detox Saudáveis': {
+      'pt-PT': 'Sumos Detox Saudáveis',
+      'es': 'Jugos Detox Saludables',
+      'en': 'Healthy Detox Juices',
+      'fr': 'Jus Détox Sains'
+    },
+    '55 Receitas Sem Glúten na Airfryer': {
+      'pt-PT': '55 Receitas Sem Glúten na Air Fryer',
+      'es': '55 Recetas Sin Gluten en Airfryer',
+      'en': '55 Gluten-Free Air Fryer Recipes',
+      'fr': '55 Recettes Sans Gluten à l’Air Fryer'
+    },
+    'Guia Alimentar Diabéticos': {
+      'pt-PT': 'Guia Alimentar para Diabéticos',
+      'es': 'Guía Alimentaria para Diabéticos',
+      'en': 'Diabetic Food Guide',
+      'fr': 'Guide Alimentaire pour Diabétiques'
+    },
+    'Vitaminas Poderosas': {
+      'pt-PT': 'Vitaminas Poderosas',
+      'es': 'Vitaminas Poderosas',
+      'en': 'Powerful Vitamin Smoothies',
+      'fr': 'Vitamines Puissantes'
+    },
+    'Guia Alimentar': {
+      'pt-PT': 'Guia Alimentar',
+      'es': 'Guía Alimentaria',
+      'en': 'Food Guide',
+      'fr': 'Guide Alimentaire'
+    }
+  };
+
+  function getBonusI18n() {
+    return BONUS_I18N[getLangAtual()] || BONUS_I18N['pt-BR'];
+  }
+
+  function traduzirTituloPdf(tituloOriginal) {
+    var lang = getLangAtual();
+    if (lang === 'pt-BR') return tituloOriginal;
+    var mapa = BONUS_TITULOS_I18N[tituloOriginal];
+    if (mapa && mapa[lang]) return mapa[lang];
+    return tituloOriginal;
+  }
+
   // Duas chaves separadas:
   // INSTALL_POPUP_KEY  = usuário JÁ VIU e respondeu ao popup (não mostrar de novo)
   // INSTALL_DONE_KEY   = usuário instalou ou o app já está instalado (ocultar FAB)
@@ -372,7 +480,11 @@
   var ROOT_EL = null;
 
   function injetarNavBar() {
-    if (document.getElementById('pq-bottom-nav')) return;
+    if (document.getElementById('pq-bottom-nav')) {
+      // Já existe: apenas garante que o estado visual (aba ativa) está correto.
+      atualizarAbas();
+      return;
+    }
 
     var nav = document.createElement('div');
     nav.id = 'pq-bottom-nav';
@@ -392,14 +504,17 @@
       'font-family:Inter,system-ui,sans-serif'
     ].join(';');
 
+    // Sem estado ativo fixo no HTML: o estado real (Aulas ou Bônus) é sempre
+    // aplicado logo depois via atualizarAbas(), para nunca ficar dessincronizado
+    // com a tela que está de fato visível.
     nav.innerHTML =
-      '<button id="pq-tab-aulas" onclick="window.__pqMudarAba(\'aulas\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#d4af37;border-top:2px solid #d4af37;">'
+      '<button id="pq-tab-aulas" onclick="window.__pqMudarAba(\'aulas\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#9b7ec8;border-top:2px solid transparent;">'
       + '<span style="font-size:20px">🧘‍♀️</span>'
       + '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;">Aulas</span>'
       + '</button>'
       + '<button id="pq-tab-bonus" onclick="window.__pqMudarAba(\'bonus\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#9b7ec8;border-top:2px solid transparent;">'
       + '<span style="font-size:20px">🎁</span>'
-      + '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;">Bônus</span>'
+      + '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;">' + getBonusI18n().tabLabel + '</span>'
       + '</button>';
 
     document.body.appendChild(nav);
@@ -407,6 +522,16 @@
     // Ajustar padding inferior do app para não sobrepor a nav
     var root = document.getElementById('root');
     if (root) root.style.paddingBottom = '64px';
+
+    // Aplica o estado real da aba (evita a barra "nascer" sempre em Aulas
+    // mesmo quando o usuário estava em Bônus no momento da recriação).
+    atualizarAbas();
+
+    // Se a barra precisou ser recriada enquanto a tela de bônus estava aberta
+    // e essa tela também sumiu junto, restaura ela também.
+    if (abaAtiva === 'bonus' && !document.getElementById('pq-bonus-screen')) {
+      mostrarTelaBonus();
+    }
   }
 
   function atualizarAbas() {
@@ -448,27 +573,30 @@
       '-webkit-overflow-scrolling:touch'
     ].join(';');
 
+    var t = getBonusI18n();
+
     var cardsHtml = BONUS_PDFS.map(function(pdf) {
       var thumb = getThumbUrl(pdf.id);
       var viewUrl = getViewUrl(pdf.id);
-      return '<div onclick="window.__pqAbrirPdf(\'' + pdf.id + '\',\'' + pdf.titulo.replace(/'/g, "\\'") + '\')" style="cursor:pointer;background:#1a1035;border-radius:12px;overflow:hidden;border:1px solid rgba(212,175,55,0.15);transition:transform 0.15s;active:scale-95;" onmousedown="this.style.transform=\'scale(0.97)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(0.97)\'" ontouchend="this.style.transform=\'scale(1)\'">'
+      var tituloTraduzido = traduzirTituloPdf(pdf.titulo);
+      return '<div onclick="window.__pqAbrirPdf(\'' + pdf.id + '\',\'' + tituloTraduzido.replace(/'/g, "\\'") + '\')" style="cursor:pointer;background:#1a1035;border-radius:12px;overflow:hidden;border:1px solid rgba(212,175,55,0.15);transition:transform 0.15s;active:scale-95;" onmousedown="this.style.transform=\'scale(0.97)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(0.97)\'" ontouchend="this.style.transform=\'scale(1)\'">'
         + '<div style="width:100%;aspect-ratio:3/4;overflow:hidden;background:#2a1a40;position:relative;">'
-        + '<img src="' + thumb + '" alt="' + pdf.titulo + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+        + '<img src="' + thumb + '" alt="' + tituloTraduzido + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
         + '<div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a1a40,#1a1035);flex-direction:column;gap:8px;">'
         + '<span style="font-size:40px">📄</span>'
         + '</div>'
         + '</div>'
         + '<div style="padding:10px 10px 12px;">'
-        + '<p style="color:#fff;font-size:12px;font-weight:600;margin:0;line-height:1.3;text-align:center;">' + pdf.titulo + '</p>'
+        + '<p style="color:#fff;font-size:12px;font-weight:600;margin:0;line-height:1.3;text-align:center;">' + tituloTraduzido + '</p>'
         + '</div>'
         + '</div>';
     }).join('');
 
     tela.innerHTML =
       '<div style="padding:20px 16px 16px;">'
-      + '<h2 style="color:#d4af37;font-size:18px;font-weight:700;margin:0 0 4px;letter-spacing:1px;">🎁 Bônus Exclusivos</h2>'
-      + '<p style="color:#d4af37;font-size:13px;font-weight:600;margin:0 0 6px;">Esses bônus vão te ajudar a acelerar seus resultados 🚀</p>'
-      + '<p style="color:#9b7ec8;font-size:13px;margin:0 0 20px;">Materiais extras inclusos no seu acesso</p>'
+      + '<h2 style="color:#d4af37;font-size:18px;font-weight:700;margin:0 0 4px;letter-spacing:1px;">' + t.titulo + '</h2>'
+      + '<p style="color:#d4af37;font-size:13px;font-weight:600;margin:0 0 6px;">' + t.chamada + '</p>'
+      + '<p style="color:#9b7ec8;font-size:13px;margin:0 0 20px;">' + t.subtitulo + '</p>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
       + cardsHtml
       + '</div>'
@@ -588,12 +716,24 @@
       if (!overlay) return;
       overlay.style.visibility = 'hidden';
       if (card.querySelector('#pq-cert-lock')) return;
+      // O cadeado deve ficar apenas sobre a área da capa (imagem), nunca
+      // sobre a área de texto abaixo — por isso usamos o wrapper da imagem
+      // (aspect-square) como referência de posicionamento, não o card inteiro.
+      var imgWrap = overlay.parentElement && overlay.parentElement.querySelector('[class*="aspect-square"]');
+      if (!imgWrap) imgWrap = overlay.parentElement;
+      if (imgWrap && getComputedStyle(imgWrap).position === 'static') {
+        imgWrap.style.position = 'relative';
+      }
       var lock = document.createElement('div');
       lock.id = 'pq-cert-lock';
-      lock.style.cssText = 'position:absolute;inset:0;z-index:11;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;';
+      lock.style.cssText = 'position:absolute;left:0;right:0;top:0;bottom:0;z-index:11;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:8%;gap:10px;pointer-events:none;';
       lock.innerHTML = LOCK_SVG
         + '<p style="color:#d4af37;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0;text-shadow:0 1px 4px rgba(0,0,0,0.6);">Bloqueado</p>';
-      card.appendChild(lock);
+      if (imgWrap) {
+        imgWrap.appendChild(lock);
+      } else {
+        card.appendChild(lock);
+      }
     }
 
     function removerBloqueado(lock) {
