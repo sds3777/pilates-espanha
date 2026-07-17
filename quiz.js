@@ -42,7 +42,7 @@
     if (document.getElementById('pq-install-fab')) return;
     var fab = document.createElement('button');
     fab.id = 'pq-install-fab';
-    fab.style.cssText = 'display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:9998;align-items:center;justify-content:center;gap:8px;padding:12px 20px;background:#d4af37;color:#0d1a1f;border:none;border-radius:999px;font-family:Inter,system-ui,sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.35);';
+    fab.style.cssText = 'display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(80px + env(safe-area-inset-bottom, 0px));z-index:9998;align-items:center;justify-content:center;gap:8px;padding:12px 20px;background:#d4af37;color:#0d1a1f;border:none;border-radius:999px;font-family:Inter,system-ui,sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.35);';
     fab.innerHTML =
       '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>'
       + 'Instalar App';
@@ -289,6 +289,7 @@
           } catch(e) {}
           overlay.remove();
           atualizarBotaoInstalar();
+          injetarNavBar();
           // Mostrar popup de instalação 800ms após o login
           setTimeout(mostrarPopupInstalar, 800);
         } else if (res.motivo === 'OUTRO_DISPOSITIVO') {
@@ -529,21 +530,20 @@
     try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
     if (auth && auth.loggedIn) {
       injetarNavBar();
-    } else {
-      // Aguardar login via MutationObserver no body (overlay de login some)
-      var obs = new MutationObserver(function() {
-        var login = document.getElementById('pq-email-login');
-        if (!login) {
-          var a = null;
-          try { a = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
-          if (a && a.loggedIn) {
-            injetarNavBar();
-            obs.disconnect();
-          }
-        }
-      });
-      obs.observe(document.body, { childList: true, subtree: false });
     }
+    // Observador permanente: garante que a nav bar volte a aparecer caso seja
+    // removida por engano (ex: re-renderizações) e injeta assim que o login
+    // (overlay de e-mail) for concluído.
+    var obs = new MutationObserver(function() {
+      var a = null;
+      try { a = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
+      var logado = !!(a && a.loggedIn);
+      var login = document.getElementById('pq-email-login');
+      if (logado && !login && !document.getElementById('pq-bottom-nav')) {
+        injetarNavBar();
+      }
+    });
+    obs.observe(document.body, { childList: true, subtree: false });
   }
 
   if (document.readyState === 'loading') {
