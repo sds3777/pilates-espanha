@@ -556,17 +556,30 @@
 
     var t = getBonusI18n();
 
-    var cardsHtml = BONUS_PDFS.map(function(pdf) {
+    var cardsHtml = BONUS_PDFS.map(function(pdf, idx) {
       var thumb = getThumbUrl(pdf.id);
       var viewUrl = getViewUrl(pdf.id);
       var tituloTraduzido = traduzirTituloPdf(pdf.titulo);
-      return '<div onclick="window.__pqAbrirPdf(\'' + pdf.id + '\',\'' + tituloTraduzido.replace(/'/g, "\\'") + '\')" style="cursor:pointer;background:#1a1035;border-radius:12px;overflow:hidden;border:1px solid rgba(212,175,55,0.15);transition:transform 0.15s;active:scale-95;" onmousedown="this.style.transform=\'scale(0.97)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(0.97)\'" ontouchend="this.style.transform=\'scale(1)\'">'
-        + '<div style="width:100%;aspect-ratio:3/4;overflow:hidden;background:#2a1a40;position:relative;">'
+      // No modo demonstração, apenas os 2 primeiros bônus ficam liberados;
+      // os demais mostram a capa desfocada com cadeado e, ao serem tocados,
+      // levam à mesma oferta nativa do app (bloco #comprovante-block),
+      // sem abrir o PDF.
+      var bloqueado = MODO_TESTE && idx >= 2;
+      var onClickAttr = bloqueado
+        ? 'onclick="window.__pqMudarAba&&window.__pqMudarAba(\'aulas\');var el=document.getElementById(\'comprovante-block\');if(el){setTimeout(function(){el.scrollIntoView({behavior:\'smooth\'});},80);}"'
+        : ('onclick="window.__pqAbrirPdf(\'' + pdf.id + '\',\'' + tituloTraduzido.replace(/'/g, "\\'") + '\')"');
+      return '<div ' + onClickAttr + ' style="cursor:pointer;background:#1a1035;border-radius:12px;overflow:hidden;border:1px solid rgba(212,175,55,0.15);transition:transform 0.15s;active:scale-95;position:relative;" onmousedown="this.style.transform=\'scale(0.97)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(0.97)\'" ontouchend="this.style.transform=\'scale(1)\'">'
+        + '<div style="width:100%;aspect-ratio:3/4;overflow:hidden;background:#2a1a40;position:relative;' + (bloqueado ? 'filter:blur(4px);' : '') + '">'
         + '<img src="' + thumb + '" alt="' + tituloTraduzido + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
         + '<div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a1a40,#1a1035);flex-direction:column;gap:8px;">'
         + '<span style="font-size:40px">📄</span>'
         + '</div>'
         + '</div>'
+        + (bloqueado
+          ? '<div style="position:absolute;top:0;left:0;right:0;aspect-ratio:3/4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;pointer-events:none;">'
+            + '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>'
+            + '</div>'
+          : '')
         + '<div style="padding:10px 10px 12px;">'
         + '<p style="color:#fff;font-size:12px;font-weight:600;margin:0;line-height:1.3;text-align:center;">' + tituloTraduzido + '</p>'
         + '</div>'
