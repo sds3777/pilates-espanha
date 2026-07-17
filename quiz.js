@@ -569,7 +569,13 @@
   }
 
   // ─── Injetar cadeado grande sobre capa do certificado (estado bloqueado) ──
-  // MutationObserver aguarda o React renderizar e injeta o cadeado SVG
+  // MutationObserver aguarda o React renderizar e injeta o cadeado SVG.
+  // IMPORTANTE: nunca sobrescrevemos innerHTML de nós que o React controla —
+  // isso quebra a reconciliação do React (o React perde a referência dos
+  // elementos que ele mesmo criou) e pode travar/re-renderizar o app inteiro
+  // sem aviso. Em vez disso, apenas ocultamos visualmente o conteúdo original
+  // (visibility:hidden, sem remover do DOM) e sobrepomos nosso próprio
+  // elemento independente por cima.
   (function injetarCadeadoCertificado() {
     var LOCK_SVG =
       '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
@@ -577,22 +583,45 @@
       + '<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>'
       + '</svg>';
 
+    function aplicarBloqueado(card) {
+      var overlay = card.querySelector('[class*="absolute inset-0 flex flex-col items-center justify-center z-10"]');
+      if (!overlay) return;
+      overlay.style.visibility = 'hidden';
+      if (card.querySelector('#pq-cert-lock')) return;
+      var lock = document.createElement('div');
+      lock.id = 'pq-cert-lock';
+      lock.style.cssText = 'position:absolute;inset:0;z-index:11;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;';
+      lock.innerHTML = LOCK_SVG
+        + '<p style="color:#d4af37;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0;text-shadow:0 1px 4px rgba(0,0,0,0.6);">Bloqueado</p>';
+      card.appendChild(lock);
+    }
+
+    function removerBloqueado(lock) {
+      var card = lock.closest('[class*="col-span-2"]');
+      lock.remove();
+      if (!card) return;
+      var overlay = card.querySelector('[class*="absolute inset-0 flex flex-col items-center justify-center z-10"]');
+      if (overlay) overlay.style.visibility = '';
+    }
+
     function tentarInjetar() {
-      var cards = document.querySelectorAll('[class*="col-span-2"][class*="cursor-not-allowed"]');
-      cards.forEach(function(card) {
-        if (card.querySelector('#pq-cert-lock')) return;
-        var overlay = card.querySelector('[class*="absolute inset-0 flex flex-col items-center justify-center z-10"]');
-        if (!overlay) return;
-        // Limpar conteúdo existente e injetar cadeado
-        overlay.innerHTML =
-          '<div id="pq-cert-lock" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">'
-          + LOCK_SVG
-          + '<p style="color:#d4af37;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0;text-shadow:0 1px 4px rgba(0,0,0,0.6);">Bloqueado</p>'
-          + '</div>';
+      // Aplica o cadeado enquanto o certificado estiver bloqueado
+      document.querySelectorAll('[class*="col-span-2"][class*="cursor-not-allowed"]').forEach(aplicarBloqueado);
+      // Remove o cadeado assim que o certificado for desbloqueado (evita
+      // "cadeado fantasma" preso depois que o usuário completa os módulos)
+      document.querySelectorAll('#pq-cert-lock').forEach(function (lock) {
+        var card = lock.closest('[class*="col-span-2"]');
+        if (!card || card.className.indexOf('cursor-not-allowed') === -1) {
+          removerBloqueado(lock);
+        }
       });
     }
 
-    var obs = new MutationObserver(tentarInjetar);
+    var debounced;
+    var obs = new MutationObserver(function () {
+      clearTimeout(debounced);
+      debounced = setTimeout(tentarInjetar, 150);
+    });
     obs.observe(document.body, { childList: true, subtree: true });
     tentarInjetar();
   })();
