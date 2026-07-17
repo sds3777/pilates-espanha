@@ -14,7 +14,17 @@
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
     deferredInstallPrompt = e;
-    atualizarBotaoInstalar();
+    // Garantir que o FAB exista antes de tentar atualizar
+    // (beforeinstallprompt pode disparar antes do body estar pronto)
+    if (document.body) {
+      criarBotaoInstalarFlutuante();
+      atualizarBotaoInstalar();
+    } else {
+      document.addEventListener('DOMContentLoaded', function() {
+        criarBotaoInstalarFlutuante();
+        atualizarBotaoInstalar();
+      });
+    }
   });
   window.addEventListener('appinstalled', function () {
     deferredInstallPrompt = null;
@@ -523,26 +533,28 @@
   };
 
   // Injetar nav bar após login
+  // Injetar nav bar após login
   function iniciarNavBar() {
     var auth = null;
     try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
     if (auth && auth.loggedIn) {
       injetarNavBar();
-    } else {
-      // Aguardar login via MutationObserver no body (overlay de login some)
-      var obs = new MutationObserver(function() {
-        var login = document.getElementById('pq-email-login');
-        if (!login) {
-          var a = null;
-          try { a = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
-          if (a && a.loggedIn) {
-            injetarNavBar();
-            obs.disconnect();
-          }
-        }
-      });
-      obs.observe(document.body, { childList: true, subtree: false });
+      return;
     }
+    // Polling robusto — MutationObserver com subtree:false perdia eventos quando
+    // o overlay era removido antes do observer estar ativo (race condition no refresh).
+    var tentativas = 0;
+    var intervalo = setInterval(function() {
+      tentativas++;
+      var a = null;
+      try { a = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
+      if (a && a.loggedIn) {
+        clearInterval(intervalo);
+        injetarNavBar();
+        return;
+      }
+      if (tentativas >= 600) clearInterval(intervalo); // timeout 3min
+    }, 300);
   }
 
   if (document.readyState === 'loading') {
@@ -551,33 +563,149 @@
     iniciarNavBar();
   }
 
-  // ─── Injetar cadeado grande sobre capa do certificado (estado bloqueado) ──
-  // MutationObserver aguarda o React renderizar e injeta o cadeado SVG
-  (function injetarCadeadoCertificado() {
+  // ─── Certificado: injetar cadeado e reestruturar card bloqueado ──────────
+  // Estratégia robusta: não depende de seletores de classe hasheados do Tailwind.
+  // Em vez disso, encontra o card pela presença da imagem capa7.png.
+  (function gerenciarCardCertificado() {
+
     var LOCK_SVG =
-      '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
-      + '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>'
-      + '<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="width:60px;height:60px;filter:drop-shadow(0 0 16px rgba(212,175,55,0.7));">'
+      + '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>'
+      + '<path d="M7 11V7a5 5 0 0 1 10 0v4"/>'
       + '</svg>';
 
-    function tentarInjetar() {
-      var cards = document.querySelectorAll('[class*="col-span-2"][class*="cursor-not-allowed"]');
-      cards.forEach(function(card) {
-        if (card.querySelector('#pq-cert-lock')) return;
-        var overlay = card.querySelector('[class*="absolute inset-0 flex flex-col items-center justify-center z-10"]');
-        if (!overlay) return;
-        // Limpar conteúdo existente e injetar cadeado
-        overlay.innerHTML =
-          '<div id="pq-cert-lock" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">'
-          + LOCK_SVG
-          + '<p style="color:#d4af37;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0;text-shadow:0 1px 4px rgba(0,0,0,0.6);">Bloqueado</p>'
-          + '</div>';
+    // Mapa de títulos por idioma (fallback se a captura do DOM falhar)
+    var TITULO_MAP = {
+      'pt': 'Certificado de Conclusão',
+      'es': 'Certificado de Finalización',
+      'en': 'Certificate of Completion',
+      'fr': "Certificat d'Achèvement"
+    };
+
+    function getTitulo(card) {
+      // Tenta capturar o texto do h3 que o React renderizou antes da modificação
+      var h3s = card.querySelectorAll('h3');
+      for (var i = 0; i < h3s.length; i++) {
+        var t = h3s[i].textContent.trim();
+        if (t.length > 5) return t;
+      }
+      var lang = document.documentElement.lang || navigator.language || 'pt';
+      return TITULO_MAP[lang.slice(0, 2)] || TITULO_MAP['pt'];
+    }
+
+    function processarCard(card) {
+      if (card.dataset.pqCertDone) return;
+
+      var img = card.querySelector('img[src*="capa7"]');
+      if (!img) return;
+
+      // ── Determinar estado: bloqueado ou desbloqueado ──
+      var bloqueado = card.className.includes('cursor-not-allowed');
+      if (!bloqueado) {
+        // Card desbloqueado — apenas ajustar aspect-ratio da capa e sair
+        ajustarAspectRatio(card, img);
+        card.dataset.pqCertDone = 'unlocked';
+        return;
+      }
+
+      // ── Capturar título ANTES de modificar o DOM ──
+      var titulo = getTitulo(card);
+
+      // ── Ajustar aspect-ratio da capa ──
+      ajustarAspectRatio(card, img);
+
+      // ── Encontrar o wrapper da imagem (div pai direto da img) ──
+      var imgWrap = img.parentElement;
+      // Subir até o elemento que tem position:relative e contém os overlays absolutos
+      var imgContainer = imgWrap;
+      while (imgContainer && imgContainer !== card) {
+        if (window.getComputedStyle(imgContainer).position === 'relative' ||
+            imgContainer.className.includes('relative')) break;
+        imgContainer = imgContainer.parentElement;
+      }
+
+      // ── Remover todos os overlays absolutos dentro do container da imagem ──
+      // (são os divs que o React coloca com absolute inset-0 para blur/conteúdo)
+      if (imgContainer) {
+        var absoluteDivs = imgContainer.querySelectorAll('div');
+        absoluteDivs.forEach(function(d) {
+          // Remover apenas divs que são position absolute (overlays do React)
+          var style = window.getComputedStyle(d);
+          if (style.position === 'absolute') d.remove();
+        });
+
+        // ── Criar novo overlay limpo: só cadeado centralizado ──
+        var novoOverlay = document.createElement('div');
+        novoOverlay.id = 'pq-cert-lock';
+        novoOverlay.style.cssText =
+          'position:absolute;inset:0;display:flex;align-items:center;' +
+          'justify-content:center;z-index:10;pointer-events:none;';
+        novoOverlay.innerHTML = LOCK_SVG;
+        imgContainer.appendChild(novoOverlay);
+      }
+
+      // ── Reestruturar seção de texto inferior ──
+      // Encontrar o div de texto (irmão do imgContainer dentro do card)
+      var children = card.children;
+      var textDiv = null;
+      for (var i = 0; i < children.length; i++) {
+        if (children[i] !== imgContainer && children[i].className &&
+            (children[i].className.includes('p-4') || children[i].className.includes('flex flex-col'))) {
+          textDiv = children[i];
+          break;
+        }
+      }
+      // Fallback: último filho do card que não é o imgContainer
+      if (!textDiv) {
+        for (var j = children.length - 1; j >= 0; j--) {
+          if (children[j] !== imgContainer) { textDiv = children[j]; break; }
+        }
+      }
+
+      if (textDiv && !textDiv.dataset.pqTextFixed) {
+        textDiv.dataset.pqTextFixed = '1';
+        // Injetar h3 com o título como PRIMEIRO filho
+        var h3 = document.createElement('h3');
+        h3.textContent = titulo;
+        h3.style.cssText =
+          'color:#ffffff;font-size:16px;font-weight:700;text-align:center;' +
+          'margin:0 0 6px 0;letter-spacing:0.5px;line-height:1.3;width:100%;';
+        textDiv.insertBefore(h3, textDiv.firstChild);
+      }
+
+      card.dataset.pqCertDone = 'locked';
+    }
+
+    function ajustarAspectRatio(card, img) {
+      if (card.dataset.pqAspect) return;
+      card.dataset.pqAspect = '1';
+      // Remover aspect-square do wrapper da imagem
+      var wrap = img.closest('[class*="aspect-square"]') || img.parentElement;
+      if (wrap) {
+        wrap.style.aspectRatio = '2 / 1.1';
+        wrap.style.height = 'auto';
+        wrap.className = wrap.className.replace(/aspect-square/g, '').trim();
+        wrap.id = 'pq-cert-img-wrap';
+      }
+    }
+
+    function varrer() {
+      // Busca qualquer col-span-2 que contenha capa7 — sem depender de cursor-not-allowed
+      document.querySelectorAll('[class*="col-span-2"]').forEach(function(card) {
+        processarCard(card);
       });
     }
 
-    var obs = new MutationObserver(tentarInjetar);
-    obs.observe(document.body, { childList: true, subtree: true });
-    tentarInjetar();
+    // Rodar agora e monitorar mudanças do React
+    var certObs = new MutationObserver(function(mutations) {
+      // Só processar se houver nodes adicionados (evita loops desnecessários)
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].addedNodes.length > 0) { varrer(); break; }
+      }
+    });
+    certObs.observe(document.documentElement, { childList: true, subtree: true });
+    varrer();
+
   })();
 
 })();
