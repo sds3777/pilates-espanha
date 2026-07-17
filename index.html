@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!doctype html>
 <html lang="en">
   <head>
@@ -819,3 +820,826 @@
     </script>
   </body>
 </html>
+=======
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pilates em Casa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a1025">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <script type="module" crossorigin src="/assets/index-Dk7Fq3Ln.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BQ8LcfVF.css">
+  </head>
+  <body>
+
+    <!-- ── Instalação do app (PWA) ── -->
+    <style>
+      #pq-install-btn {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 84px;
+        z-index: 9990;
+        background: #d4af37;
+        color: #1a0a20;
+        font-weight: 700;
+        font-family: 'Cinzel', serif;
+        letter-spacing: 0.5px;
+        font-size: 14px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 999px;
+        box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35), 0 4px 12px rgba(0, 0, 0, 0.3);
+        cursor: pointer;
+        display: none;
+      }
+      #pq-install-btn.pq-visible { display: block; }
+      #pq-install-btn:active { transform: translateX(-50%) scale(0.96); }
+      /* Caso não exista a barra inferior Aulas/Bônus, mantém uma distância confortável do rodapé */
+      body:not(:has(#pq-bottom-nav)) #pq-install-btn {
+        bottom: 24px;
+      }
+
+      /* ── Modal de instruções de instalação (iOS Safari) ── */
+      #pq-ios-install-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 999998;
+        background: rgba(13, 7, 24, 0.72);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: none;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 0;
+      }
+      #pq-ios-install-modal.pq-visible {
+        display: flex;
+        animation: pq-fade-in 0.2s ease;
+      }
+      @keyframes pq-fade-in { from { opacity: 0; } to { opacity: 1; } }
+      #pq-ios-install-modal .pq-ios-sheet {
+        width: 100%;
+        max-width: 440px;
+        background: linear-gradient(160deg, rgba(42,26,64,0.98) 0%, rgba(26,16,37,0.99) 100%);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-bottom: none;
+        border-radius: 24px 24px 0 0;
+        box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.5), 0 0 60px rgba(212, 175, 55, 0.08);
+        padding: 10px 26px 30px;
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        text-align: center;
+        animation: pq-slide-up 0.25s ease;
+      }
+      @keyframes pq-slide-up {
+        from { transform: translateY(24px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      #pq-ios-install-modal .pq-ios-handle {
+        width: 40px;
+        height: 4px;
+        background: rgba(212, 175, 55, 0.35);
+        border-radius: 999px;
+        margin: 0 auto 18px;
+      }
+      #pq-ios-install-modal .pq-ios-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background: rgba(212, 175, 55, 0.12);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        margin: 0 auto 14px;
+      }
+      #pq-ios-install-modal h2 {
+        color: #d4af37;
+        font-family: 'Cinzel', serif;
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        margin: 0 0 8px;
+        text-shadow: 0 0 16px rgba(212, 175, 55, 0.2);
+      }
+      #pq-ios-install-modal .pq-ios-sub {
+        color: #c9a8f0;
+        font-size: 14.5px;
+        line-height: 1.5;
+        margin: 0 0 22px;
+      }
+      #pq-ios-install-modal .pq-ios-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        text-align: left;
+        margin-bottom: 24px;
+      }
+      #pq-ios-install-modal .pq-ios-step {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: rgba(13, 7, 24, 0.4);
+        border: 1px solid rgba(212, 175, 55, 0.15);
+        border-radius: 14px;
+        padding: 12px 14px;
+      }
+      #pq-ios-install-modal .pq-ios-step-num {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e6c458, #d4af37);
+        color: #1a0a20;
+        font-family: 'Cinzel', serif;
+        font-weight: 700;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #pq-ios-install-modal .pq-ios-step-icon {
+        flex-shrink: 0;
+        font-size: 20px;
+      }
+      #pq-ios-install-modal .pq-ios-step-text {
+        color: #f0e6ff;
+        font-size: 14.5px;
+        line-height: 1.4;
+      }
+      #pq-ios-install-modal .pq-ios-step-text b {
+        color: #d4af37;
+      }
+      #pq-ios-install-modal button {
+        width: 100%;
+        padding: 14px 18px;
+        border-radius: 999px;
+        background: transparent;
+        border: 1px solid rgba(212, 175, 55, 0.45);
+        color: #d4af37;
+        font-weight: 700;
+        font-family: 'Cinzel', serif;
+        letter-spacing: 1px;
+        font-size: 14.5px;
+        cursor: pointer;
+      }
+
+      /* ── Popup de instalação automático (exibido após login) ── */
+      #pq-install-popup {
+        position: fixed;
+        inset: 0;
+        z-index: 999997;
+        background: rgba(13, 7, 24, 0.72);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      #pq-install-popup.pq-visible {
+        display: flex;
+        animation: pq-fade-in 0.2s ease;
+      }
+      #pq-install-popup .pq-ip-card {
+        width: 100%;
+        max-width: 400px;
+        background: linear-gradient(160deg, rgba(42,26,64,0.98) 0%, rgba(26,16,37,0.99) 100%);
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 0 60px rgba(212, 175, 55, 0.15), 0 32px 64px rgba(0, 0, 0, 0.6);
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        text-align: center;
+        animation: pq-slide-up 0.25s ease;
+      }
+      #pq-install-popup .pq-ip-bar {
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #d4af37, transparent);
+      }
+      #pq-install-popup .pq-ip-body {
+        padding: 36px 28px 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+      #pq-install-popup .pq-ip-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: rgba(212, 175, 55, 0.12);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+      }
+      #pq-install-popup h2 {
+        color: #d4af37;
+        font-family: 'Cinzel', serif;
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        margin: 0;
+        text-shadow: 0 0 16px rgba(212, 175, 55, 0.2);
+      }
+      #pq-install-popup p {
+        color: #c9a8f0;
+        font-size: 14.5px;
+        line-height: 1.5;
+        margin: 0 0 6px;
+      }
+      #pq-install-popup .pq-ip-actions {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 6px;
+      }
+      #pq-install-popup-aceitar {
+        width: 100%;
+        padding: 14px 18px;
+        border-radius: 999px;
+        background: #d4af37;
+        border: none;
+        color: #1a0a20;
+        font-weight: 700;
+        font-family: 'Cinzel', serif;
+        letter-spacing: 1px;
+        font-size: 14.5px;
+        cursor: pointer;
+      }
+      #pq-install-popup-recusar {
+        width: 100%;
+        padding: 14px 18px;
+        border-radius: 999px;
+        background: transparent;
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        color: #9b7ec8;
+        font-weight: 700;
+        font-family: 'Cinzel', serif;
+        letter-spacing: 1px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+    </style>
+    <button id="pq-install-btn" type="button">⬇ Instalar App</button>
+    <div id="pq-install-popup">
+      <div class="pq-ip-card">
+        <div class="pq-ip-bar"></div>
+        <div class="pq-ip-body">
+          <div class="pq-ip-icon">📲</div>
+          <h2>Instalar o Pilates em Casa</h2>
+          <p>Adicione o app à sua tela de início para acessar suas aulas com um toque, sempre à mão.</p>
+          <div class="pq-ip-actions">
+            <button id="pq-install-popup-aceitar" type="button">Instalar agora</button>
+            <button id="pq-install-popup-recusar" type="button">Agora não</button>
+          </div>
+        </div>
+        <div class="pq-ip-bar"></div>
+      </div>
+    </div>
+    <div id="pq-ios-install-modal">
+      <div class="pq-ios-sheet">
+        <div class="pq-ios-handle"></div>
+        <div class="pq-ios-icon">📲</div>
+        <h2>Instalar o Pilates em Casa</h2>
+        <p class="pq-ios-sub">Adicione o app à sua tela de início para acessar suas aulas com um toque.</p>
+        <div class="pq-ios-steps">
+          <div class="pq-ios-step">
+            <span class="pq-ios-step-num">1</span>
+            <span class="pq-ios-step-icon">⬆️</span>
+            <span class="pq-ios-step-text">Toque no botão <b>Compartilhar</b> (□↑) na barra do Safari.</span>
+          </div>
+          <div class="pq-ios-step">
+            <span class="pq-ios-step-num">2</span>
+            <span class="pq-ios-step-icon">➕</span>
+            <span class="pq-ios-step-text">Selecione <b>"Adicionar à Tela de Início"</b>.</span>
+          </div>
+        </div>
+        <button id="pq-ios-modal-close" type="button">Entendi</button>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var deferredPrompt = null;
+        var installBtn = document.getElementById('pq-install-btn');
+        var iosModal = document.getElementById('pq-ios-install-modal');
+        var iosModalClose = document.getElementById('pq-ios-modal-close');
+        var installed = false;
+
+        // ── Fonte única de verdade: o app já está instalado/rodando como app? ──
+        // Android/Chrome/Edge: display-mode "standalone".
+        // iOS Safari: navigator.standalone === true.
+        function isStandalone() {
+          return window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone === true;
+        }
+        function isAppInstalled() {
+          return installed || isStandalone();
+        }
+
+        // Detecta Safari no iPhone/iPad (iOS não dispara beforeinstallprompt).
+        function isIOSSafari() {
+          var ua = window.navigator.userAgent || '';
+          var isIOS = /iPad|iPhone|iPod/.test(ua) ||
+            (ua.includes('Macintosh') && 'ontouchend' in document); // iPadOS 13+ se identifica como Mac
+          if (!isIOS) return false;
+          var isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|Chrome|Android/.test(ua);
+          return isSafari;
+        }
+
+        function hideInstallBtn() {
+          installBtn.classList.remove('pq-visible');
+        }
+        function showInstallBtn() {
+          // Nunca exibe o botão se o app já estiver instalado.
+          if (isAppInstalled()) {
+            hideInstallBtn();
+            return;
+          }
+          installBtn.classList.add('pq-visible');
+        }
+
+        function showIOSModal() {
+          // Nunca exibe o modal se o app já estiver instalado.
+          if (isAppInstalled()) return;
+          iosModal.classList.add('pq-visible');
+        }
+        function hideIOSModal() {
+          iosModal.classList.remove('pq-visible');
+        }
+        iosModalClose.addEventListener('click', hideIOSModal);
+        iosModal.addEventListener('click', function (e) {
+          if (e.target === iosModal) hideIOSModal();
+        });
+
+        window.addEventListener('beforeinstallprompt', function (e) {
+          e.preventDefault();
+          // Se o app já estiver instalado, ignora o evento (não guarda o prompt).
+          if (isAppInstalled()) return;
+          deferredPrompt = e;
+          // O navegador sinalizou que a instalação está disponível: exibe o botão
+          // imediatamente (independe de ter feito login ainda).
+          showInstallBtn();
+        });
+
+        window.addEventListener('appinstalled', function () {
+          installed = true;
+          deferredPrompt = null;
+          // Só agora, com a instalação de fato concluída, o botão some.
+          hideInstallBtn();
+          hideIOSModal();
+        });
+
+        function triggerInstallPrompt(onDismiss) {
+          // Trava de segurança: se o app já estiver instalado, não faz nada.
+          if (isAppInstalled()) {
+            hideInstallBtn();
+            return;
+          }
+          // iOS Safari não suporta beforeinstallprompt: mostra o passo a passo manual.
+          if (isIOSSafari()) {
+            showIOSModal();
+            // O botão continua disponível para o usuário abrir o passo a passo de novo.
+            if (onDismiss) onDismiss();
+            return;
+          }
+          if (!deferredPrompt) {
+            // Ainda não há prompt disponível neste momento; mantém/mostra o botão
+            // para o usuário tentar novamente quando o navegador disponibilizar o evento.
+            if (onDismiss) onDismiss();
+            return;
+          }
+          var promptEvent = deferredPrompt;
+          promptEvent.prompt();
+          promptEvent.userChoice.then(function (choice) {
+            // Independentemente de aceitar ou recusar, o botão só desaparece de fato
+            // quando o evento "appinstalled" confirmar a instalação. Se o usuário
+            // recusar, garantimos que o botão continue visível.
+            if (choice.outcome !== 'accepted' && onDismiss) {
+              onDismiss();
+            }
+            // Cada evento só pode ser usado uma vez; aguarda o navegador
+            // disparar um novo beforeinstallprompt para futuras tentativas.
+            deferredPrompt = null;
+          });
+        }
+
+        installBtn.addEventListener('click', function () {
+          triggerInstallPrompt(showInstallBtn);
+        });
+
+        // Ao carregar a página, se o app ainda não estiver instalado, o botão
+        // já fica disponível (não depende de aguardar o login para aparecer).
+        // Em iOS Safari, mostramos direto (não há beforeinstallprompt).
+        // Nos demais navegadores, mostramos como fallback manual enquanto
+        // aguardamos (ou não) o beforeinstallprompt — que, se disparar, também
+        // chama showInstallBtn() acima.
+        if (!isAppInstalled()) {
+          showInstallBtn();
+        }
+
+        // ── Popup automático de instalação após login ──────────────────────
+        // Some(o gancho): quiz.js chama window.__pqTriggerInstallAfterLogin()
+        // assim que um login é concluído com sucesso (manual ou revalidação).
+        var SESSION_DISMISS_KEY = 'pq_install_popup_dismissed';
+        var popupOverlay = document.getElementById('pq-install-popup');
+        var popupAceitar = document.getElementById('pq-install-popup-aceitar');
+        var popupRecusar = document.getElementById('pq-install-popup-recusar');
+
+        function foiRecusadoNestaSessao() {
+          try { return sessionStorage.getItem(SESSION_DISMISS_KEY) === '1'; } catch (e) { return false; }
+        }
+        function marcarRecusadoNestaSessao() {
+          try { sessionStorage.setItem(SESSION_DISMISS_KEY, '1'); } catch (e) {}
+        }
+
+        function esconderPopupInstalacao() {
+          popupOverlay.classList.remove('pq-visible');
+        }
+
+        function mostrarPopupInstalacao() {
+          // Nunca mostra se já instalado, se o usuário já recusou nesta
+          // sessão, ou se outra tela de instalação (modal iOS) já está aberta.
+          if (isAppInstalled() || foiRecusadoNestaSessao() || iosModal.classList.contains('pq-visible')) return;
+          popupOverlay.classList.add('pq-visible');
+        }
+
+        popupAceitar.addEventListener('click', function () {
+          esconderPopupInstalacao();
+          // Inicia a instalação de verdade. Se o usuário aceitar o prompt
+          // nativo (ou seguir o passo a passo no iOS), o botão "Instalar App"
+          // só some quando o evento 'appinstalled' confirmar a instalação —
+          // igual ao clique direto no botão inferior.
+          triggerInstallPrompt(showInstallBtn);
+        });
+
+        popupRecusar.addEventListener('click', function () {
+          esconderPopupInstalacao();
+          // Não mostra o popup de novo nesta sessão, mas o botão "Instalar
+          // App" continua disponível na parte inferior para instalação manual.
+          marcarRecusadoNestaSessao();
+        });
+
+        popupOverlay.addEventListener('click', function (e) {
+          if (e.target === popupOverlay) {
+            esconderPopupInstalacao();
+            marcarRecusadoNestaSessao();
+          }
+        });
+
+        // Se a instalação for concluída enquanto o popup estiver aberto
+        // (ex.: usuário aceitou o prompt nativo), some com o popup também.
+        window.addEventListener('appinstalled', esconderPopupInstalacao);
+
+        window.__pqTriggerInstallAfterLogin = function () {
+          mostrarPopupInstalacao();
+        };
+
+      })();
+    </script>
+
+    <div id="root"></div>
+    <script src="/quiz.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
+
+    <style>
+      /* ── Popup social proof: reduzir ~50% no mobile ── */
+      [data-spopup="1"] {
+        max-width: 76px !important;
+      }
+      [data-spopup="1"] > div {
+        padding: 5px !important;
+        gap: 5px !important;
+      }
+      /* Avatar */
+      [data-spopup="1"] > div > div:first-child {
+        width: 14px !important;
+        height: 14px !important;
+        min-width: 14px !important;
+        font-size: 5px !important;
+      }
+      /* Textos */
+      [data-spopup="1"] p {
+        font-size: 5.5px !important;
+        line-height: 1.3 !important;
+        margin-bottom: 1px !important;
+      }
+      /* Botão fechar */
+      [data-spopup="1"] button {
+        font-size: 8px !important;
+        padding: 0 !important;
+      }
+      /* Em telas maiores (tablet+), mantém tamanho original */
+      @media (min-width: 640px) {
+        [data-spopup="1"] {
+          max-width: 168px !important;
+        }
+        [data-spopup="1"] > div {
+          padding: 8px !important;
+          gap: 6px !important;
+        }
+        [data-spopup="1"] > div > div:first-child {
+          width: 24px !important;
+          height: 24px !important;
+          min-width: 24px !important;
+          font-size: 9px !important;
+        }
+        [data-spopup="1"] p {
+          font-size: inherit !important;
+          line-height: inherit !important;
+          margin-bottom: inherit !important;
+        }
+        [data-spopup="1"] button {
+          font-size: inherit !important;
+        }
+      }
+
+      /* ── Ajustes "Minhas Aulas": remover espaço vazio antes dos cards ── */
+      [class*="sm:justify-between gap-3 mb-2 px-0"] + div.relative {
+        margin-top: 0.25rem !important;
+      }
+
+      /* Setas de navegação (já ocultas por padrão) — garantia extra */
+      [class*="sm:justify-between gap-3 mb-2 px-0"] > [class="hidden"] {
+        display: none !important;
+      }
+
+      /* ── Cards dos módulos: mais largos, mais próximos das bordas ── */
+      [class*="grid grid-cols-2 gap-2 pb-8 pt-0"] {
+        margin-left: -0.75rem !important;
+        margin-right: -0.75rem !important;
+      }
+
+      /* ── Faixa "MÓDULO X": fonte ampliada para 18px, alinhada ao canto da capa, sem ultrapassar a borda ── */
+      [class*="top-1.5 left-1.5 bg-[#d4af37]"][class*="rounded-full"] {
+        top: 4px !important;
+        left: 4px !important;
+        padding: 3px 8px !important;
+        font-size: 15px !important;
+        line-height: 1.2 !important;
+        letter-spacing: 0.5px !important;
+        max-width: calc(100% - 8px) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+
+      /* ── Card "Certificado de Conclusão": borda dourada premium + centralizado ── */
+      /* Agora ocupa 1 coluna (não mais col-span-2) para abrir espaço ao card "Novo módulo" ao lado */
+      [class*="col-span-2 rounded-2xl overflow-hidden shadow-xl transition-transform"] {
+        background: rgba(42, 26, 64, 0.45) !important;
+        backdrop-filter: blur(18px) !important;
+        -webkit-backdrop-filter: blur(18px) !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+        box-shadow: 0 0 30px rgba(212, 175, 55, 0.12), 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+        justify-self: center !important;
+        width: 100% !important;
+        grid-column: span 1 / span 1 !important;
+      }
+
+      /* ── Certificado: cadeado exatamente centralizado no centro da capa ── */
+      [class*="col-span-2 rounded-2xl overflow-hidden shadow-xl transition-transform"] .bg-black\/40.backdrop-blur-\[1px\].rounded-2xl {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      /* ── Seção de texto abaixo da capa: compacta ── */
+      [class*="p-4 flex flex-col justify-center items-center bg-[#1a1025] text-center"] {
+        background: rgba(26, 16, 37, 0.35) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        padding: 14px 20px !important;
+        gap: 8px !important;
+      }
+
+      /* ── Ícones do certificado ── */
+      /* Reduzidos porque o card do certificado passou a ocupar 1 coluna (mais estreito) */
+      [class*="w-14 h-14 text-[#d4af37]"] {
+        width: 44px !important;
+        height: 44px !important;
+      }
+      [class*="w-20 h-20 text-[#d4af37] drop-shadow-md"] {
+        width: 52px !important;
+        height: 52px !important;
+      }
+
+      /* ── Remover completamente a tela de login antiga (nome + senha) ── */
+      [class*="z-[9998]"],
+      [class*="z-[9999]"] {
+        display: none !important;
+      }
+
+      /* ── Novo card "Em breve" (ao lado do Certificado) ── */
+      #pq-coming-soon-card {
+        position: relative;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+        background: rgba(42, 26, 64, 0.45);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        display: flex;
+        flex-direction: column;
+        cursor: default;
+      }
+      #pq-coming-soon-card .pq-cs-cover {
+        position: relative;
+        aspect-ratio: 1 / 1;
+        width: 100%;
+        overflow: hidden;
+      }
+      #pq-coming-soon-card .pq-cs-cover img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: blur(4px);
+        transform: scale(1.05);
+      }
+      #pq-coming-soon-card .pq-cs-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(26, 16, 37, 0.7);
+        z-index: 1;
+      }
+      #pq-coming-soon-card .pq-cs-content {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-align: center;
+      }
+      #pq-coming-soon-card .pq-cs-lock {
+        width: 44px;
+        height: 44px;
+        color: #d4af37;
+        flex-shrink: 0;
+      }
+      #pq-coming-soon-card .pq-cs-title {
+        color: #fff;
+        font-size: 1.125rem;
+        line-height: 1.3;
+        font-weight: 700;
+        margin: 0;
+      }
+      #pq-coming-soon-card .pq-cs-text {
+        padding: 14px 20px;
+        background: rgba(26, 16, 37, 0.35);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        text-align: center;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      #pq-coming-soon-card .pq-cs-text p {
+        margin: 0;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.4;
+      }
+
+      /* ── Botão WhatsApp: evitar que fique escondido atrás da barra Aulas/Bônus ── */
+      body:has(#pq-bottom-nav) .fixed.bottom-6.right-4.z-50 {
+        bottom: 84px !important;
+      }
+    </style>
+
+    <!-- Ajustes do card Certificado + inserção do card "Novo módulo (Em breve)" -->
+    <script>
+      (function() {
+        // ── Traduções do card "Novo módulo", seguindo o mesmo padrão de idioma do app ──
+        var LANG_STORAGE_KEY = 'pilates_lang';
+        var DEFAULT_LANG = 'pt-BR';
+        var TRANSLATIONS = {
+          'pt-BR': { comingSoon: 'Em breve', newLessons: '🚀 Novas Aulas em Produção' },
+          'pt-PT': { comingSoon: 'Brevemente', newLessons: '🚀 Novas Aulas em Produção' },
+          'es':    { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas Clases en Producción' },
+          'en':    { comingSoon: 'Coming soon', newLessons: '🚀 New Classes in Production' },
+          'fr':    { comingSoon: 'Bientôt disponible', newLessons: '🚀 Nouveaux Cours en Préparation' }
+        };
+
+        function getCurrentLang() {
+          try {
+            var lang = localStorage.getItem(LANG_STORAGE_KEY);
+            if (lang && TRANSLATIONS[lang]) return lang;
+          } catch {}
+          return DEFAULT_LANG;
+        }
+
+        function applyComingSoonTexts() {
+          var card = document.getElementById('pq-coming-soon-card');
+          if (!card) return;
+          var t = TRANSLATIONS[getCurrentLang()] || TRANSLATIONS[DEFAULT_LANG];
+          var titleEl = card.querySelector('.pq-cs-title');
+          var textEl = card.querySelector('.pq-cs-text p');
+          if (titleEl) titleEl.textContent = t.comingSoon;
+          if (textEl) textEl.textContent = t.newLessons;
+        }
+
+        function fixCertCard() {
+          // Encontrar o card do certificado (agora col-span-1) pela imagem capa7.png
+          var cards = document.querySelectorAll('[class*="col-span-2"]');
+          var certCard = null;
+          cards.forEach(function(card) {
+            var img = card.querySelector('img[src*="capa7"]');
+            if (img) certCard = card;
+          });
+          if (!certCard) return;
+          certCard.dataset.pqFixed = '1';
+
+          insertComingSoonCard(certCard);
+        }
+
+        function insertComingSoonCard(certCard) {
+          if (document.getElementById('pq-coming-soon-card')) return;
+          var grid = certCard.parentElement;
+          if (!grid) return;
+
+          var card = document.createElement('div');
+          card.id = 'pq-coming-soon-card';
+          card.setAttribute('aria-disabled', 'true');
+          card.innerHTML =
+            '<div class="pq-cs-cover">' +
+              '<img src="/capa6.png" alt="Novo módulo em breve" />' +
+              '<div class="pq-cs-overlay"></div>' +
+              '<div class="pq-cs-content">' +
+                '<svg class="pq-cs-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>' +
+                  '<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>' +
+                '</svg>' +
+                '<h3 class="pq-cs-title"></h3>' +
+              '</div>' +
+            '</div>' +
+            '<div class="pq-cs-text">' +
+              '<p></p>' +
+            '</div>';
+
+          // Insere logo após o card do certificado, no mesmo grid
+          certCard.insertAdjacentElement('afterend', card);
+          applyComingSoonTexts();
+        }
+
+        // Atualiza os textos do card sempre que o idioma do app mudar.
+        // O evento 'storage' só dispara em outras abas/janelas (comportamento
+        // padrão do navegador), então para refletir a troca na MESMA aba
+        // interceptamos o localStorage.setItem da própria chave 'pilates_lang'
+        // e emitimos o evento 'pilates:lang' — a mesma fonte/sistema de idioma
+        // já usado pelo app, sem criar nada novo.
+        window.addEventListener('storage', function (e) {
+          if (e.key === LANG_STORAGE_KEY) applyComingSoonTexts();
+        });
+        window.addEventListener('pilates:lang', applyComingSoonTexts);
+
+        try {
+          if (!window.__pqLangPatchApplied) {
+            window.__pqLangPatchApplied = true;
+            var _origSetItem = Storage.prototype.setItem;
+            Storage.prototype.setItem = function (key, value) {
+              _origSetItem.apply(this, arguments);
+              if (key === LANG_STORAGE_KEY) {
+                try {
+                  window.dispatchEvent(new CustomEvent('pilates:lang', { detail: value }));
+                } catch {}
+              }
+            };
+          }
+        } catch {}
+
+        var obs = new MutationObserver(fixCertCard);
+        obs.observe(document.body || document.documentElement, { childList: true, subtree: true });
+        if (document.body) fixCertCard();
+        document.addEventListener('DOMContentLoaded', fixCertCard);
+      })();
+    </script>
+  </body>
+</html>
+>>>>>>> 0d83480 (Adiciona novos arquivos)
