@@ -309,12 +309,16 @@
     try { localStorage.setItem(INSTALL_DONE_KEY, '1'); } catch(e) {}
   }
 
-  // Se já tem auth salvo, mostrar popup (se ainda não viu) e encerrar
+  // Se já tem auth salvo, mostrar popup (se ainda não viu).
+  // IMPORTANTE: não usar "return" aqui — isso encerrava o script inteiro e
+  // impedia que a barra inferior (Aulas/Bônus) fosse recriada ao atualizar
+  // a página já estando logado. O restante do script continua normalmente;
+  // apenas a tela de login (mostrarLogin) é pulada mais abaixo quando já
+  // há sessão ativa.
   var auth = null;
   try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
   if (auth && auth.loggedIn) {
     setTimeout(mostrarPopupInstalar, 800);
-    return;
   }
 
   // ─── deviceId ─────────────────────────────────────────────────────────────
@@ -427,10 +431,15 @@
   };
 
   // ─── Mostrar login ────────────────────────────────────────────────────────
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mostrarLogin);
-  } else {
-    mostrarLogin();
+  // Só exibe a tela de login quando ainda não há sessão ativa. Se já estiver
+  // logado (ex.: após atualizar a página), pulamos direto para a inicialização
+  // da barra inferior (Aulas/Bônus) mais abaixo.
+  if (!(auth && auth.loggedIn)) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', mostrarLogin);
+    } else {
+      mostrarLogin();
+    }
   }
 
   // ─── Sistema de abas: Aulas / Bônus ─────────────────────────────────────
