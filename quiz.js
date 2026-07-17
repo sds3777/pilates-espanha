@@ -466,6 +466,7 @@
     tela.innerHTML =
       '<div style="padding:20px 16px 16px;">'
       + '<h2 style="color:#d4af37;font-size:18px;font-weight:700;margin:0 0 4px;letter-spacing:1px;">🎁 Bônus Exclusivos</h2>'
+      + '<p style="color:#d4af37;font-size:13px;font-weight:600;margin:0 0 6px;">Esses bônus vão te ajudar a acelerar seus resultados 🚀</p>'
       + '<p style="color:#9b7ec8;font-size:13px;margin:0 0 20px;">Materiais extras inclusos no seu acesso</p>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
       + cardsHtml
