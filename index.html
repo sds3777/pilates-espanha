@@ -90,14 +90,14 @@
         margin-right: -0.75rem !important;
       }
 
-      /* ── Faixa "MÓDULO X": ~20% menor, alinhada ao canto da capa, sem ultrapassar a borda ── */
+      /* ── Faixa "MÓDULO X": aumentada ~25% para melhor legibilidade, mesma posição ── */
       [class*="top-1.5 left-1.5 bg-[#d4af37]"][class*="rounded-full"] {
         top: 4px !important;
         left: 4px !important;
-        padding: 1.5px 5px !important;
-        font-size: 6px !important;
+        padding: 2px 6.5px !important;
+        font-size: 7.5px !important;
         line-height: 1.2 !important;
-        letter-spacing: 0.5px !important;
+        letter-spacing: 0.6px !important;
         max-width: calc(100% - 8px) !important;
       }
 
@@ -131,9 +131,10 @@
         height: 88px !important;
       }
 
-      /* ── Remover completamente a tela de login antiga (nome + senha) ── */
-      [class*="z-[9998]"],
-      [class*="z-[9999]"] {
+      /* ── Remover completamente a tela de login antiga (nome + senha) do React ── */
+      /* Usar seletor mais específico para não afetar nossos próprios elementos */
+      div[class*="z-[9998]"]:not([id]),
+      div[class*="z-[9999]"]:not([id]) {
         display: none !important;
       }
 
@@ -142,37 +143,16 @@
         aspect-ratio: 2 / 1.1 !important;
         height: auto !important;
       }
+
+      /* ── Cabeçalho: remover comportamento fixo/sticky ── */
+      /* Seletor restrito à tag <header> com sticky+top-0+z-50 para não afetar
+         outros elementos sticky/fixed do app (ex: barra de progresso da aula) */
+      header[class*="sticky"][class*="top-0"][class*="z-50"] {
+        position: static !important;
+        top: auto !important;
+      }
     </style>
 
-    <!-- Corrigir aspect-ratio do certificado via JS (React usa classes hasheadas que não são acessíveis por CSS simples) -->
-    <script>
-      (function() {
-        function fixCertCard() {
-          // Encontrar o card col-span-2 (certificado)
-          var cards = document.querySelectorAll('[class*="col-span-2"]');
-          cards.forEach(function(card) {
-            if (card.dataset.pqFixed) return;
-            // Verificar se é o card do certificado (contém imagem capa7.png)
-            var img = card.querySelector('img[src*="capa7"]');
-            if (!img) return;
-            card.dataset.pqFixed = '1';
-            // Encontrar o wrapper da imagem (tem aspect-ratio square via Tailwind)
-            var wrap = img.closest('[class*="aspect-square"]') || img.parentElement;
-            if (wrap) {
-              wrap.id = 'pq-cert-img-wrap';
-              wrap.style.aspectRatio = '2 / 1.1';
-              wrap.style.height = 'auto';
-              // Remover classe aspect-square se existir para não conflitar
-              wrap.className = wrap.className.replace(/aspect-square/g, '').trim();
-            }
-          });
-        }
-
-        var obs = new MutationObserver(fixCertCard);
-        obs.observe(document.body || document.documentElement, { childList: true, subtree: true });
-        if (document.body) fixCertCard();
-        document.addEventListener('DOMContentLoaded', fixCertCard);
-      })();
-    </script>
+    <!-- Certificado e nav bar gerenciados pelo quiz.js -->
   </body>
 </html>
