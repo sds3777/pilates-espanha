@@ -111,180 +111,6 @@
     return tituloOriginal;
   }
 
-  // Duas chaves separadas:
-  // INSTALL_POPUP_KEY  = usuário JÁ VIU e respondeu ao popup (não mostrar de novo)
-  // INSTALL_DONE_KEY   = usuário instalou ou o app já está instalado (ocultar FAB)
-  var INSTALL_POPUP_KEY = 'pilates_install_popup_seen';
-  var INSTALL_DONE_KEY  = 'pilates_install_done';
-
-  // ─── PWA: capturar o prompt de instalação o quanto antes ─────────────────
-  var deferredInstallPrompt = null;
-  window.addEventListener('beforeinstallprompt', function (e) {
-    e.preventDefault();
-    deferredInstallPrompt = e;
-    atualizarBotaoInstalar();
-  });
-  window.addEventListener('appinstalled', function () {
-    deferredInstallPrompt = null;
-    try { localStorage.setItem(INSTALL_DONE_KEY, '1'); } catch (e) {}
-    try { localStorage.setItem(INSTALL_POPUP_KEY, '1'); } catch (e) {}
-    fecharPopupInstalar();
-    atualizarBotaoInstalar();
-  });
-
-  function isStandaloneApp() {
-    try {
-      return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    } catch (e) { return false; }
-  }
-
-  function isIOS() {
-    try {
-      return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    } catch (e) { return false; }
-  }
-
-  // ─── Botão flutuante "Instalar App" ──────────────────────────────────────
-  function criarBotaoInstalarFlutuante() {
-    if (document.getElementById('pq-install-fab')) return;
-    var fab = document.createElement('button');
-    fab.id = 'pq-install-fab';
-    fab.style.cssText = 'display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:calc(80px + env(safe-area-inset-bottom, 0px));z-index:9998;align-items:center;justify-content:center;gap:8px;padding:12px 20px;background:#d4af37;color:#0d1a1f;border:none;border-radius:999px;font-family:Inter,system-ui,sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.35);';
-    fab.innerHTML =
-      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M5 21h14"></path></svg>'
-      + 'Instalar App';
-    fab.addEventListener('click', function () {
-      if (deferredInstallPrompt) {
-        fab.disabled = true;
-        deferredInstallPrompt.prompt();
-        deferredInstallPrompt.userChoice.finally(function () {
-          deferredInstallPrompt = null;
-          fab.disabled = false;
-          atualizarBotaoInstalar();
-        });
-      } else if (isIOS()) {
-        mostrarInstrucaoIOS();
-      }
-    });
-    document.body.appendChild(fab);
-  }
-
-  function atualizarBotaoInstalar() {
-    var fab = document.getElementById('pq-install-fab');
-    if (!fab) return;
-
-    // Se já instalou ou está rodando como PWA, ocultar
-    var jaInstalou = false;
-    try { jaInstalou = localStorage.getItem(INSTALL_DONE_KEY) === '1'; } catch(e) {}
-    if (jaInstalou || isStandaloneApp()) {
-      fab.style.display = 'none';
-      return;
-    }
-
-    var authAtual = null;
-    try { authAtual = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch (e) {}
-    var logado = !!(authAtual && authAtual.loggedIn);
-
-    if (!logado) {
-      fab.style.display = 'none';
-      return;
-    }
-    if (deferredInstallPrompt || isIOS()) {
-      fab.style.display = 'flex';
-      fab.disabled = false;
-    } else {
-      fab.style.display = 'none';
-    }
-  }
-
-  // ─── Pop-up de instalação ─────────────────────────────────────────────────
-  function jaViuPopupInstalar() {
-    try { return localStorage.getItem(INSTALL_POPUP_KEY) === '1'; } catch (e) { return false; }
-  }
-  function marcarPopupVisto() {
-    try { localStorage.setItem(INSTALL_POPUP_KEY, '1'); } catch (e) {}
-  }
-  function fecharPopupInstalar() {
-    var el = document.getElementById('pq-install-popup');
-    if (el) el.remove();
-  }
-
-  function mostrarPopupInstalar() {
-    // Não mostrar se já está rodando como app instalado
-    if (isStandaloneApp()) {
-      marcarPopupVisto();
-      try { localStorage.setItem(INSTALL_DONE_KEY, '1'); } catch(e) {}
-      atualizarBotaoInstalar();
-      return;
-    }
-    // Não mostrar se o usuário já respondeu ao popup antes
-    if (jaViuPopupInstalar()) {
-      atualizarBotaoInstalar();
-      return;
-    }
-    // Não duplicar
-    if (document.getElementById('pq-install-popup')) return;
-
-    var modal = document.createElement('div');
-    modal.id = 'pq-install-popup';
-    modal.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:20px;font-family:Inter,system-ui,sans-serif;';
-    modal.innerHTML =
-      '<div style="background:#2a1a40;border:1px solid rgba(212,175,55,0.4);border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;">'
-      + '<p style="font-size:32px;margin:0 0 12px;">📲</p>'
-      + '<p style="color:#fff;font-size:16px;font-weight:700;margin:0 0 8px;">Instalar o app na tela inicial?</p>'
-      + '<p style="color:#c9a8f0;font-size:14px;line-height:1.5;margin:0 0 24px;">Acesse suas aulas de Pilates com um toque, direto da tela do seu celular.</p>'
-      + '<div style="display:flex;gap:12px;">'
-      + '<button id="pq-install-nao" style="flex:1;padding:12px;background:transparent;border:2px solid #3a2560;color:#9b7ec8;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;">Não, agora</button>'
-      + '<button id="pq-install-sim" style="flex:1;padding:12px;background:#d4af37;border:none;color:#0d1a1f;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;">Sim, instalar</button>'
-      + '</div></div>';
-    document.body.appendChild(modal);
-
-    // "Não, agora" — fecha o popup, mantém FAB para instalar depois
-    document.getElementById('pq-install-nao').addEventListener('click', function () {
-      marcarPopupVisto();
-      fecharPopupInstalar();
-      atualizarBotaoInstalar(); // garante que o FAB fica visível
-    });
-
-    // "Sim, instalar" — dispara instalação e oculta FAB
-    document.getElementById('pq-install-sim').addEventListener('click', function () {
-      marcarPopupVisto();
-      fecharPopupInstalar();
-      if (deferredInstallPrompt) {
-        deferredInstallPrompt.prompt();
-        deferredInstallPrompt.userChoice.then(function(choice) {
-          if (choice.outcome === 'accepted') {
-            try { localStorage.setItem(INSTALL_DONE_KEY, '1'); } catch(e) {}
-          }
-          deferredInstallPrompt = null;
-          atualizarBotaoInstalar();
-        }).catch(function() {
-          deferredInstallPrompt = null;
-          atualizarBotaoInstalar();
-        });
-      } else if (isIOS()) {
-        mostrarInstrucaoIOS();
-        try { localStorage.setItem(INSTALL_DONE_KEY, '1'); } catch(e) {}
-        atualizarBotaoInstalar();
-      }
-    });
-  }
-
-  // ─── Instrução iOS ────────────────────────────────────────────────────────
-  function mostrarInstrucaoIOS() {
-    var modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:20px;';
-    modal.innerHTML =
-      '<div style="background:#2a1a40;border:1px solid rgba(212,175,55,0.4);border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;">'
-      + '<p style="color:#d4af37;font-size:32px;margin:0 0 12px;">⬆️</p>'
-      + '<p style="color:#fff;font-size:15px;line-height:1.6;margin:0 0 24px;">Toque em <strong>Compartilhar</strong> <span style="opacity:.8;">(ícone de seta para cima)</span> e depois em <strong>"Adicionar à Tela de Início"</strong>.</p>'
-      + '<button id="pq-ios-ok" style="width:100%;padding:12px;background:#d4af37;border:none;color:#0d1a1f;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">Entendi</button>'
-      + '</div>';
-    document.body.appendChild(modal);
-    document.getElementById('pq-ios-ok').addEventListener('click', function() { modal.remove(); });
-  }
-
   // ─── Modal de transferência de dispositivo ────────────────────────────────
   function mostrarConfirmacao(mensagem, onSim, onNao) {
     var modal = document.createElement('div');
@@ -301,25 +127,13 @@
     document.getElementById('pq-nao').addEventListener('click', function() { modal.remove(); onNao(); });
   }
 
-  // ─── Inicialização do FAB ─────────────────────────────────────────────────
-  criarBotaoInstalarFlutuante();
-  atualizarBotaoInstalar();
-  if (isStandaloneApp()) {
-    marcarPopupVisto();
-    try { localStorage.setItem(INSTALL_DONE_KEY, '1'); } catch(e) {}
-  }
-
-  // Se já tem auth salvo, mostrar popup (se ainda não viu).
-  // IMPORTANTE: não usar "return" aqui — isso encerrava o script inteiro e
-  // impedia que a barra inferior (Aulas/Bônus) fosse recriada ao atualizar
-  // a página já estando logado. O restante do script continua normalmente;
-  // apenas a tela de login (mostrarLogin) é pulada mais abaixo quando já
-  // há sessão ativa.
+  // Se já tem auth salvo, a barra inferior (Aulas/Bônus) precisa ser
+  // recriada ao atualizar a página já estando logado.
+  // IMPORTANTE: não usar "return" aqui — isso encerraria o script inteiro.
+  // O restante do script continua normalmente; apenas a tela de login
+  // (mostrarLogin) é pulada mais abaixo quando já há sessão ativa.
   var auth = null;
   try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
-  if (auth && auth.loggedIn) {
-    setTimeout(mostrarPopupInstalar, 800);
-  }
 
   // ─── deviceId ─────────────────────────────────────────────────────────────
   function getDeviceId() {
@@ -354,7 +168,7 @@
       + '<img src="https://i.imgur.com/m6vjf6a.png" style="width:88px;height:88px;border-radius:50%;border:2px solid rgba(212,175,55,0.5);object-fit:cover;" onerror="this.style.display=\'none\'">'
       + '<div style="text-align:center;">'
       + '<h1 style="color:#d4af37;font-size:22px;font-weight:700;letter-spacing:2px;margin:0 0 6px;font-family:Cinzel,serif;">PILATES EM CASA</h1>'
-      + '<p style="color:#c9a8f0;font-size:13px;letter-spacing:4px;margin:0;font-family:Cinzel,serif;">com Ana Rita</p>'
+      + '<p style="color:#c9a8f0;font-size:13px;letter-spacing:4px;margin:0;font-family:Cinzel,serif;">com Daniela</p>'
       + '</div>'
       + '<div style="text-align:center;">'
       + '<p style="color:#fff;font-size:17px;font-weight:600;margin:0 0 6px;">Acesso exclusivo para alunas 💛</p>'
@@ -379,6 +193,28 @@
     function mostrarErro(msg) { erroEl.textContent = msg; erroEl.style.display = 'block'; }
     function esconderErro() { erroEl.style.display = 'none'; }
 
+    // ─── Tela de bloqueio (status diferente de ATIVO) ────────────────────────
+    // Substitui o conteúdo do mesmo overlay já aberto — não é uma tela nova
+    // nem pede e-mail novamente, e só aparece como resultado da verificação.
+    function mostrarBloqueado(mensagem) {
+      overlay.innerHTML =
+        '<div style="width:100%;max-width:420px;background:linear-gradient(160deg,rgba(42,26,64,0.98),rgba(26,16,37,0.99));border:1px solid rgba(212,175,55,0.35);border-radius:24px;overflow:hidden;box-shadow:0 0 60px rgba(212,175,55,0.15),0 32px 64px rgba(0,0,0,0.6);">'
+        + '<div style="height:3px;background:linear-gradient(90deg,transparent,#d4af37,transparent);"></div>'
+        + '<div style="padding:36px 32px 40px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;">'
+        + '<div style="width:56px;height:56px;border-radius:50%;background:rgba(255,138,138,0.12);border:1px solid rgba(255,138,138,0.35);display:flex;align-items:center;justify-content:center;font-size:26px;">🔒</div>'
+        + '<h2 style="color:#d4af37;font-family:Cinzel,serif;font-size:20px;font-weight:700;letter-spacing:1px;margin:0;">Acesso indisponível</h2>'
+        + '<p style="color:#c9a8f0;font-size:15px;line-height:1.5;margin:0;">' + (mensagem || 'Não foi possível liberar seu acesso.') + '</p>'
+        + '<button id="pq-blocked-retry" style="width:100%;padding:14px 18px;border-radius:999px;background:transparent;border:1px solid rgba(212,175,55,0.45);color:#d4af37;font-weight:700;font-family:Cinzel,serif;letter-spacing:1px;font-size:14.5px;cursor:pointer;">Tentar novamente</button>'
+        + '<a href="https://wa.me/5519982532156" target="_blank" rel="noopener" style="color:#25D366;font-size:14px;font-weight:600;text-decoration:none;">Falar com o suporte no WhatsApp 📲</a>'
+        + '</div>'
+        + '<div style="height:3px;background:linear-gradient(90deg,transparent,#d4af37,transparent);"></div>'
+        + '</div>';
+      document.getElementById('pq-blocked-retry').addEventListener('click', function () {
+        overlay.remove();
+        mostrarLogin();
+      });
+    }
+
     function tentarEntrar(transferir) {
       var email = input.value.trim().toLowerCase();
       if (!email || !email.includes('@')) { mostrarErro('Digite um e-mail válido.'); return; }
@@ -400,17 +236,16 @@
             localStorage.setItem(AUTH_KEY, JSON.stringify({ loggedIn: true, nome: '', email: email }));
           } catch(e) {}
           overlay.remove();
-          atualizarBotaoInstalar();
           injetarNavBar();
-          // Mostrar popup de instalação 800ms após o login
-          setTimeout(mostrarPopupInstalar, 800);
         } else if (res.motivo === 'OUTRO_DISPOSITIVO') {
           mostrarConfirmacao(res.mensagem, function() { tentarEntrar(true); }, function() {
             btn.disabled = false; btn.textContent = 'Entrar';
           });
         } else {
-          mostrarErro(res.mensagem || 'Nenhuma compra ativa encontrada para este e-mail.');
-          btn.disabled = false; btn.textContent = 'Entrar';
+          // Status diferente de ATIVO (bloqueado, cancelado, reembolsado,
+          // inativo, desativado) ou e-mail não encontrado: mostra a tela
+          // de bloqueio com WhatsApp, sem pedir e-mail novamente.
+          mostrarBloqueado(res.mensagem);
         }
       })
       .catch(function() {
