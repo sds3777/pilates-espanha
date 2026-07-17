@@ -484,15 +484,7 @@
     </script>
 
     <div id="root"></div>
-    <script>
-      // ── Modo demonstração (/teste): não carrega o login/auth normal (quiz.js),
-      // não verifica Supabase, entra direto numa vitrine própria (demo.js).
-      if (window.location.pathname.replace(/\/+$/, '') === '/teste') {
-        document.write('<script src="/demo.js"><\/script>');
-      } else {
-        document.write('<script src="/quiz.js"><\/script>');
-      }
-    </script>
+    <script src="/quiz.js"></script>
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {

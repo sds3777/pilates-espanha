@@ -3,16 +3,6 @@
   var AUTH_KEY = 'pilates_auth';
   var LANG_KEY = 'pilates_lang';
 
-  // ─── Modo demonstração (/teste) ──────────────────
-  // Na rota /teste o React já abre sozinho no modo DEMO nativo (aulas
-  // liberadas/bloqueadas e oferta tratadas dentro do próprio bundle).
-  // Aqui apenas pulamos totalmente a tela de login e a checagem no
-  // Supabase, liberando a nav bar (Aulas/Bônus) direto — sem tocar em
-  // mais nada do fluxo normal, que continua abaixo intacto para as
-  // demais rotas.
-  var MODO_TESTE = window.location.pathname.replace(/\/+$/, '') === '/teste';
-
-
   // window.__pq_auth_ok só vira true depois que o backend confirma o acesso
   // (login manual OU revalidação automática) nesta sessão de página.
   window.__pq_auth_ok = false;
@@ -384,14 +374,6 @@
   // rede rápida); caso o backend não confirme o acesso, tudo é desfeito e
   // a tela de bloqueio/login é exibida — ver revalidarAcessoNoBackend().
   function iniciarRevalidacao() {
-    if (MODO_TESTE) {
-      // Modo demonstração: nunca mostra login nem consulta o backend.
-      // Libera a nav bar (Aulas/Bônus) direto; o React já cuida sozinho
-      // do bloqueio de aulas/bônus e da oferta no modo DEMO nativo.
-      window.__pq_auth_ok = true;
-      injetarNavBar();
-      return;
-    }
     revalidarAcessoNoBackend();
   }
 
@@ -404,14 +386,14 @@
   // Revalida novamente sempre que o usuário volta ao app: troca de aba,
   // troca de app no celular e retorna, ou reabre o PWA instalado.
   document.addEventListener('visibilitychange', function () {
-    if (!MODO_TESTE && !document.hidden) revalidarAcessoNoBackend();
+    if (!document.hidden) revalidarAcessoNoBackend();
   });
 
   // Cobre o caso de navegação por cache do navegador (bfcache), em que o
   // evento 'load'/'DOMContentLoaded' não dispara de novo, mas a página
   // volta a ficar visível para o usuário (ex.: botão "voltar").
   window.addEventListener('pageshow', function (e) {
-    if (!MODO_TESTE && e.persisted) revalidarAcessoNoBackend();
+    if (e.persisted) revalidarAcessoNoBackend();
   });
 
   // ─── Sistema de abas: Aulas / Bônus ─────────────────────────────────────
