@@ -534,7 +534,8 @@
     // Observador permanente: garante que a nav bar volte a aparecer caso seja
     // removida por engano (ex: re-renderizações) e injeta assim que o login
     // (overlay de e-mail) for concluído.
-    var obs = new MutationObserver(function() {
+    // subtree:true para pegar remoções em qualquer nível, não só filhos diretos do body.
+    function garantirNavBar() {
       var a = null;
       try { a = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
       var logado = !!(a && a.loggedIn);
@@ -542,8 +543,23 @@
       if (logado && !login && !document.getElementById('pq-bottom-nav')) {
         injetarNavBar();
       }
+    }
+
+    var obs = new MutationObserver(function () {
+      clearTimeout(garantirNavBar._t);
+      garantirNavBar._t = setTimeout(garantirNavBar, 200);
     });
-    obs.observe(document.body, { childList: true, subtree: false });
+    obs.observe(document.body, { childList: true, subtree: true });
+
+    // Watchdog: checagem periódica como rede de segurança extra, caso a nav
+    // suma por algum re-render que o MutationObserver não capture a tempo.
+    setInterval(garantirNavBar, 1500);
+
+    // Reforça também em navegações internas (SPA) e quando a aba volta a ficar visível.
+    window.addEventListener('popstate', garantirNavBar);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) garantirNavBar();
+    });
   }
 
   if (document.readyState === 'loading') {

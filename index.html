@@ -90,15 +90,18 @@
         margin-right: -0.75rem !important;
       }
 
-      /* ── Faixa "MÓDULO X": ~20% menor, alinhada ao canto da capa, sem ultrapassar a borda ── */
+      /* ── Faixa "MÓDULO X": fonte ampliada para 18px, alinhada ao canto da capa, sem ultrapassar a borda ── */
       [class*="top-1.5 left-1.5 bg-[#d4af37]"][class*="rounded-full"] {
         top: 4px !important;
         left: 4px !important;
-        padding: 1.5px 5px !important;
-        font-size: 6px !important;
+        padding: 3px 8px !important;
+        font-size: 18px !important;
         line-height: 1.2 !important;
         letter-spacing: 0.5px !important;
         max-width: calc(100% - 8px) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
       }
 
       /* ── Card "Certificado de Conclusão": borda dourada premium + centralizado ── */
