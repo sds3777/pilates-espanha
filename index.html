@@ -12,6 +12,261 @@
     <link rel="stylesheet" crossorigin href="/assets/index-BQ8LcfVF.css">
   </head>
   <body>
+    <!-- ── Verificação de acesso (Supabase) ── -->
+    <style>
+      #pq-access-gate {
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        background: #1a1025;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        font-family: 'Cormorant Garamond', serif, sans-serif;
+      }
+      #pq-access-gate.pq-hidden { display: none !important; }
+      #pq-access-gate .pq-box {
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+      }
+      #pq-access-gate .pq-spinner {
+        width: 44px;
+        height: 44px;
+        border: 3px solid #2a1a40;
+        border-top-color: #d4af37;
+        border-radius: 50%;
+        animation: pq-spin 0.8s linear infinite;
+      }
+      @keyframes pq-spin { to { transform: rotate(360deg); } }
+      #pq-access-gate .pq-title {
+        color: #d4af37;
+        font-family: 'Cinzel', serif;
+        font-size: 20px;
+        letter-spacing: 1px;
+        margin: 0;
+      }
+      #pq-access-gate .pq-msg {
+        color: #c9a8f0;
+        font-size: 15px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      #pq-access-gate input[type="email"] {
+        width: 100%;
+        padding: 14px 18px;
+        border-radius: 999px;
+        background: #2a1a40;
+        border: 1px solid #7c3aed;
+        color: #fff;
+        text-align: center;
+        font-size: 15px;
+        outline: none;
+        box-sizing: border-box;
+      }
+      #pq-access-gate input[type="email"]:focus { border-color: #d4af37; }
+      #pq-access-gate button {
+        width: 100%;
+        padding: 14px 18px;
+        border-radius: 999px;
+        background: #d4af37;
+        color: #1a0a20;
+        font-weight: 700;
+        font-family: 'Cinzel', serif;
+        letter-spacing: 1px;
+        border: none;
+        font-size: 15px;
+        cursor: pointer;
+      }
+      #pq-access-gate button:disabled { opacity: 0.6; cursor: default; }
+      #pq-access-gate button.pq-secondary {
+        background: transparent;
+        border: 1px solid rgba(212,175,55,0.5);
+        color: #d4af37;
+      }
+      #pq-access-gate .pq-error {
+        color: #ff8a8a;
+        font-size: 13px;
+        margin: 0;
+        min-height: 16px;
+      }
+      #pq-access-gate .pq-whatsapp-link {
+        color: #d4af37;
+        font-size: 13px;
+        text-decoration: underline;
+      }
+    </style>
+    <div id="pq-access-gate">
+      <div class="pq-box" id="pq-gate-content">
+        <div class="pq-spinner"></div>
+        <p class="pq-msg">Verificando seu acesso...</p>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var STORAGE_EMAIL_KEY = 'pilates_user_email';
+        var STORAGE_DEVICE_KEY = 'pilates_device_id';
+        var gate = document.getElementById('pq-access-gate');
+        var content = document.getElementById('pq-gate-content');
+
+        function getDeviceId() {
+          try {
+            var id = localStorage.getItem(STORAGE_DEVICE_KEY);
+            if (!id) {
+              id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 12);
+              localStorage.setItem(STORAGE_DEVICE_KEY, id);
+            }
+            return id;
+          } catch {
+            return 'dev_' + Math.random().toString(36).slice(2, 12);
+          }
+        }
+
+        function getSavedEmail() {
+          try {
+            return localStorage.getItem(STORAGE_EMAIL_KEY) || '';
+          } catch {
+            return '';
+          }
+        }
+
+        function saveEmail(email) {
+          try { localStorage.setItem(STORAGE_EMAIL_KEY, email); } catch {}
+        }
+
+        function clearAccess() {
+          try {
+            localStorage.removeItem(STORAGE_EMAIL_KEY);
+          } catch {}
+        }
+
+        function showGate() {
+          gate.classList.remove('pq-hidden');
+        }
+        function hideGate() {
+          gate.classList.add('pq-hidden');
+        }
+
+        function renderEmailForm(errorMsg) {
+          content.innerHTML =
+            '<h2 class="pq-title">Acesso exclusivo para alunas 💛</h2>' +
+            '<p class="pq-msg">Digite o e-mail usado na sua compra para liberar o acesso às aulas.</p>' +
+            '<input type="email" id="pq-email-input" placeholder="Digite seu e-mail" autocomplete="email" />' +
+            '<p class="pq-error" id="pq-email-error">' + (errorMsg || '') + '</p>' +
+            '<button id="pq-email-submit">Entrar</button>' +
+            '<a class="pq-whatsapp-link" href="https://wa.me/5519982532156" target="_blank" rel="noopener">Precisa de ajuda? Fale no WhatsApp</a>';
+
+          var input = document.getElementById('pq-email-input');
+          var btn = document.getElementById('pq-email-submit');
+          setTimeout(function () { input && input.focus(); }, 100);
+
+          function submit() {
+            var email = (input.value || '').trim();
+            if (!email || email.indexOf('@') === -1) {
+              document.getElementById('pq-email-error').textContent = 'Digite um e-mail válido.';
+              return;
+            }
+            saveEmail(email);
+            runVerification(email, false);
+          }
+          btn.addEventListener('click', submit);
+          input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') submit();
+          });
+        }
+
+        function renderBlocked(mensagem) {
+          content.innerHTML =
+            '<h2 class="pq-title">Acesso indisponível</h2>' +
+            '<p class="pq-msg">' + (mensagem || 'Não foi possível liberar seu acesso.') + '</p>' +
+            '<button id="pq-retry-btn" class="pq-secondary">Tentar novamente</button>' +
+            '<a class="pq-whatsapp-link" href="https://wa.me/5519982532156" target="_blank" rel="noopener">Falar com o suporte no WhatsApp</a>';
+          document.getElementById('pq-retry-btn').addEventListener('click', function () {
+            clearAccess();
+            renderEmailForm();
+          });
+        }
+
+        function renderDeviceConflict(mensagem, email) {
+          content.innerHTML =
+            '<h2 class="pq-title">Outro dispositivo detectado</h2>' +
+            '<p class="pq-msg">' + (mensagem || '') + '</p>' +
+            '<button id="pq-transfer-btn">Transferir para este aparelho</button>' +
+            '<button id="pq-cancel-btn" class="pq-secondary">Cancelar</button>';
+          document.getElementById('pq-transfer-btn').addEventListener('click', function () {
+            runVerification(email, true);
+          });
+          document.getElementById('pq-cancel-btn').addEventListener('click', function () {
+            clearAccess();
+            renderEmailForm();
+          });
+        }
+
+        function renderVerifying() {
+          content.innerHTML =
+            '<div class="pq-spinner"></div>' +
+            '<p class="pq-msg">Verificando seu acesso...</p>';
+        }
+
+        function runVerification(email, transferirDispositivo) {
+          renderVerifying();
+          var deviceId = getDeviceId();
+
+          fetch('/api/verificar-acesso', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: email,
+              deviceId: deviceId,
+              transferirDispositivo: !!transferirDispositivo,
+            }),
+          })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data && data.acesso === true) {
+                saveEmail(email);
+                hideGate();
+                return;
+              }
+
+              // Acesso negado: status bloqueado/cancelado/inativo, e-mail não encontrado,
+              // ou conflito de dispositivo aguardando confirmação.
+              if (data && data.motivo === 'OUTRO_DISPOSITIVO') {
+                renderDeviceConflict(data.mensagem, email);
+                return;
+              }
+
+              clearAccess();
+              renderBlocked(data && data.mensagem);
+            })
+            .catch(function () {
+              content.innerHTML =
+                '<h2 class="pq-title">Erro de conexão</h2>' +
+                '<p class="pq-msg">Não foi possível verificar seu acesso agora. Verifique sua internet e tente novamente.</p>' +
+                '<button id="pq-retry-conn-btn">Tentar novamente</button>';
+              document.getElementById('pq-retry-conn-btn').addEventListener('click', function () {
+                runVerification(email, transferirDispositivo);
+              });
+            });
+        }
+
+        // ── Sempre verifica o acesso a cada abertura do app (PWA ou web),
+        // mesmo que o e-mail já esteja salvo localmente. ──
+        showGate();
+        var savedEmail = getSavedEmail();
+        if (savedEmail) {
+          runVerification(savedEmail, false);
+        } else {
+          renderEmailForm();
+        }
+      })();
+    </script>
+
     <div id="root"></div>
     <script src="/quiz.js"></script>
     <script>
@@ -105,6 +360,7 @@
       }
 
       /* ── Card "Certificado de Conclusão": borda dourada premium + centralizado ── */
+      /* Agora ocupa 1 coluna (não mais col-span-2) para abrir espaço ao card "Novo módulo" ao lado */
       [class*="col-span-2 rounded-2xl overflow-hidden shadow-xl transition-transform"] {
         background: rgba(42, 26, 64, 0.45) !important;
         backdrop-filter: blur(18px) !important;
@@ -113,6 +369,24 @@
         box-shadow: 0 0 30px rgba(212, 175, 55, 0.12), 0 12px 32px rgba(0, 0, 0, 0.35) !important;
         justify-self: center !important;
         width: 100% !important;
+        grid-column: span 1 / span 1 !important;
+      }
+
+      /* ── Certificado: cadeado sempre centralizado no topo, sem sobrepor o título ── */
+      [class*="col-span-2 rounded-2xl overflow-hidden shadow-xl transition-transform"] .bg-black\/40.backdrop-blur-\[1px\].rounded-2xl {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 10px !important;
+        padding-top: 18px !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+      #pq-cert-lock-icon {
+        flex-shrink: 0 !important;
+        margin: 0 auto !important;
+        display: block !important;
       }
 
       /* ── Seção de texto abaixo da capa: compacta ── */
@@ -125,13 +399,19 @@
       }
 
       /* ── Ícones do certificado ── */
+      /* Reduzidos porque o card do certificado passou a ocupar 1 coluna (mais estreito) */
       [class*="w-14 h-14 text-[#d4af37]"] {
-        width: 68px !important;
-        height: 68px !important;
+        width: 44px !important;
+        height: 44px !important;
       }
       [class*="w-20 h-20 text-[#d4af37] drop-shadow-md"] {
-        width: 88px !important;
-        height: 88px !important;
+        width: 52px !important;
+        height: 52px !important;
+      }
+
+      /* ── Certificado: título/legenda com respiro para nunca colidir com o cadeado ── */
+      [class*="col-span-2 rounded-2xl overflow-hidden shadow-xl transition-transform"] h3 {
+        margin-top: 2px !important;
       }
 
       /* ── Remover completamente a tela de login antiga (nome + senha) ── */
@@ -140,39 +420,146 @@
         display: none !important;
       }
 
-      /* ── Certificado: capa landscape (proporção 2 módulos lado a lado) ── */
-      #pq-cert-img-wrap {
-        aspect-ratio: 2 / 1.1 !important;
-        height: auto !important;
+      /* ── Novo card "Em breve" (ao lado do Certificado) ── */
+      #pq-coming-soon-card {
+        position: relative;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+        background: rgba(42, 26, 64, 0.45);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        display: flex;
+        flex-direction: column;
+        cursor: default;
       }
+      #pq-coming-soon-card .pq-cs-cover {
+        position: relative;
+        aspect-ratio: 1 / 1;
+        width: 100%;
+        overflow: hidden;
+      }
+      #pq-coming-soon-card .pq-cs-cover img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: blur(4px);
+        transform: scale(1.05);
+      }
+      #pq-coming-soon-card .pq-cs-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(26, 16, 37, 0.7);
+        z-index: 1;
+      }
+      #pq-coming-soon-card .pq-cs-content {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        padding-top: 18px;
+        text-align: center;
+      }
+      #pq-coming-soon-card .pq-cs-lock {
+        width: 44px;
+        height: 44px;
+        color: #d4af37;
+        flex-shrink: 0;
+      }
+      #pq-coming-soon-card .pq-cs-title {
+        color: #fff;
+        font-size: 1.125rem;
+        line-height: 1.3;
+        font-weight: 700;
+        margin: 0;
+      }
+      #pq-coming-soon-card .pq-cs-text {
+        padding: 14px 20px;
+        background: rgba(26, 16, 37, 0.35);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        text-align: center;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+      #pq-coming-soon-card .pq-cs-text p {
+        margin: 0;
+        color: #d4af37;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.4;
+      }
+      #pq-coming-soon-card .pq-cs-text p.pq-cs-sub {
+        color: #9b7ec8;
+        font-weight: 500;
+        font-size: 12px;
+      }
+
       /* ── Botão WhatsApp: evitar que fique escondido atrás da barra Aulas/Bônus ── */
       body:has(#pq-bottom-nav) .fixed.bottom-6.right-4.z-50 {
         bottom: 84px !important;
       }
     </style>
 
-    <!-- Corrigir aspect-ratio do certificado via JS (React usa classes hasheadas que não são acessíveis por CSS simples) -->
+    <!-- Ajustes do card Certificado + inserção do card "Novo módulo (Em breve)" -->
     <script>
       (function() {
         function fixCertCard() {
-          // Encontrar o card col-span-2 (certificado)
+          // Encontrar o card do certificado (agora col-span-1) pela imagem capa7.png
           var cards = document.querySelectorAll('[class*="col-span-2"]');
+          var certCard = null;
           cards.forEach(function(card) {
-            if (card.dataset.pqFixed) return;
-            // Verificar se é o card do certificado (contém imagem capa7.png)
             var img = card.querySelector('img[src*="capa7"]');
-            if (!img) return;
-            card.dataset.pqFixed = '1';
-            // Encontrar o wrapper da imagem (tem aspect-ratio square via Tailwind)
-            var wrap = img.closest('[class*="aspect-square"]') || img.parentElement;
-            if (wrap) {
-              wrap.id = 'pq-cert-img-wrap';
-              wrap.style.aspectRatio = '2 / 1.1';
-              wrap.style.height = 'auto';
-              // Remover classe aspect-square se existir para não conflitar
-              wrap.className = wrap.className.replace(/aspect-square/g, '').trim();
-            }
+            if (img) certCard = card;
           });
+          if (!certCard) return;
+          certCard.dataset.pqFixed = '1';
+
+          // Marca o ícone de cadeado do certificado para que o CSS possa centralizá-lo com segurança
+          var lockIcon = certCard.querySelector('.bg-black\\/40.backdrop-blur-\\[1px\\].rounded-2xl svg');
+          if (lockIcon && !lockIcon.id) lockIcon.id = 'pq-cert-lock-icon';
+
+          insertComingSoonCard(certCard);
+        }
+
+        function insertComingSoonCard(certCard) {
+          if (document.getElementById('pq-coming-soon-card')) return;
+          var grid = certCard.parentElement;
+          if (!grid) return;
+
+          var card = document.createElement('div');
+          card.id = 'pq-coming-soon-card';
+          card.setAttribute('aria-disabled', 'true');
+          card.innerHTML =
+            '<div class="pq-cs-cover">' +
+              '<img src="/capa6.png" alt="Novo módulo em breve" />' +
+              '<div class="pq-cs-overlay"></div>' +
+              '<div class="pq-cs-content">' +
+                '<svg class="pq-cs-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                  '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>' +
+                  '<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>' +
+                '</svg>' +
+                '<h3 class="pq-cs-title">Novo módulo</h3>' +
+              '</div>' +
+            '</div>' +
+            '<div class="pq-cs-text">' +
+              '<p>🚀 Em breve...</p>' +
+              '<p class="pq-cs-sub">✨ Novas aulas em produção</p>' +
+            '</div>';
+
+          // Insere logo após o card do certificado, no mesmo grid
+          certCard.insertAdjacentElement('afterend', card);
         }
 
         var obs = new MutationObserver(fixCertCard);
