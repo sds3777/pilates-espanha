@@ -324,6 +324,233 @@
     mostrarLogin();
   }
 
+  // ─── Sistema de abas: Aulas / Bônus ─────────────────────────────────────
+  var BONUS_PDFS = [
+    {
+      titulo: 'Guia Xô, Ansiedade',
+      id: '1XbEgKvAZu3LIdloFfPGqKvIQVJwrUlBm'
+    },
+    {
+      titulo: 'Doces e Sobremesas Zero',
+      id: '1TEWlwQ6HD7tkiPCLSi-BEcCGJZhtwPse'
+    },
+    {
+      titulo: 'Chá Caseiro Mounjaro Natural',
+      id: '1Qv-CELx4d-H-dttVtQN-JBBNxO4V0rAX'
+    },
+    {
+      titulo: 'Sucos Detox Saudáveis',
+      id: '1nCkYElZS4GHCRUt0JbHbnXnAD53nmai8'
+    },
+    {
+      titulo: '55 Receitas Sem Glúten na Airfryer',
+      id: '1KQ4w2B96yrl6tkzyiNltrJzLrfaWof1b'
+    },
+    {
+      titulo: 'Guia Alimentar Diabéticos',
+      id: '1BwhtTPjQJzimZDteYGeWe3-Rhb1GtJax'
+    },
+    {
+      titulo: 'Vitaminas Poderosas',
+      id: '1aDBgZiOBgeZUR9vKUUApqMXQpDCwLJeG'
+    },
+    {
+      titulo: 'Guia Alimentar',
+      id: '1DeBR6DmxtsBasZUA_FUvEWJksgc7SCV-'
+    }
+  ];
+
+  function getViewUrl(id) {
+    return 'https://drive.google.com/file/d/' + id + '/preview';
+  }
+  function getThumbUrl(id) {
+    return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w400';
+  }
+
+  var abaAtiva = 'aulas'; // 'aulas' ou 'bonus'
+  var ROOT_EL = null;
+
+  function injetarNavBar() {
+    if (document.getElementById('pq-bottom-nav')) return;
+
+    var nav = document.createElement('div');
+    nav.id = 'pq-bottom-nav';
+    nav.style.cssText = [
+      'position:fixed',
+      'bottom:0',
+      'left:0',
+      'right:0',
+      'z-index:9990',
+      'background:#13082a',
+      'border-top:1px solid rgba(212,175,55,0.2)',
+      'display:flex',
+      'align-items:center',
+      'justify-content:center',
+      'gap:0',
+      'padding-bottom:env(safe-area-inset-bottom,0px)',
+      'font-family:Inter,system-ui,sans-serif'
+    ].join(';');
+
+    nav.innerHTML =
+      '<button id="pq-tab-aulas" onclick="window.__pqMudarAba(\'aulas\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#d4af37;border-top:2px solid #d4af37;">'
+      + '<span style="font-size:20px">🧘‍♀️</span>'
+      + '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;">Aulas</span>'
+      + '</button>'
+      + '<button id="pq-tab-bonus" onclick="window.__pqMudarAba(\'bonus\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#9b7ec8;border-top:2px solid transparent;">'
+      + '<span style="font-size:20px">🎁</span>'
+      + '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;">Bônus</span>'
+      + '</button>';
+
+    document.body.appendChild(nav);
+
+    // Ajustar padding inferior do app para não sobrepor a nav
+    var root = document.getElementById('root');
+    if (root) root.style.paddingBottom = '64px';
+  }
+
+  function atualizarAbas() {
+    var btnAulas = document.getElementById('pq-tab-aulas');
+    var btnBonus = document.getElementById('pq-tab-bonus');
+    if (!btnAulas || !btnBonus) return;
+    if (abaAtiva === 'aulas') {
+      btnAulas.style.color = '#d4af37';
+      btnAulas.style.borderTop = '2px solid #d4af37';
+      btnBonus.style.color = '#9b7ec8';
+      btnBonus.style.borderTop = '2px solid transparent';
+    } else {
+      btnBonus.style.color = '#d4af37';
+      btnBonus.style.borderTop = '2px solid #d4af37';
+      btnAulas.style.color = '#9b7ec8';
+      btnAulas.style.borderTop = '2px solid transparent';
+    }
+  }
+
+  function mostrarTelaBonus() {
+    // Esconder o app React
+    var root = document.getElementById('root');
+    if (root) root.style.display = 'none';
+
+    // Remover tela de bônus anterior se existir
+    var anterior = document.getElementById('pq-bonus-screen');
+    if (anterior) anterior.remove();
+
+    var tela = document.createElement('div');
+    tela.id = 'pq-bonus-screen';
+    tela.style.cssText = [
+      'position:fixed',
+      'inset:0',
+      'bottom:64px',
+      'z-index:9980',
+      'background:#0d0720',
+      'overflow-y:auto',
+      'font-family:Inter,system-ui,sans-serif',
+      '-webkit-overflow-scrolling:touch'
+    ].join(';');
+
+    var cardsHtml = BONUS_PDFS.map(function(pdf) {
+      var thumb = getThumbUrl(pdf.id);
+      var viewUrl = getViewUrl(pdf.id);
+      return '<div onclick="window.__pqAbrirPdf(\'' + pdf.id + '\',\'' + pdf.titulo.replace(/'/g, "\\'") + '\')" style="cursor:pointer;background:#1a1035;border-radius:12px;overflow:hidden;border:1px solid rgba(212,175,55,0.15);transition:transform 0.15s;active:scale-95;" onmousedown="this.style.transform=\'scale(0.97)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(0.97)\'" ontouchend="this.style.transform=\'scale(1)\'">'
+        + '<div style="width:100%;aspect-ratio:3/4;overflow:hidden;background:#2a1a40;position:relative;">'
+        + '<img src="' + thumb + '" alt="' + pdf.titulo + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+        + '<div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a1a40,#1a1035);flex-direction:column;gap:8px;">'
+        + '<span style="font-size:40px">📄</span>'
+        + '</div>'
+        + '</div>'
+        + '<div style="padding:10px 10px 12px;">'
+        + '<p style="color:#fff;font-size:12px;font-weight:600;margin:0;line-height:1.3;text-align:center;">' + pdf.titulo + '</p>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    tela.innerHTML =
+      '<div style="padding:20px 16px 16px;">'
+      + '<h2 style="color:#d4af37;font-size:18px;font-weight:700;margin:0 0 4px;letter-spacing:1px;">🎁 Bônus Exclusivos</h2>'
+      + '<p style="color:#9b7ec8;font-size:13px;margin:0 0 20px;">Materiais extras inclusos no seu acesso</p>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'
+      + cardsHtml
+      + '</div>'
+      + '</div>';
+
+    document.body.insertBefore(tela, document.getElementById('pq-bottom-nav'));
+  }
+
+  function ocultarTelaBonus() {
+    var tela = document.getElementById('pq-bonus-screen');
+    if (tela) tela.remove();
+    var root = document.getElementById('root');
+    if (root) root.style.display = '';
+  }
+
+  function abrirPdf(id, titulo) {
+    var viewUrl = getViewUrl(id);
+    var viewer = document.createElement('div');
+    viewer.id = 'pq-pdf-viewer';
+    viewer.style.cssText = [
+      'position:fixed',
+      'inset:0',
+      'z-index:99995',
+      'background:#0d0720',
+      'display:flex',
+      'flex-direction:column',
+      'font-family:Inter,system-ui,sans-serif'
+    ].join(';');
+
+    viewer.innerHTML =
+      '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#13082a;border-bottom:1px solid rgba(212,175,55,0.2);flex-shrink:0;">'
+      + '<button onclick="document.getElementById(\'pq-pdf-viewer\').remove()" style="background:none;border:none;cursor:pointer;color:#d4af37;padding:4px;display:flex;align-items:center;">'
+      + '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg>'
+      + '</button>'
+      + '<p style="color:#fff;font-size:14px;font-weight:600;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + titulo + '</p>'
+      + '</div>'
+      + '<iframe src="' + viewUrl + '" style="flex:1;width:100%;border:none;" allow="autoplay" allowfullscreen></iframe>';
+
+    document.body.appendChild(viewer);
+  }
+
+  window.__pqMudarAba = function(aba) {
+    abaAtiva = aba;
+    atualizarAbas();
+    if (aba === 'bonus') {
+      mostrarTelaBonus();
+    } else {
+      ocultarTelaBonus();
+    }
+  };
+
+  window.__pqAbrirPdf = function(id, titulo) {
+    abrirPdf(id, titulo);
+  };
+
+  // Injetar nav bar após login
+  function iniciarNavBar() {
+    var auth = null;
+    try { auth = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
+    if (auth && auth.loggedIn) {
+      injetarNavBar();
+    } else {
+      // Aguardar login via MutationObserver no body (overlay de login some)
+      var obs = new MutationObserver(function() {
+        var login = document.getElementById('pq-email-login');
+        if (!login) {
+          var a = null;
+          try { a = JSON.parse(localStorage.getItem(AUTH_KEY)); } catch(e) {}
+          if (a && a.loggedIn) {
+            injetarNavBar();
+            obs.disconnect();
+          }
+        }
+      });
+      obs.observe(document.body, { childList: true, subtree: false });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciarNavBar);
+  } else {
+    iniciarNavBar();
+  }
+
   // ─── Injetar cadeado grande sobre capa do certificado (estado bloqueado) ──
   // MutationObserver aguarda o React renderizar e injeta o cadeado SVG
   (function injetarCadeadoCertificado() {
