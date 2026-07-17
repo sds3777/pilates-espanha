@@ -205,7 +205,7 @@
           gate.classList.add('pq-hidden');
         }
 
-        function renderEmailForm(errorMsg) {
+        function renderEmailForm(errorMsg, prefillEmail) {
           content.innerHTML =
             '<div class="pq-icon">🔐</div>' +
             '<h2 class="pq-title">Acesso exclusivo para alunas</h2>' +
@@ -217,6 +217,7 @@
 
           var input = document.getElementById('pq-email-input');
           var btn = document.getElementById('pq-email-submit');
+          if (prefillEmail) input.value = prefillEmail;
           setTimeout(function () { input && input.focus(); }, 100);
 
           function submit() {
@@ -313,15 +314,14 @@
             });
         }
 
-        // ── Sempre verifica o acesso a cada abertura do app (PWA ou web),
-        // mesmo que o e-mail já esteja salvo localmente. ──
+        // ── Ao abrir o link, sempre exibe primeiro a tela original de e-mail.
+        // A verificação (e a eventual tela de bloqueio com WhatsApp) só é
+        // disparada depois que o usuário confirma o e-mail nessa tela — nunca
+        // automaticamente no carregamento da página. Se já houver um e-mail
+        // salvo de um acesso anterior, ele apenas pré-preenche o campo. ──
         showGate();
         var savedEmail = getSavedEmail();
-        if (savedEmail) {
-          runVerification(savedEmail, false);
-        } else {
-          renderEmailForm();
-        }
+        renderEmailForm(null, savedEmail);
       })();
     </script>
 
