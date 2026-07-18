@@ -274,10 +274,13 @@
       + '</div>'
       + '<div style="text-align:center;">'
       + '<p style="color:#fff;font-size:17px;font-weight:600;margin:0 0 6px;">Acesso exclusivo para alunas 💛</p>'
-      + '<p style="color:#9b7ec8;font-size:13px;margin:0;">Digite o e-mail usado na sua compra</p>'
+      + '<p id="pq-login-sub" style="color:#9b7ec8;font-size:13px;margin:0;">Digite o e-mail usado na sua compra</p>'
       + '</div>'
       + '<div style="width:100%;">'
-      + '<label style="color:#d4af37;font-size:14px;font-weight:600;display:block;margin-bottom:8px;">E-mail</label>'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+      + '<label id="pq-login-label" style="color:#d4af37;font-size:14px;font-weight:600;margin:0;">E-mail</label>'
+      + '<button id="pq-login-toggle" type="button" style="background:none;border:none;color:#9b7ec8;font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer;padding:0;">Entrar com nome</button>'
+      + '</div>'
       + '<input id="pq-email-input" type="email" placeholder="seuemail@email.com" value="' + emailUrl + '" autocomplete="email" style="width:100%;box-sizing:border-box;background:#1a1025;border:2px solid #3a2560;border-radius:12px;padding:14px 16px;color:#fff;font-size:16px;outline:none;">'
       + '<p id="pq-email-erro" style="color:#f87171;font-size:13px;margin:6px 0 0;min-height:18px;display:none;"></p>'
       + '</div>'
@@ -291,9 +294,38 @@
     var input = document.getElementById('pq-email-input');
     var btn = document.getElementById('pq-email-btn');
     var erroEl = document.getElementById('pq-email-erro');
+    var toggleBtn = document.getElementById('pq-login-toggle');
+    var subEl = document.getElementById('pq-login-sub');
+    var labelEl = document.getElementById('pq-login-label');
+    var modoNome = false;
 
     function mostrarErro(msg) { erroEl.textContent = msg; erroEl.style.display = 'block'; }
     function esconderErro() { erroEl.style.display = 'none'; }
+
+    // ─── Alternar entre login por e-mail ou por nome ─────────────────────────
+    // Apenas troca o modo do mesmo campo/tela existente; não cria tela nova.
+    toggleBtn.addEventListener('click', function() {
+      modoNome = !modoNome;
+      esconderErro();
+      if (modoNome) {
+        labelEl.textContent = 'Nome';
+        subEl.textContent = 'Digite o nome usado na sua compra';
+        toggleBtn.textContent = 'Entrar com e-mail';
+        input.type = 'text';
+        input.placeholder = 'Seu nome completo';
+        input.value = '';
+        input.autocomplete = 'name';
+      } else {
+        labelEl.textContent = 'E-mail';
+        subEl.textContent = 'Digite o e-mail usado na sua compra';
+        toggleBtn.textContent = 'Entrar com nome';
+        input.type = 'email';
+        input.placeholder = 'seuemail@email.com';
+        input.value = '';
+        input.autocomplete = 'email';
+      }
+      input.focus();
+    });
 
     // ─── Tela de bloqueio (status diferente de ATIVO) ────────────────────────
     // Substitui o conteúdo do mesmo overlay já aberto — não é uma tela nova
@@ -326,8 +358,15 @@
     }
 
     function tentarEntrar(transferir) {
-      var email = input.value.trim().toLowerCase();
-      if (!email || !email.includes('@')) { mostrarErro('Digite um e-mail válido.'); return; }
+      var valor = input.value.trim();
+      var email = modoNome ? '' : valor.toLowerCase();
+      var nome = modoNome ? valor : '';
+
+      if (modoNome) {
+        if (!nome) { mostrarErro('Digite seu nome.'); return; }
+      } else {
+        if (!email || !email.includes('@')) { mostrarErro('Digite um e-mail válido.'); return; }
+      }
 
       btn.disabled = true;
       btn.textContent = 'Verificando…';
@@ -336,16 +375,16 @@
       fetch('/api/verificar-acesso', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, deviceId: getDeviceId(), transferirDispositivo: !!transferir })
+        body: JSON.stringify({ email: email, nome: nome, deviceId: getDeviceId(), transferirDispositivo: !!transferir })
       })
       .then(function(r) { return r.json(); })
       .then(function(res) {
         if (res.acesso) {
           window.__pq_auth_ok = true;
           try {
-            origSetItem(AUTH_KEY, JSON.stringify({ loggedIn: true, nome: res.nome || '', email: email }));
+            origSetItem(AUTH_KEY, JSON.stringify({ loggedIn: true, nome: res.nome || nome || '', email: email }));
           } catch(e) {}
-          auth = { loggedIn: true, nome: res.nome || '', email: email };
+          auth = { loggedIn: true, nome: res.nome || nome || '', email: email };
           overlay.remove();
           injetarNavBar();
           // Login concluído com sucesso: dispara o popup de instalação do
