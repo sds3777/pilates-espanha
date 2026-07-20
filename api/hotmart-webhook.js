@@ -51,14 +51,45 @@ module.exports = async (req, res) => {
     'SUBSCRIPTION_ACTIVATION',
   ];
 
+  // Eventos que colocam acesso em PROCESSANDO (boleto/Multibanco gerado)
+  const EVENTOS_PROCESSAR = [
+    'PURCHASE_WAITING_PAYMENT',
+    'PURCHASE_BILLET_PRINTED',
+  ];
+
   // Eventos que BLOQUEIAM o acesso
   const EVENTOS_BLOQUEAR = [
     'PURCHASE_REFUNDED',
     'PURCHASE_CHARGEBACK',
     'PURCHASE_CANCELLED',
+    'PURCHASE_EXPIRED',
     'SUBSCRIPTION_CANCELLATION',
     'SUBSCRIPTION_INACTIVATED',
   ];
+
+  if (EVENTOS_PROCESSAR.includes(evento)) {
+    const { error } = await supabase
+      .from('acessos')
+      .upsert(
+        {
+          email,
+          nome,
+          hotmart_id: hotmartId,
+          data_compra: dataCompra,
+          status: 'PROCESSANDO',
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'email' }
+      );
+
+    if (error) {
+      console.error('Erro ao gravar PROCESSANDO:', error);
+      return res.status(500).send('Erro interno');
+    }
+
+    console.log(`Acesso PROCESSANDO para: ${email}`);
+    return res.status(200).send('OK');
+  }
 
   if (EVENTOS_ATIVAR.includes(evento)) {
     const { error } = await supabase

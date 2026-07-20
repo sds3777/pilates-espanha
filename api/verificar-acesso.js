@@ -55,6 +55,14 @@ module.exports = async (req, res) => {
     });
   }
 
+  if (data.status === 'PROCESSANDO') {
+    return res.status(200).json({
+      acesso: false,
+      motivo: 'PROCESSANDO',
+      mensagem: 'Seu pagamento ainda não foi compensado. Se você pagou por Multibanco, a confirmação pode levar de 1 a 2 dias úteis. Tente novamente mais tarde.',
+    });
+  }
+
   if (data.status !== 'ATIVO') {
     return res.status(200).json({
       acesso: false,
