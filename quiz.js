@@ -7,7 +7,7 @@
   // Na rota /teste o React já abre sozinho no modo DEMO nativo (aulas
   // liberadas/bloqueadas e oferta tratadas dentro do próprio bundle).
   // Aqui apenas pulamos totalmente a tela de login e a checagem no
-  // Supabase, liberando a nav bar (Aulas/Bônus) direto — sem tocar em
+  // Supabase, liberando a nav bar (Clases/Bonos) direto — sem tocar em
   // mais nada do fluxo normal, que continua abaixo intacto para as
   // demais rotas.
   var MODO_TESTE = window.location.pathname.replace(/\/+$/, '') === '/teste';
@@ -36,13 +36,13 @@
     return 'pt-BR';
   }
 
-  // ─── Traduções da tela de Bônus ────────────────────────────────────────────
+  // ─── Traduções da tela de Bonos ────────────────────────────────────────────
   var BONUS_I18N = {
     'pt-BR': {
-      titulo: '🎁 Bônus Exclusivos',
-      chamada: 'Esses bônus vão te ajudar a acelerar seus resultados 🚀',
-      subtitulo: 'Materiais extras inclusos no seu acesso',
-      tabLabel: 'Bônus'
+      titulo: '🎁 Bonos Exclusivos',
+      chamada: 'Estos bonos te ayudarán a acelerar tus resultados 🚀',
+      subtitulo: 'Materiales extra incluidos en tu acceso',
+      tabLabel: 'Bonos'
     },
     'pt-PT': {
       titulo: '🎁 Bónus Exclusivos',
@@ -143,7 +143,7 @@
       + '<p style="color:#fff;font-size:15px;line-height:1.6;margin:0 0 24px;">' + mensagem + '</p>'
       + '<div style="display:flex;gap:12px;">'
       + '<button id="pq-nao" style="flex:1;padding:12px;background:transparent;border:2px solid #3a2560;color:#9b7ec8;border-radius:12px;font-size:15px;cursor:pointer;">Cancelar</button>'
-      + '<button id="pq-sim" style="flex:1;padding:12px;background:#d4af37;border:none;color:#0d1a1f;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">Transferir acesso</button>'
+      + '<button id="pq-sim" style="flex:1;padding:12px;background:#d4af37;border:none;color:#0d1a1f;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">Transferir acceso</button>'
       + '</div></div>';
     document.body.appendChild(modal);
     document.getElementById('pq-sim').addEventListener('click', function() { modal.remove(); onSim(); });
@@ -219,7 +219,7 @@
         revalidando = false;
         // Falha de conexão: por segurança, não libera acesso silenciosamente
         // com base apenas no localStorage. Mantém/mostra a tela de login,
-        // cujo próprio botão "Entrar" já trata erro de rede.
+        // cujo próprio botão "Ingresar" já trata erro de rede.
         if (!document.getElementById('pq-email-login')) {
           limparAuthLocal();
           var navErr = document.getElementById('pq-bottom-nav');
@@ -267,24 +267,24 @@
       '<div style="width:100%;max-width:420px;background:linear-gradient(160deg,rgba(42,26,64,0.98),rgba(26,16,37,0.99));border:1px solid rgba(212,175,55,0.35);border-radius:24px;overflow:hidden;box-shadow:0 0 60px rgba(212,175,55,0.15),0 32px 64px rgba(0,0,0,0.6);">'
       + '<div style="height:3px;background:linear-gradient(90deg,transparent,#d4af37,transparent);"></div>'
       + '<div style="padding:36px 32px 40px;display:flex;flex-direction:column;align-items:center;gap:24px;">'
-      + '<img src="https://i.imgur.com/m6vjf6a.png" style="width:88px;height:88px;border-radius:50%;border:2px solid rgba(212,175,55,0.5);object-fit:cover;" onerror="this.style.display=\'none\'">'
+      + '<img src="/logo-pilates-en-casa.png" style="width:88px;height:88px;border-radius:50%;border:2px solid rgba(212,175,55,0.5);object-fit:cover;" onerror="this.style.display=\'none\'">'
       + '<div style="text-align:center;">'
-      + '<h1 style="color:#d4af37;font-size:22px;font-weight:700;letter-spacing:2px;margin:0 0 6px;font-family:Cinzel,serif;">PILATES EM CASA</h1>'
+      + '<h1 style="color:#d4af37;font-size:22px;font-weight:700;letter-spacing:2px;margin:0 0 6px;font-family:Cinzel,serif;">PILATES EN CASA</h1>'
       + '<p style="color:#c9a8f0;font-size:13px;letter-spacing:4px;margin:0;font-family:Cinzel,serif;">com Daniela</p>'
       + '</div>'
       + '<div style="text-align:center;">'
-      + '<p style="color:#fff;font-size:17px;font-weight:600;margin:0 0 6px;">Acesso exclusivo para alunas 💛</p>'
-      + '<p id="pq-login-sub" style="color:#9b7ec8;font-size:13px;margin:0;">Digite o e-mail usado na sua compra</p>'
+      + '<p style="color:#fff;font-size:17px;font-weight:600;margin:0 0 6px;">Acceso exclusivo para alumnas 💛</p>'
+      + '<p id="pq-login-sub" style="color:#9b7ec8;font-size:13px;margin:0;">Escribe el correo usado en tu compra</p>'
       + '</div>'
       + '<div style="width:100%;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
       + '<label id="pq-login-label" style="color:#d4af37;font-size:14px;font-weight:600;margin:0;">E-mail</label>'
-      + '<button id="pq-login-toggle" type="button" style="background:none;border:none;color:#9b7ec8;font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer;padding:0;">Entrar com nome</button>'
+      + '<button id="pq-login-toggle" type="button" style="background:none;border:none;color:#9b7ec8;font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer;padding:0;">Ingresar con nombre</button>'
       + '</div>'
       + '<input id="pq-email-input" type="email" placeholder="seuemail@email.com" value="' + emailUrl + '" autocomplete="email" style="width:100%;box-sizing:border-box;background:#1a1025;border:2px solid #3a2560;border-radius:12px;padding:14px 16px;color:#fff;font-size:16px;outline:none;">'
       + '<p id="pq-email-erro" style="color:#f87171;font-size:13px;margin:6px 0 0;min-height:18px;display:none;"></p>'
       + '</div>'
-      + '<button id="pq-email-btn" style="width:100%;padding:16px;background:#d4af37;color:#0d1a1f;border:none;border-radius:14px;font-size:18px;font-weight:700;cursor:pointer;font-family:Cinzel,serif;letter-spacing:1px;">Entrar</button>'
+      + '<button id="pq-email-btn" style="width:100%;padding:16px;background:#d4af37;color:#0d1a1f;border:none;border-radius:14px;font-size:18px;font-weight:700;cursor:pointer;font-family:Cinzel,serif;letter-spacing:1px;">Ingresar</button>'
       + '</div>'
       + '<div style="height:3px;background:linear-gradient(90deg,transparent,#d4af37,transparent);"></div>'
       + '</div>';
@@ -310,15 +310,15 @@
       if (modoNome) {
         labelEl.textContent = 'Nome';
         subEl.textContent = 'Digite o nome usado na sua compra';
-        toggleBtn.textContent = 'Entrar com e-mail';
+        toggleBtn.textContent = 'Ingresar com e-mail';
         input.type = 'text';
         input.placeholder = 'Seu nome completo';
         input.value = '';
         input.autocomplete = 'name';
       } else {
         labelEl.textContent = 'E-mail';
-        subEl.textContent = 'Digite o e-mail usado na sua compra';
-        toggleBtn.textContent = 'Entrar com nome';
+        subEl.textContent = 'Escribe el correo usado en tu compra';
+        toggleBtn.textContent = 'Ingresar con nombre';
         input.type = 'email';
         input.placeholder = 'seuemail@email.com';
         input.value = '';
@@ -351,19 +351,19 @@
 
     // Se a revalidação automática (ao abrir/atualizar o app) já identificou
     // que o acesso não está disponível, mostra a tela de bloqueio direto,
-    // sem obrigar o usuário a digitar o e-mail e clicar em "Entrar" de novo.
+    // sem obrigar o usuário a digitar o e-mail e clicar em "Ingresar" de novo.
     if (mensagemBloqueio) {
       mostrarBloqueado(mensagemBloqueio);
       return;
     }
 
-    function tentarEntrar(transferir) {
+    function tentarIngresar(transferir) {
       var valor = input.value.trim();
       var email = modoNome ? '' : valor.toLowerCase();
       var nome = modoNome ? valor : '';
 
       if (modoNome) {
-        if (!nome) { mostrarErro('Digite seu nome.'); return; }
+        if (!nome) { mostrarErro('Escribe tu nombre.'); return; }
       } else {
         if (!email || !email.includes('@')) { mostrarErro('Digite um e-mail válido.'); return; }
       }
@@ -395,8 +395,8 @@
             window.__pqTriggerInstallAfterLogin();
           }
         } else if (res.motivo === 'OUTRO_DISPOSITIVO') {
-          mostrarConfirmacao(res.mensagem, function() { tentarEntrar(true); }, function() {
-            btn.disabled = false; btn.textContent = 'Entrar';
+          mostrarConfirmacao(res.mensagem, function() { tentarIngresar(true); }, function() {
+            btn.disabled = false; btn.textContent = 'Ingresar';
           });
         } else {
           // Status diferente de ATIVO (bloqueado, cancelado, reembolsado,
@@ -407,12 +407,12 @@
       })
       .catch(function() {
         mostrarErro('Erro de conexão. Tente novamente.');
-        btn.disabled = false; btn.textContent = 'Entrar';
+        btn.disabled = false; btn.textContent = 'Ingresar';
       });
     }
 
-    btn.addEventListener('click', function() { tentarEntrar(false); });
-    input.addEventListener('keydown', function(e) { if (e.key === 'Enter') tentarEntrar(false); });
+    btn.addEventListener('click', function() { tentarIngresar(false); });
+    input.addEventListener('keydown', function(e) { if (e.key === 'Enter') tentarIngresar(false); });
   }
 
   // ─── Revalidar acesso ao abrir o app ───────────────────────────────────
@@ -425,7 +425,7 @@
   function iniciarRevalidacao() {
     if (MODO_TESTE) {
       // Modo demonstração: nunca mostra login nem consulta o backend.
-      // Libera a nav bar (Aulas/Bônus) direto; o React já cuida sozinho
+      // Libera a nav bar (Clases/Bonos) direto; o React já cuida sozinho
       // do bloqueio de aulas/bônus e da oferta no modo DEMO nativo.
       window.__pq_auth_ok = true;
       injetarNavBar();
@@ -453,7 +453,7 @@
     if (!MODO_TESTE && e.persisted) revalidarAcessoNoBackend();
   });
 
-  // ─── Sistema de abas: Aulas / Bônus ─────────────────────────────────────
+  // ─── Sistema de abas: Clases / Bonos ─────────────────────────────────────
   var BONUS_PDFS = [
     {
       titulo: 'Guia Xô, Ansiedade',
@@ -524,13 +524,13 @@
       'font-family:Inter,system-ui,sans-serif'
     ].join(';');
 
-    // Sem estado ativo fixo no HTML: o estado real (Aulas ou Bônus) é sempre
+    // Sem estado ativo fixo no HTML: o estado real (Clases ou Bonos) é sempre
     // aplicado logo depois via atualizarAbas(), para nunca ficar dessincronizado
     // com a tela que está de fato visível.
     nav.innerHTML =
       '<button id="pq-tab-aulas" onclick="window.__pqMudarAba(\'aulas\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#9b7ec8;border-top:2px solid transparent;">'
       + '<span style="font-size:20px">🧘‍♀️</span>'
-      + '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;">Aulas</span>'
+      + '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;">Clases</span>'
       + '</button>'
       + '<button id="pq-tab-bonus" onclick="window.__pqMudarAba(\'bonus\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#9b7ec8;border-top:2px solid transparent;">'
       + '<span style="font-size:20px">🎁</span>'
@@ -543,8 +543,8 @@
     var root = document.getElementById('root');
     if (root) root.style.paddingBottom = '64px';
 
-    // Aplica o estado real da aba (evita a barra "nascer" sempre em Aulas
-    // mesmo quando o usuário estava em Bônus no momento da recriação).
+    // Aplica o estado real da aba (evita a barra "nascer" sempre em Clases
+    // mesmo quando o usuário estava em Bonos no momento da recriação).
     atualizarAbas();
 
     // Se a barra precisou ser recriada enquanto a tela de bônus estava aberta
@@ -555,19 +555,19 @@
   }
 
   function atualizarAbas() {
-    var btnAulas = document.getElementById('pq-tab-aulas');
+    var btnClases = document.getElementById('pq-tab-aulas');
     var btnBonus = document.getElementById('pq-tab-bonus');
-    if (!btnAulas || !btnBonus) return;
+    if (!btnClases || !btnBonus) return;
     if (abaAtiva === 'aulas') {
-      btnAulas.style.color = '#d4af37';
-      btnAulas.style.borderTop = '2px solid #d4af37';
+      btnClases.style.color = '#d4af37';
+      btnClases.style.borderTop = '2px solid #d4af37';
       btnBonus.style.color = '#9b7ec8';
       btnBonus.style.borderTop = '2px solid transparent';
     } else {
       btnBonus.style.color = '#d4af37';
       btnBonus.style.borderTop = '2px solid #d4af37';
-      btnAulas.style.color = '#9b7ec8';
-      btnAulas.style.borderTop = '2px solid transparent';
+      btnClases.style.color = '#9b7ec8';
+      btnClases.style.borderTop = '2px solid transparent';
     }
   }
 

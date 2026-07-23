@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pilates em Casa</title>
+    <title>Pilates en Casa</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1a1025">
@@ -265,42 +265,71 @@
         font-size: 14px;
         cursor: pointer;
       }
-    </style>
-    <button id="pq-install-btn" type="button">⬇ Instalar App</button>
+    
+      #pq-language-popup{display:none;position:fixed;inset:0;z-index:10020;background:rgba(8,5,14,.82);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px}
+      #pq-language-popup.pq-visible{display:flex}
+      #pq-language-popup .pq-lang-card{width:min(430px,100%);background:linear-gradient(160deg,#2a1a40,#1a1025);border:1px solid rgba(212,175,55,.42);border-radius:24px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.55);text-align:center;color:#f4edf9}
+      #pq-language-popup h2{font-family:'Cinzel',serif;color:#d4af37;margin:0 0 8px;font-size:22px}
+      #pq-language-popup p{margin:0 0 18px;color:#c9bdd8;font-size:14px;line-height:1.45}
+      .pq-lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+      .pq-lang-option{border:1px solid rgba(212,175,55,.25);background:rgba(255,255,255,.04);border-radius:16px;padding:12px 6px;color:#eee6f5;cursor:pointer;font-weight:700;min-height:88px;transition:.2s}
+      .pq-lang-option:hover,.pq-lang-option.pq-selected{border-color:#d4af37;background:rgba(212,175,55,.13);transform:translateY(-1px)}
+      .pq-lang-flag{display:block;font-size:31px;line-height:1;margin-bottom:8px}
+      .pq-lang-name{font-size:12px}
+      #pq-language-confirm{width:100%;margin-top:16px;padding:13px;border:0;border-radius:999px;background:#d4af37;color:#21152f;font-family:'Cinzel',serif;font-weight:800;cursor:pointer;opacity:.45}
+      #pq-language-confirm:not(:disabled){opacity:1}
+      @media(max-width:380px){.pq-lang-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+    <button id="pq-install-btn" type="button">⬇ Instalar aplicación</button>
     <div id="pq-install-popup">
       <div class="pq-ip-card">
         <div class="pq-ip-bar"></div>
         <div class="pq-ip-body">
           <div class="pq-ip-icon">📲</div>
-          <h2>Instalar o Pilates em Casa</h2>
-          <p>Adicione o app à sua tela de início para acessar suas aulas com um toque, sempre à mão.</p>
+          <h2>Instalar Pilates en Casa</h2>
+          <p>Agrega la aplicación a tu pantalla de inicio para acceder a tus clases con un toque.</p>
           <div class="pq-ip-actions">
-            <button id="pq-install-popup-aceitar" type="button">Instalar agora</button>
-            <button id="pq-install-popup-recusar" type="button">Agora não</button>
+            <button id="pq-install-popup-aceitar" type="button">Instalar aplicación</button>
+            <button id="pq-install-popup-recusar" type="button">Ahora no</button>
           </div>
         </div>
         <div class="pq-ip-bar"></div>
+      </div>
+    </div>
+
+    <div id="pq-language-popup" role="dialog" aria-modal="true" aria-labelledby="pq-language-title">
+      <div class="pq-lang-card">
+        <h2 id="pq-language-title">Selecciona tu idioma</h2>
+        <p>Elige la variante de español que deseas usar. Tu elección quedará guardada en este dispositivo.</p>
+        <div class="pq-lang-grid">
+          <button class="pq-lang-option" data-lang="es-ES"><span class="pq-lang-flag">🇪🇸</span><span class="pq-lang-name">España</span></button>
+          <button class="pq-lang-option" data-lang="es-MX"><span class="pq-lang-flag">🇲🇽</span><span class="pq-lang-name">México</span></button>
+          <button class="pq-lang-option" data-lang="es-CO"><span class="pq-lang-flag">🇨🇴</span><span class="pq-lang-name">Colombia</span></button>
+          <button class="pq-lang-option" data-lang="es-PE"><span class="pq-lang-flag">🇵🇪</span><span class="pq-lang-name">Perú</span></button>
+          <button class="pq-lang-option" data-lang="es-CL"><span class="pq-lang-flag">🇨🇱</span><span class="pq-lang-name">Chile</span></button>
+        </div>
+        <button id="pq-language-confirm" type="button" disabled>Aceptar</button>
       </div>
     </div>
     <div id="pq-ios-install-modal">
       <div class="pq-ios-sheet">
         <div class="pq-ios-handle"></div>
         <div class="pq-ios-icon">📲</div>
-        <h2>Instalar o Pilates em Casa</h2>
-        <p class="pq-ios-sub">Adicione o app à sua tela de início para acessar suas aulas com um toque.</p>
+        <h2>Instalar Pilates en Casa</h2>
+        <p class="pq-ios-sub">Agrega la aplicación a tu pantalla de inicio para acceder a tus clases con un toque.</p>
         <div class="pq-ios-steps">
           <div class="pq-ios-step">
             <span class="pq-ios-step-num">1</span>
             <span class="pq-ios-step-icon">⬆️</span>
-            <span class="pq-ios-step-text">Toque no botão <b>Compartilhar</b> (□↑) na barra do Safari.</span>
+            <span class="pq-ios-step-text">Toca el botón <b>Compartir</b> (□↑) en la barra de Safari.</span>
           </div>
           <div class="pq-ios-step">
             <span class="pq-ios-step-num">2</span>
             <span class="pq-ios-step-icon">➕</span>
-            <span class="pq-ios-step-text">Selecione <b>"Adicionar à Tela de Início"</b>.</span>
+            <span class="pq-ios-step-text">Selecciona <b>“Agregar a pantalla de inicio”</b>.</span>
           </div>
         </div>
-        <button id="pq-ios-modal-close" type="button">Entendi</button>
+        <button id="pq-ios-modal-close" type="button">Entendido</button>
       </div>
     </div>
     <script>
@@ -310,6 +339,35 @@
         var iosModal = document.getElementById('pq-ios-install-modal');
         var iosModalClose = document.getElementById('pq-ios-modal-close');
         var installed = false;
+        var LANGUAGE_DONE_KEY = 'pq_language_selected';
+        var languagePopup = document.getElementById('pq-language-popup');
+        var languageConfirm = document.getElementById('pq-language-confirm');
+        var selectedLanguage = null;
+
+        function idiomaJaSelecionado() {
+          try { return localStorage.getItem(LANGUAGE_DONE_KEY) === '1'; } catch (e) { return false; }
+        }
+        function mostrarPopupIdioma() {
+          if (idiomaJaSelecionado()) return;
+          setTimeout(function () { languagePopup.classList.add('pq-visible'); }, 250);
+        }
+        Array.prototype.forEach.call(document.querySelectorAll('.pq-lang-option'), function (button) {
+          button.addEventListener('click', function () {
+            selectedLanguage = button.getAttribute('data-lang');
+            Array.prototype.forEach.call(document.querySelectorAll('.pq-lang-option'), function (item) { item.classList.remove('pq-selected'); });
+            button.classList.add('pq-selected');
+            languageConfirm.disabled = false;
+          });
+        });
+        languageConfirm.addEventListener('click', function () {
+          if (!selectedLanguage) return;
+          try {
+            localStorage.setItem('pilates_lang', selectedLanguage);
+            localStorage.setItem(LANGUAGE_DONE_KEY, '1');
+          } catch (e) {}
+          window.dispatchEvent(new CustomEvent('pilates:lang', { detail: selectedLanguage }));
+          languagePopup.classList.remove('pq-visible');
+        });
 
         // ── Fonte única de verdade: o app já está instalado/rodando como app? ──
         // Android/Chrome/Edge: display-mode "standalone".
@@ -411,6 +469,7 @@
 
         installBtn.addEventListener('click', function () {
           triggerInstallPrompt(showInstallBtn);
+          mostrarPopupIdioma();
         });
 
         // Ao carregar a página, se o app ainda não estiver instalado, o botão
@@ -463,21 +522,27 @@
           // Não mostra o popup de novo nesta sessão, mas o botão "Instalar
           // App" continua disponível na parte inferior para instalação manual.
           marcarRecusadoNestaSessao();
+          mostrarPopupIdioma();
         });
 
         popupOverlay.addEventListener('click', function (e) {
           if (e.target === popupOverlay) {
             esconderPopupInstalacao();
             marcarRecusadoNestaSessao();
+            mostrarPopupIdioma();
           }
         });
 
         // Se a instalação for concluída enquanto o popup estiver aberto
         // (ex.: usuário aceitou o prompt nativo), some com o popup também.
-        window.addEventListener('appinstalled', esconderPopupInstalacao);
+        window.addEventListener('appinstalled', function () { esconderPopupInstalacao(); mostrarPopupIdioma(); });
 
         window.__pqTriggerInstallAfterLogin = function () {
-          mostrarPopupInstalacao();
+          if (isAppInstalled() || foiRecusadoNestaSessao()) {
+            mostrarPopupIdioma();
+          } else {
+            mostrarPopupInstalacao();
+          }
         };
 
       })();
@@ -717,8 +782,8 @@
         var LANG_STORAGE_KEY = 'pilates_lang';
         var DEFAULT_LANG = 'pt-BR';
         var TRANSLATIONS = {
-          'pt-BR': { comingSoon: 'Em breve', newLessons: '🚀 Novas Aulas em Produção' },
-          'pt-PT': { comingSoon: 'Brevemente', newLessons: '🚀 Novas Aulas em Produção' },
+          'pt-BR': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
+          'pt-PT': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
           'es':    { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas Clases en Producción' },
           'en':    { comingSoon: 'Coming soon', newLessons: '🚀 New Classes in Production' },
           'fr':    { comingSoon: 'Bientôt disponible', newLessons: '🚀 Nouveaux Cours en Préparation' }
@@ -766,7 +831,7 @@
           card.setAttribute('aria-disabled', 'true');
           card.innerHTML =
             '<div class="pq-cs-cover">' +
-              '<img src="/capa6.png" alt="Novo módulo em breve" />' +
+              '<img src="/capa6.png" alt="Nuevo módulo próximamente" />' +
               '<div class="pq-cs-overlay"></div>' +
               '<div class="pq-cs-content">' +
                 '<svg class="pq-cs-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +

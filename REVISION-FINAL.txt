@@ -1,0 +1,12 @@
+REVISIÓN FINAL
+
+Cambios limitados a los contenidos solicitados:
+- Nombres de módulos iguales a las playlists.
+- Introducción como primera clase del módulo 1.
+- Títulos de clases estandarizados y sin minutos, números finales ni niveles.
+- Dificultad dinámica según duración: hasta 15 min tranquila; hasta 25 min moderada; más de 25 min desafiante.
+- Enlace de la clase de cifosis corregido con el ID oNvOc1Oxq4w.
+- Tiempo total de cada módulo recalculado y mostrado en la portada.
+- Descripciones breves de los módulos revisadas.
+
+No se modificó la estructura, el diseño ni la navegación de la aplicación.

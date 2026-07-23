@@ -1,0 +1,8 @@
+REVISÃO DOS VÍDEOS
+
+- Player alterado para youtube-nocookie.com.
+- Adicionados origin, enablejsapi e referrerPolicy para reduzir erros de reprodução incorporada.
+- Tempos escritos como “X min” foram padronizados para “XX:00”.
+- Dois vídeos repetidos foram removidos do módulo 5.
+- Tempos marcados como “—” não foram inventados: o texto fornecido não continha a duração exata.
+- Caso um vídeo continue recusando a reprodução, a causa é a configuração do próprio vídeo no YouTube (incorporação desativada, restrição, processamento ou indisponibilidade), não o link dentro do aplicativo.

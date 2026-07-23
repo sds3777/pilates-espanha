@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
 
   if ((!email && !nome) || !deviceId) {
     return res.status(400).json({
-      erro: 'Email ou nome, e deviceId, são obrigatórios',
+      erro: 'El correo o el nombre y el dispositivo son obligatorios',
     });
   }
 
@@ -64,7 +64,7 @@ module.exports = async (req, res) => {
     return res.status(500).json({
       acesso: false,
       motivo: 'ERRO_INTERNO',
-      mensagem: 'Não foi possível verificar o acesso. Tente novamente.',
+      mensagem: 'No fue posible verificar el acceso. Inténtalo de nuevo.',
     });
   }
 
@@ -92,7 +92,7 @@ module.exports = async (req, res) => {
       acesso: false,
       motivo: 'BLOQUEADO',
       mensagem:
-        'Seu acesso foi cancelado ou reembolsado. Entre em contato com o suporte.',
+        'Tu acceso fue cancelado o reembolsado. Comunícate con soporte.',
     });
   }
 
@@ -146,7 +146,7 @@ module.exports = async (req, res) => {
       return res.status(500).json({
         acesso: false,
         motivo: 'ERRO_INTERNO',
-        mensagem: 'Não foi possível transferir o acesso. Tente novamente.',
+        mensagem: 'No fue posible transferir el acceso. Inténtalo de nuevo.',
       });
     }
 
@@ -161,7 +161,7 @@ module.exports = async (req, res) => {
     acesso: false,
     motivo: 'OUTRO_DISPOSITIVO',
     mensagem: email
-      ? 'Este e-mail já está vinculado a outro dispositivo. Deseja transferir o acesso para este aparelho? O acesso anterior será desativado.'
-      : 'Este nome já está vinculado a outro dispositivo. Deseja transferir o acesso para este aparelho? O acesso anterior será desativado.',
+      ? 'Este correo ya está vinculado a otro dispositivo. ¿Deseas transferir el acceso a este dispositivo? El acceso anterior será desactivado.'
+      : 'Este nombre ya está vinculado a otro dispositivo. ¿Deseas transferir el acceso a este dispositivo? El acceso anterior será desactivado.',
   });
 };

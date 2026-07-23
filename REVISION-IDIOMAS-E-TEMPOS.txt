@@ -1,0 +1,9 @@
+Revisión final aplicada:
+- Cinco duraciones corregidas según el cliente.
+- Totales de cada módulo recalculados.
+- Dificultad dinámica: hasta 15 min Tranquilo; 15:01–25 min Moderado; más de 25 min Desafiante.
+- Botón traducido a “Instalar aplicación”.
+- Selector inicial de variante de español añadido tras el aviso de instalación.
+- Elección guardada en localStorage para no volver a preguntar.
+- Variantes: España, México, Colombia, Perú y Chile.
+- Estructura y navegación originales conservadas.

@@ -48,7 +48,7 @@ module.exports = async (req, res) => {
   }
 
   if (!email) {
-    return res.status(400).send('Email não encontrado no payload');
+    return res.status(400).send('Correo no encontrado en los datos recibidos');
   }
 
   console.log(`Evento: ${evento || 'NÃO_INFORMADO'} | Email: ${email}`);
@@ -90,7 +90,7 @@ module.exports = async (req, res) => {
 
     if (error) {
       console.error('Erro ao gravar acesso como PROCESSANDO:', error);
-      return res.status(500).send('Erro interno');
+      return res.status(500).send('Error interno');
     }
 
     console.log(`Acesso PROCESSANDO para: ${email}`);
@@ -114,7 +114,7 @@ module.exports = async (req, res) => {
 
     if (error) {
       console.error('Erro ao ativar acesso:', error);
-      return res.status(500).send('Erro interno');
+      return res.status(500).send('Error interno');
     }
 
     console.log(`Acesso ATIVADO para: ${email}`);
@@ -132,7 +132,7 @@ module.exports = async (req, res) => {
 
     if (error) {
       console.error('Erro ao bloquear acesso:', error);
-      return res.status(500).send('Erro interno');
+      return res.status(500).send('Error interno');
     }
 
     console.log(`Acesso BLOQUEADO para: ${email}`);
