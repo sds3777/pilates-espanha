@@ -5,6 +5,8 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
+const TABELA_ACESSOS = 'acessos_es';
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -20,32 +22,53 @@ module.exports = async (req, res) => {
   }
 
   let body;
+
   try {
-    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
   } catch {
     return res.status(400).json({ erro: 'JSON inválido' });
   }
 
-  const email = (body.email || '').toLowerCase().trim();
-  const nome = (body.nome || '').trim();
-  const deviceId = (body.deviceId || '').trim();
+  const email = String(body.email || '').toLowerCase().trim();
+  const nome = String(body.nome || '').trim();
+  const deviceId = String(body.deviceId || '').trim();
   const transferirDispositivo = body.transferirDispositivo === true;
 
-  // Mesma validação de sempre — apenas agora aceitando e-mail OU nome como
-  // identificador de busca, sem criar nenhum sistema de autenticação novo.
   if ((!email && !nome) || !deviceId) {
-    return res.status(400).json({ erro: 'Email ou nome, e deviceId, são obrigatórios' });
+    return res.status(400).json({
+      erro: 'Email ou nome, e deviceId, são obrigatórios',
+    });
   }
 
-  // Buscar acesso no Supabase — pela mesma tabela "acessos" já existente,
-  // apenas trocando a coluna consultada (email ou nome) conforme o que foi
-  // enviado. Nenhuma tabela nova, nenhum fluxo de autenticação paralelo.
-  const query = supabase.from('acessos').select('*');
-  const { data, error } = email
-    ? await query.eq('email', email).single()
-    : await query.ilike('nome', nome).single();
+  let consulta;
 
-  if (error || !data) {
+  if (email) {
+    consulta = supabase
+      .from(TABELA_ACESSOS)
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+  } else {
+    consulta = supabase
+      .from(TABELA_ACESSOS)
+      .select('*')
+      .ilike('nome', nome)
+      .maybeSingle();
+  }
+
+  const { data, error } = await consulta;
+
+  if (error) {
+    console.error('Erro ao consultar acesso:', error);
+
+    return res.status(500).json({
+      acesso: false,
+      motivo: 'ERRO_INTERNO',
+      mensagem: 'Não foi possível verificar o acesso. Tente novamente.',
+    });
+  }
+
+  if (!data) {
     return res.status(200).json({
       acesso: false,
       motivo: 'NAO_ENCONTRADO',
@@ -59,7 +82,8 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       acesso: false,
       motivo: 'PROCESSANDO',
-      mensagem: 'Seu pagamento ainda não foi compensado. Se você pagou por Multibanco, a confirmação pode levar de 1 a 2 dias úteis. Tente novamente mais tarde.',
+      mensagem:
+        'Seu pagamento ainda não foi compensado. Se você pagou por Multibanco, a confirmação pode levar de 1 a 2 dias úteis. Tente novamente mais tarde.',
     });
   }
 
@@ -67,21 +91,31 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       acesso: false,
       motivo: 'BLOQUEADO',
-      mensagem: 'Seu acesso foi cancelado ou reembolsado. Entre em contato com o suporte.',
+      mensagem:
+        'Seu acesso foi cancelado ou reembolsado. Entre em contato com o suporte.',
     });
   }
 
-  // Verificar dispositivo
   const deviceAtual = data.device_id;
 
   if (!deviceAtual) {
-    // Primeiro acesso — registrar dispositivo
-    // Usa o id do registro já encontrado (funciona igual tenha vindo da
-    // busca por e-mail ou por nome, sem duplicar lógica por coluna).
-    await supabase
-      .from('acessos')
-      .update({ device_id: deviceId, updated_at: new Date().toISOString() })
+    const { error: updateError } = await supabase
+      .from(TABELA_ACESSOS)
+      .update({
+        device_id: deviceId,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', data.id);
+
+    if (updateError) {
+      console.error('Erro ao registrar o primeiro dispositivo:', updateError);
+
+      return res.status(500).json({
+        acesso: false,
+        motivo: 'ERRO_INTERNO',
+        mensagem: 'Não foi possível registrar este dispositivo. Tente novamente.',
+      });
+    }
 
     return res.status(200).json({
       acesso: true,
@@ -91,22 +125,38 @@ module.exports = async (req, res) => {
   }
 
   if (deviceAtual === deviceId) {
-    // Mesmo dispositivo — acesso liberado
-    return res.status(200).json({ acesso: true, nome: data.nome });
+    return res.status(200).json({
+      acesso: true,
+      nome: data.nome,
+    });
   }
 
-  // Dispositivo diferente
   if (transferirDispositivo) {
-    // Usuário confirmou transferência
-    await supabase
-      .from('acessos')
-      .update({ device_id: deviceId, updated_at: new Date().toISOString() })
+    const { error: transferError } = await supabase
+      .from(TABELA_ACESSOS)
+      .update({
+        device_id: deviceId,
+        updated_at: new Date().toISOString(),
+      })
       .eq('id', data.id);
 
-    return res.status(200).json({ acesso: true, nome: data.nome, dispositivo_transferido: true });
+    if (transferError) {
+      console.error('Erro ao transferir dispositivo:', transferError);
+
+      return res.status(500).json({
+        acesso: false,
+        motivo: 'ERRO_INTERNO',
+        mensagem: 'Não foi possível transferir o acesso. Tente novamente.',
+      });
+    }
+
+    return res.status(200).json({
+      acesso: true,
+      nome: data.nome,
+      dispositivo_transferido: true,
+    });
   }
 
-  // Pedir confirmação de transferência
   return res.status(200).json({
     acesso: false,
     motivo: 'OUTRO_DISPOSITIVO',

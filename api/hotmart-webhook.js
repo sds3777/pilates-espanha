@@ -5,7 +5,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-// Hotmart envia este header para autenticar o webhook
+const TABELA_ACESSOS = 'acessos_es';
 const HOTMART_TOKEN = process.env.HOTMART_WEBHOOK_TOKEN;
 
 module.exports = async (req, res) => {
@@ -13,16 +13,18 @@ module.exports = async (req, res) => {
     return res.status(405).send('Method Not Allowed');
   }
 
-  // Validar token da Hotmart (header hottok)
+  // Validar token enviado pela Hotmart no header hottok.
   const token = req.headers['hottok'] || req.headers['x-hotmart-hottok'];
+
   if (HOTMART_TOKEN && token !== HOTMART_TOKEN) {
-    console.error('Token inválido:', token);
+    console.error('Tentativa de webhook com token inválido.');
     return res.status(401).send('Unauthorized');
   }
 
   let body;
+
   try {
-    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
   } catch {
     return res.status(400).send('Invalid JSON');
   }
@@ -31,33 +33,37 @@ module.exports = async (req, res) => {
   const comprador = body.data?.buyer || body.buyer || {};
   const compra = body.data?.purchase || body.purchase || {};
 
-  const email = (comprador.email || '').toLowerCase().trim();
-  const nome = comprador.name || '';
-  const hotmartId = compra.transaction || compra.order_date || '';
-  const dataCompra = compra.approved_date
-    ? new Date(compra.approved_date).toISOString()
-    : new Date().toISOString();
+  const email = String(comprador.email || '').toLowerCase().trim();
+  const nome = String(comprador.name || '').trim();
+  const hotmartId = String(compra.transaction || compra.order_date || '').trim();
+
+  let dataCompra = new Date().toISOString();
+
+  if (compra.approved_date) {
+    const dataAprovacao = new Date(compra.approved_date);
+
+    if (!Number.isNaN(dataAprovacao.getTime())) {
+      dataCompra = dataAprovacao.toISOString();
+    }
+  }
 
   if (!email) {
     return res.status(400).send('Email não encontrado no payload');
   }
 
-  console.log(`Evento: ${evento} | Email: ${email}`);
+  console.log(`Evento: ${evento || 'NÃO_INFORMADO'} | Email: ${email}`);
 
-  // Eventos que ATIVAM o acesso
   const EVENTOS_ATIVAR = [
     'PURCHASE_APPROVED',
     'PURCHASE_COMPLETE',
     'SUBSCRIPTION_ACTIVATION',
   ];
 
-  // Eventos que colocam acesso em PROCESSANDO (boleto/Multibanco gerado)
   const EVENTOS_PROCESSAR = [
     'PURCHASE_WAITING_PAYMENT',
     'PURCHASE_BILLET_PRINTED',
   ];
 
-  // Eventos que BLOQUEIAM o acesso
   const EVENTOS_BLOQUEAR = [
     'PURCHASE_REFUNDED',
     'PURCHASE_CHARGEBACK',
@@ -69,7 +75,7 @@ module.exports = async (req, res) => {
 
   if (EVENTOS_PROCESSAR.includes(evento)) {
     const { error } = await supabase
-      .from('acessos')
+      .from(TABELA_ACESSOS)
       .upsert(
         {
           email,
@@ -83,7 +89,7 @@ module.exports = async (req, res) => {
       );
 
     if (error) {
-      console.error('Erro ao gravar PROCESSANDO:', error);
+      console.error('Erro ao gravar acesso como PROCESSANDO:', error);
       return res.status(500).send('Erro interno');
     }
 
@@ -93,7 +99,7 @@ module.exports = async (req, res) => {
 
   if (EVENTOS_ATIVAR.includes(evento)) {
     const { error } = await supabase
-      .from('acessos')
+      .from(TABELA_ACESSOS)
       .upsert(
         {
           email,
@@ -117,8 +123,11 @@ module.exports = async (req, res) => {
 
   if (EVENTOS_BLOQUEAR.includes(evento)) {
     const { error } = await supabase
-      .from('acessos')
-      .update({ status: 'BLOQUEADO', updated_at: new Date().toISOString() })
+      .from(TABELA_ACESSOS)
+      .update({
+        status: 'BLOQUEADO',
+        updated_at: new Date().toISOString(),
+      })
       .eq('email', email);
 
     if (error) {
@@ -130,6 +139,6 @@ module.exports = async (req, res) => {
     return res.status(200).send('OK');
   }
 
-  // Evento não relevante — responde 200 pra Hotmart não retentar
+  // Responde 200 para evitar novas tentativas da Hotmart em eventos irrelevantes.
   return res.status(200).send('Evento ignorado');
 };
