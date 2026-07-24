@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es-CO">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -302,12 +302,12 @@
         <h2 id="pq-language-title">Selecciona tu idioma</h2>
         <p>Elige la variante de español que deseas usar. Tu elección quedará guardada en este dispositivo.</p>
         <div class="pq-lang-grid">
-          <button class="pq-lang-option" data-lang="es-ES"><span class="pq-lang-flag">🇪🇸</span><span class="pq-lang-name">España</span></button>
-          <button class="pq-lang-option" data-lang="es-AR"><span class="pq-lang-flag">🇦🇷</span><span class="pq-lang-name">Argentina</span></button>
-          <button class="pq-lang-option" data-lang="es-MX"><span class="pq-lang-flag">🇲🇽</span><span class="pq-lang-name">México</span></button>
-          <button class="pq-lang-option" data-lang="es-CO"><span class="pq-lang-flag">🇨🇴</span><span class="pq-lang-name">Colombia</span></button>
-          <button class="pq-lang-option" data-lang="es-PE"><span class="pq-lang-flag">🇵🇪</span><span class="pq-lang-name">Perú</span></button>
-          <button class="pq-lang-option" data-lang="es-CL"><span class="pq-lang-flag">🇨🇱</span><span class="pq-lang-name">Chile</span></button>
+          <button class="pq-lang-option" type="button" data-lang="es-ES" aria-label="Español de España"><span class="pq-lang-flag">🇪🇸</span><span class="pq-lang-name">España</span></button>
+          <button class="pq-lang-option" type="button" data-lang="es-AR" aria-label="Español de Argentina"><span class="pq-lang-flag">🇦🇷</span><span class="pq-lang-name">Argentina</span></button>
+          <button class="pq-lang-option" type="button" data-lang="es-MX" aria-label="Español de México"><span class="pq-lang-flag">🇲🇽</span><span class="pq-lang-name">México</span></button>
+          <button class="pq-lang-option" type="button" data-lang="es-CO" aria-label="Español de Colombia"><span class="pq-lang-flag">🇨🇴</span><span class="pq-lang-name">Colombia</span></button>
+          <button class="pq-lang-option" type="button" data-lang="es-PE" aria-label="Español de Perú"><span class="pq-lang-flag">🇵🇪</span><span class="pq-lang-name">Perú</span></button>
+          <button class="pq-lang-option" type="button" data-lang="es-CL" aria-label="Español de Chile"><span class="pq-lang-flag">🇨🇱</span><span class="pq-lang-name">Chile</span></button>
         </div>
         <button id="pq-language-confirm" type="button" disabled>Aceptar</button>
       </div>
@@ -345,19 +345,40 @@
         var languageConfirm = document.getElementById('pq-language-confirm');
         var selectedLanguage = null;
 
-        function idiomaJaSelecionado() {
-          try { return localStorage.getItem(LANGUAGE_DONE_KEY) === '1'; } catch (e) { return false; }
+        var VALID_LANGUAGES = ['es-ES','es-AR','es-MX','es-CO','es-PE','es-CL'];
+        function getSavedLanguage() {
+          try {
+            var saved = localStorage.getItem('pilates_lang');
+            if (saved === 'es') {
+              localStorage.setItem('pilates_lang', 'es-CO');
+              return 'es-CO';
+            }
+            return VALID_LANGUAGES.indexOf(saved) !== -1 ? saved : null;
+          } catch (e) { return null; }
         }
-        function mostrarPopupIdioma() {
-          if (idiomaJaSelecionado()) return;
+        function idiomaJaSelecionado() {
+          var saved = getSavedLanguage();
+          try {
+            if (!saved) localStorage.removeItem(LANGUAGE_DONE_KEY);
+            return !!saved && localStorage.getItem(LANGUAGE_DONE_KEY) === '1';
+          } catch (e) { return !!saved; }
+        }
+        function selecionarIdiomaVisual(lang) {
+          selectedLanguage = lang || null;
+          Array.prototype.forEach.call(document.querySelectorAll('.pq-lang-option'), function (item) {
+            item.classList.toggle('pq-selected', item.getAttribute('data-lang') === selectedLanguage);
+          });
+          languageConfirm.disabled = !selectedLanguage;
+        }
+        function mostrarPopupIdioma(force) {
+          if (!force && idiomaJaSelecionado()) return;
+          selecionarIdiomaVisual(getSavedLanguage());
           setTimeout(function () { languagePopup.classList.add('pq-visible'); }, 250);
         }
+        window.__pqOpenLanguagePopup = function () { mostrarPopupIdioma(true); };
         Array.prototype.forEach.call(document.querySelectorAll('.pq-lang-option'), function (button) {
           button.addEventListener('click', function () {
-            selectedLanguage = button.getAttribute('data-lang');
-            Array.prototype.forEach.call(document.querySelectorAll('.pq-lang-option'), function (item) { item.classList.remove('pq-selected'); });
-            button.classList.add('pq-selected');
-            languageConfirm.disabled = false;
+            selecionarIdiomaVisual(button.getAttribute('data-lang'));
           });
         });
         languageConfirm.addEventListener('click', function () {
@@ -781,13 +802,14 @@
       (function() {
         // ── Traduções do card "Novo módulo", seguindo o mesmo padrão de idioma do app ──
         var LANG_STORAGE_KEY = 'pilates_lang';
-        var DEFAULT_LANG = 'pt-BR';
+        var DEFAULT_LANG = 'es-CO';
         var TRANSLATIONS = {
-          'pt-BR': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
-          'pt-PT': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
-          'es':    { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas Clases en Producción' },
-          'en':    { comingSoon: 'Coming soon', newLessons: '🚀 New Classes in Production' },
-          'fr':    { comingSoon: 'Bientôt disponible', newLessons: '🚀 Nouveaux Cours en Préparation' }
+          'es-ES': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
+          'es-AR': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
+          'es-MX': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
+          'es-CO': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
+          'es-PE': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
+          'es-CL': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' }
         };
 
         function getCurrentLang() {
@@ -907,27 +929,31 @@
         var title=document.getElementById('pq-info-title');
         var message=document.getElementById('pq-info-message');
         var icon=document.getElementById('pq-info-icon');
+        function currentLang(){try{return localStorage.getItem('pilates_lang')||'es-CO'}catch(e){return'es-CO'}}
+        function dialect(text){
+          var lang=currentLang(),t=text;
+          if(lang==='es-AR')t=t.replace(/Continúa/g,'Seguí').replace(/continúa/g,'seguí').replace(/encontrarás/g,'vas a encontrar');
+          if(lang==='es-ES')t=t.replace(/aplicación/g,'aplicación');
+          return t;
+        }
+        function content(type){
+          if(type==='soon')return{icon:'🚀',title:'¡Nuevas clases en camino!',message:'Estamos preparando nuevas clases, ejercicios y actualizaciones para que sigas avanzando con Pilates en Casa. Muy pronto encontrarás nuevos contenidos dentro de la aplicación.'};
+          return{icon:'🎓',title:'Tu certificado personalizado',message:'Cuando completes todas las clases del programa, desbloquearás un certificado de finalización personalizado con tu nombre, como reconocimiento por haber concluido tu recorrido en Pilates en Casa.'};
+        }
         function openInfo(type){
-          if(type==='soon'){
-            icon.textContent='🚀';
-            title.textContent='¡Nuevas clases en camino!';
-            message.textContent='Estamos preparando nuevas clases, ejercicios y actualizaciones para que sigas avanzando con Pilates en Casa. Muy pronto encontrarás nuevos contenidos dentro de la aplicación.';
-          }else{
-            icon.textContent='🎓';
-            title.textContent='Tu certificado personalizado';
-            message.textContent='Cuando completes todas las clases del programa, desbloquearás un certificado de finalización personalizado con tu nombre, como reconocimiento por haber concluido tu recorrido en Pilates en Casa.';
-          }
-          modal.classList.add('pq-visible');
+          var c=content(type); modal.dataset.type=type; icon.textContent=c.icon; title.textContent=dialect(c.title); message.textContent=dialect(c.message); modal.classList.add('pq-visible');
         }
         function closeInfo(){modal.classList.remove('pq-visible')}
         document.getElementById('pq-info-ok').addEventListener('click',closeInfo);
         modal.addEventListener('click',function(e){if(e.target===modal)closeInfo()});
+        document.addEventListener('keydown',function(e){if(e.key==='Escape')closeInfo()});
         document.addEventListener('click',function(e){
           var soon=e.target.closest&&e.target.closest('#pq-coming-soon-card');
           if(soon){e.preventDefault();e.stopPropagation();openInfo('soon');return}
           var card=e.target.closest&&e.target.closest('[class*="col-span-2"]');
           if(card&&(card.querySelector('img[src*="capa7"]')||/certificado/i.test(card.textContent||''))){e.preventDefault();e.stopPropagation();openInfo('certificate')}
         },true);
+        window.addEventListener('pilates:lang',function(){if(modal.classList.contains('pq-visible'))openInfo(modal.dataset.type||'soon')});
       })();
     </script>
 

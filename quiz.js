@@ -26,126 +26,158 @@
     origSetItem(key, value);
   };
 
-  // ─── Idioma: lê o mesmo valor salvo pelo app React em localStorage ────────
-  var IDIOMAS_VALIDOS = ['pt-BR', 'pt-PT', 'es', 'en', 'fr'];
+  // ─── Idioma: mesma fonte de verdade usada pelo app React ────────────────
+  var IDIOMAS_VALIDOS = ['es-ES', 'es-AR', 'es-MX', 'es-CO', 'es-PE', 'es-CL'];
+
   function getLangAtual() {
+    var lang = 'es-CO';
     try {
-      var v = localStorage.getItem(LANG_KEY);
-      if (v && IDIOMAS_VALIDOS.indexOf(v) !== -1) return v;
+      var salvo = localStorage.getItem(LANG_KEY);
+      if (IDIOMAS_VALIDOS.indexOf(salvo) !== -1) return salvo;
+      // Migração de versões antigas que gravavam apenas "es".
+      if (salvo === 'es') {
+        localStorage.setItem(LANG_KEY, lang);
+        return lang;
+      }
     } catch (e) {}
-    return 'pt-BR';
+    return lang;
   }
 
-  // ─── Traduções da tela de Bonos ────────────────────────────────────────────
-  var BONUS_I18N = {
-    'pt-BR': {
-      titulo: '🎁 Bonos Exclusivos',
-      chamada: 'Estos bonos te ayudarán a acelerar tus resultados 🚀',
-      subtitulo: 'Materiales extra incluidos en tu acceso',
-      tabLabel: 'Bonos'
-    },
-    'pt-PT': {
-      titulo: '🎁 Bónus Exclusivos',
-      chamada: 'Estes bónus vão ajudar a acelerar os seus resultados 🚀',
-      subtitulo: 'Materiais extra incluídos no seu acesso',
-      tabLabel: 'Bónus'
-    },
-    'es': {
-      titulo: '🎁 Bonos Exclusivos',
-      chamada: 'Estos bonos te ayudarán a acelerar tus resultados 🚀',
-      subtitulo: 'Materiales extra incluidos en tu acceso',
-      tabLabel: 'Bonos'
-    },
-    'en': {
-      titulo: '🎁 Exclusive Bonuses',
-      chamada: 'These bonuses will help you speed up your results 🚀',
-      subtitulo: 'Extra materials included in your access',
-      tabLabel: 'Bonuses'
-    },
-    'fr': {
-      titulo: '🎁 Bonus Exclusifs',
-      chamada: 'Ces bonus vont vous aider à accélérer vos résultats 🚀',
-      subtitulo: 'Documents supplémentaires inclus dans votre accès',
-      tabLabel: 'Bonus'
+  function aplicarDialeto(texto, lang) {
+    if (typeof texto !== 'string') return texto;
+    var t = texto;
+    if (lang === 'es-ES') {
+      t = t.replace(/\bcelular\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Móvil' : 'móvil'; })
+        .replace(/\bcomputadora\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Ordenador' : 'ordenador'; })
+        .replace(/\bjugos\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Zumos' : 'zumos'; });
+    } else if (lang === 'es-AR') {
+      t = t.replace(/\bIngresa\b/g, 'Ingresá').replace(/\bingresa\b/g, 'ingresá')
+        .replace(/\bEscribe\b/g, 'Escribí').replace(/\bescribe\b/g, 'escribí')
+        .replace(/\bSelecciona\b/g, 'Seleccioná').replace(/\bselecciona\b/g, 'seleccioná')
+        .replace(/\bElige\b/g, 'Elegí').replace(/\belige\b/g, 'elegí')
+        .replace(/\bToca\b/g, 'Tocá').replace(/\btoca\b/g, 'tocá')
+        .replace(/\bAgrega\b/g, 'Agregá').replace(/\bagrega\b/g, 'agregá')
+        .replace(/\bIntenta\b/g, 'Intentá').replace(/\bintenta\b/g, 'intentá')
+        .replace(/\bContinúa\b/g, 'Seguí').replace(/\bcontinúa\b/g, 'seguí')
+        .replace(/\bpuedes\b/g, 'podés').replace(/\bquieres\b/g, 'querés')
+        .replace(/\bzumos\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Jugos' : 'jugos'; });
+    } else if (lang !== 'es-ES') {
+      t = t.replace(/\bzumos\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Jugos' : 'jugos'; })
+        .replace(/\bmóvil\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Celular' : 'celular'; });
     }
+    return t;
+  }
+
+  function textoIdioma(texto) {
+    return aplicarDialeto(texto, getLangAtual());
+  }
+
+  function escapeHtml(valor) {
+    return String(valor == null ? '' : valor)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ─── Traduções da tela de Bonos ──────────────────────────────────────────
+  var BONUS_I18N_BASE = {
+    titulo: '🎁 Bonos Exclusivos',
+    chamada: 'Estos bonos te ayudarán a acelerar tus resultados 🚀',
+    subtitulo: 'Materiales extra incluidos en tu acceso',
+    tabLabel: 'Bonos',
+    clasesLabel: 'Clases'
   };
 
-  // Traduções apenas dos títulos dos PDFs (os PDFs em si continuam os mesmos)
   var BONUS_TITULOS_I18N = {
-    'Guia Xô, Ansiedade': {
-      'pt-PT': 'Guia Adeus, Ansiedade',
-      'es': 'Guía Chao, Ansiedad',
-      'en': 'Bye Anxiety Guide',
-      'fr': 'Guide Adieu Anxiété'
-    },
-    'Doces e Sobremesas Zero': {
-      'pt-PT': 'Doces e Sobremesas Zero Açúcar',
-      'es': 'Dulces y Postres Sin Azúcar',
-      'en': 'Zero Sugar Sweets & Desserts',
-      'fr': 'Desserts et Sucreries Zéro Sucre'
-    },
-    'Chá Caseiro Mounjaro Natural': {
-      'pt-PT': 'Chá Caseiro Mounjaro Natural',
-      'es': 'Té Casero Mounjaro Natural',
-      'en': 'Natural Homemade Mounjaro Tea',
-      'fr': 'Thé Maison Mounjaro Naturel'
-    },
-    'Sucos Detox Saudáveis': {
-      'pt-PT': 'Sumos Detox Saudáveis',
-      'es': 'Jugos Detox Saludables',
-      'en': 'Healthy Detox Juices',
-      'fr': 'Jus Détox Sains'
-    },
-    '55 Receitas Sem Glúten na Airfryer': {
-      'pt-PT': '55 Receitas Sem Glúten na Air Fryer',
-      'es': '55 Recetas Sin Gluten en Airfryer',
-      'en': '55 Gluten-Free Air Fryer Recipes',
-      'fr': '55 Recettes Sans Gluten à l’Air Fryer'
-    },
-    'Guia Alimentar Diabéticos': {
-      'pt-PT': 'Guia Alimentar para Diabéticos',
-      'es': 'Guía Alimentaria para Diabéticos',
-      'en': 'Diabetic Food Guide',
-      'fr': 'Guide Alimentaire pour Diabétiques'
-    },
-    'Vitaminas Poderosas': {
-      'pt-PT': 'Vitaminas Poderosas',
-      'es': 'Vitaminas Poderosas',
-      'en': 'Powerful Vitamin Smoothies',
-      'fr': 'Vitamines Puissantes'
-    },
-    'Guia Alimentar': {
-      'pt-PT': 'Guia Alimentar',
-      'es': 'Guía Alimentaria',
-      'en': 'Food Guide',
-      'fr': 'Guide Alimentaire'
-    }
+    detox: 'Jugos detox saludables.pdf',
+    vitaminas: 'Vitaminas poderosas.pdf',
+    mounjaro: 'Té casero Mounjaro Natural.pdf',
+    alimentaria: 'Guía alimentaria.pdf',
+    diabeticos: 'Guía alimentaria para diabéticos.pdf',
+    ansiedad: 'Guía adiós a la ansiedad.pdf',
+    postres: 'Dulces y postres sin azúcar.pdf',
+    airfryer: '55 recetas sin gluten para Airfryer.pdf'
   };
 
   function getBonusI18n() {
-    return BONUS_I18N[getLangAtual()] || BONUS_I18N['pt-BR'];
+    var lang = getLangAtual();
+    var copia = {};
+    Object.keys(BONUS_I18N_BASE).forEach(function (k) {
+      copia[k] = aplicarDialeto(BONUS_I18N_BASE[k], lang);
+    });
+    return copia;
   }
 
-  function traduzirTituloPdf(tituloOriginal) {
+  function traduzirTituloPdf(pdf) {
+    var chave = typeof pdf === 'object' ? pdf.key : pdf;
+    var base = BONUS_TITULOS_I18N[chave] || (typeof pdf === 'object' ? pdf.titulo : String(pdf || ''));
+    return aplicarDialeto(base, getLangAtual());
+  }
+
+  var LOGIN_I18N_BASE = {
+    subtitle: 'con Daniela',
+    exclusive: 'Acceso exclusivo para alumnas 💛',
+    emailHelp: 'Escribe el correo usado en tu compra',
+    nameHelp: 'Escribe el nombre usado en tu compra',
+    emailLabel: 'E-mail',
+    nameLabel: 'Nombre',
+    useName: 'Ingresar con nombre',
+    useEmail: 'Ingresar con e-mail',
+    emailPlaceholder: 'tuemail@email.com',
+    namePlaceholder: 'Tu nombre completo',
+    enter: 'Ingresar',
+    checking: 'Verificando…',
+    invalidEmail: 'Escribe un correo electrónico válido.',
+    invalidName: 'Escribe un nombre válido de al menos 2 caracteres.',
+    connectionError: 'No fue posible conectarse. Inténtalo de nuevo.',
+    unavailableTitle: 'Acceso no disponible',
+    unavailableDefault: 'No fue posible liberar tu acceso.',
+    retry: 'Intentar de nuevo',
+    whatsapp: 'Hablar con soporte por WhatsApp 📲',
+    cancel: 'Cancelar',
+    transfer: 'Transferir acceso'
+  };
+
+  function getLoginI18n() {
     var lang = getLangAtual();
-    if (lang === 'pt-BR') return tituloOriginal;
-    var mapa = BONUS_TITULOS_I18N[tituloOriginal];
-    if (mapa && mapa[lang]) return mapa[lang];
-    return tituloOriginal;
+    var copia = {};
+    Object.keys(LOGIN_I18N_BASE).forEach(function (k) {
+      copia[k] = aplicarDialeto(LOGIN_I18N_BASE[k], lang);
+    });
+    return copia;
+  }
+
+  function mensagemAcessoPorMotivo(motivo, fallback) {
+    var mensagens = {
+      NAO_ENCONTRADO: 'No encontramos una compra activa con los datos informados. Verifica la información o habla con soporte.',
+      PROCESSANDO: 'Tu pago todavía está siendo procesado. Si pagaste por un método con compensación diferida, espera la confirmación e inténtalo más tarde.',
+      BLOQUEADO: 'Tu acceso fue cancelado, reembolsado o desactivado. Habla con soporte para revisar tu situación.',
+      OUTRO_DISPOSITIVO: 'Este acceso ya está vinculado a otro dispositivo. ¿Deseas transferirlo a este dispositivo? El acceso anterior será desactivado.',
+      ERRO_INTERNO: 'No fue posible verificar el acceso en este momento. Inténtalo de nuevo.',
+      DADOS_INVALIDOS: 'Los datos informados no son válidos. Revísalos e inténtalo de nuevo.',
+      MUITAS_TENTATIVAS: 'Se realizaron demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
+      ORIGEM_NAO_PERMITIDA: 'Esta dirección no está autorizada para verificar el acceso.',
+      REDE: 'No fue posible conectarse para verificar el acceso. Comprueba tu conexión e inténtalo de nuevo.'
+    };
+    return textoIdioma(mensagens[motivo] || fallback || LOGIN_I18N_BASE.unavailableDefault);
   }
 
   // ─── Modal de transferência de dispositivo ────────────────────────────────
   function mostrarConfirmacao(mensagem, onSim, onNao) {
+    var t = getLoginI18n();
     var modal = document.createElement('div');
     modal.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:20px;';
     modal.innerHTML =
       '<div style="background:#2a1a40;border:1px solid rgba(212,175,55,0.4);border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;">'
-      + '<p style="color:#fff;font-size:15px;line-height:1.6;margin:0 0 24px;">' + mensagem + '</p>'
+      + '<p id="pq-confirm-message" style="color:#fff;font-size:15px;line-height:1.6;margin:0 0 24px;"></p>'
       + '<div style="display:flex;gap:12px;">'
-      + '<button id="pq-nao" style="flex:1;padding:12px;background:transparent;border:2px solid #3a2560;color:#9b7ec8;border-radius:12px;font-size:15px;cursor:pointer;">Cancelar</button>'
-      + '<button id="pq-sim" style="flex:1;padding:12px;background:#d4af37;border:none;color:#0d1a1f;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">Transferir acceso</button>'
+      + '<button id="pq-nao" type="button" style="flex:1;padding:12px;background:transparent;border:2px solid #3a2560;color:#9b7ec8;border-radius:12px;font-size:15px;cursor:pointer;">' + escapeHtml(t.cancel) + '</button>'
+      + '<button id="pq-sim" type="button" style="flex:1;padding:12px;background:#d4af37;border:none;color:#0d1a1f;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">' + escapeHtml(t.transfer) + '</button>'
       + '</div></div>';
     document.body.appendChild(modal);
+    document.getElementById('pq-confirm-message').textContent = mensagem;
     document.getElementById('pq-sim').addEventListener('click', function() { modal.remove(); onSim(); });
     document.getElementById('pq-nao').addEventListener('click', function() { modal.remove(); onNao(); });
   }
@@ -183,13 +215,24 @@
     if (revalidando) return;
     revalidando = true;
 
+    var controlador = typeof AbortController === 'function' ? new AbortController() : null;
+    var timeoutRevalidacao = setTimeout(function () {
+      if (controlador) controlador.abort();
+    }, 15000);
+
     fetch('/api/verificar-acesso', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailSalvo, deviceId: getDeviceId(), transferirDispositivo: false })
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email: emailSalvo, deviceId: getDeviceId(), transferirDispositivo: false }),
+      signal: controlador ? controlador.signal : undefined
     })
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r.ok) throw new Error('Falha na revalidação');
+        return r.json();
+      })
       .then(function (res) {
+        clearTimeout(timeoutRevalidacao);
         revalidando = false;
         if (res.acesso) {
           // E-mail confirmado ATIVO no backend agora sim: libera de fato.
@@ -201,6 +244,9 @@
           var loginAberto = document.getElementById('pq-email-login');
           if (loginAberto) loginAberto.remove();
           injetarNavBar();
+          if (typeof window.__pqTriggerInstallAfterLogin === 'function') {
+            window.__pqTriggerInstallAfterLogin();
+          }
         } else {
           // Inválido, inexistente, bloqueado, cancelado, reembolsado, ou
           // vinculado a outro dispositivo (motivo OUTRO_DISPOSITIVO): nunca
@@ -212,10 +258,11 @@
           ocultarTelaBonus();
           var root = document.getElementById('root');
           if (root) root.style.display = 'none';
-          mostrarLogin(res.mensagem);
+          mostrarLogin({ motivo: res.motivo, mensagem: res.mensagem });
         }
       })
       .catch(function () {
+        clearTimeout(timeoutRevalidacao);
         revalidando = false;
         // Falha de conexão: por segurança, não libera acesso silenciosamente
         // com base apenas no localStorage. Mantém/mostra a tela de login,
@@ -235,56 +282,72 @@
   // ─── deviceId ─────────────────────────────────────────────────────────────
   function getDeviceId() {
     var key = 'pilates_device_id';
+    function gerarId() {
+      if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+        return 'dev_' + window.crypto.randomUUID().replace(/-/g, '');
+      }
+      return 'dev_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
     try {
       var id = localStorage.getItem(key);
-      if (id) return id;
-      id = 'dev_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      if (id && /^dev_[a-zA-Z0-9-]{8,100}$/.test(id)) return id;
+      id = gerarId();
       localStorage.setItem(key, id);
       return id;
-    } catch(e) { return 'dev_unknown'; }
+    } catch(e) {
+      if (!window.__pqFallbackDeviceId) window.__pqFallbackDeviceId = gerarId();
+      return window.__pqFallbackDeviceId;
+    }
   }
 
   function getEmailFromUrl() {
     try {
-      return new URLSearchParams(window.location.search).get('email') || '';
+      var valor = new URLSearchParams(window.location.search).get('email') || '';
+      return valor.trim().slice(0, 254);
     } catch(e) { return ''; }
   }
 
-  // ─── Tela de login por e-mail ─────────────────────────────────────────────
-  function mostrarLogin(mensagemBloqueio) {
-    // Evita empilhar overlays duplicados caso a função seja chamada mais
-    // de uma vez (ex.: revalidação em andamento + retorno de visibilidade).
+  function normalizarNome(valor) {
+    return String(valor || '').replace(/[\u0000-\u001F\u007F]/g, '').trim().replace(/\s+/g, ' ').slice(0, 100);
+  }
+
+  function emailValido(email) {
+    return email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+  }
+
+  // ─── Tela de login por e-mail/nome ───────────────────────────────────────
+  function mostrarLogin(bloqueio) {
     var existente = document.getElementById('pq-email-login');
     if (existente) existente.remove();
 
+    var t = getLoginI18n();
     var emailUrl = getEmailFromUrl();
-
     var overlay = document.createElement('div');
     overlay.id = 'pq-email-login';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(13,7,24,0.97);display:flex;align-items:center;justify-content:center;font-family:Inter,system-ui,sans-serif;padding:20px;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(13,7,24,0.97);display:flex;align-items:center;justify-content:center;font-family:Inter,system-ui,sans-serif;padding:20px;overflow-y:auto;';
 
     overlay.innerHTML =
       '<div style="width:100%;max-width:420px;background:linear-gradient(160deg,rgba(42,26,64,0.98),rgba(26,16,37,0.99));border:1px solid rgba(212,175,55,0.35);border-radius:24px;overflow:hidden;box-shadow:0 0 60px rgba(212,175,55,0.15),0 32px 64px rgba(0,0,0,0.6);">'
       + '<div style="height:3px;background:linear-gradient(90deg,transparent,#d4af37,transparent);"></div>'
-      + '<div style="padding:36px 32px 40px;display:flex;flex-direction:column;align-items:center;gap:24px;">'
-      + '<img src="/logo-pilates-en-casa.png" style="width:88px;height:88px;border-radius:50%;border:2px solid rgba(212,175,55,0.5);object-fit:cover;" onerror="this.style.display=\'none\'">'
+      + '<div style="padding:30px 28px 34px;display:flex;flex-direction:column;align-items:center;gap:20px;">'
+      + '<img src="/logo-pilates-en-casa.png" alt="Pilates en Casa" style="width:88px;height:88px;border-radius:50%;border:2px solid rgba(212,175,55,0.5);object-fit:cover;" onerror="this.style.display=\'none\'">'
       + '<div style="text-align:center;">'
       + '<h1 style="color:#d4af37;font-size:22px;font-weight:700;letter-spacing:2px;margin:0 0 6px;font-family:Cinzel,serif;">PILATES EN CASA</h1>'
-      + '<p style="color:#c9a8f0;font-size:13px;letter-spacing:4px;margin:0;font-family:Cinzel,serif;">com Daniela</p>'
+      + '<p style="color:#c9a8f0;font-size:13px;letter-spacing:4px;margin:0;font-family:Cinzel,serif;">' + escapeHtml(t.subtitle) + '</p>'
       + '</div>'
       + '<div style="text-align:center;">'
-      + '<p style="color:#fff;font-size:17px;font-weight:600;margin:0 0 6px;">Acceso exclusivo para alumnas 💛</p>'
-      + '<p id="pq-login-sub" style="color:#9b7ec8;font-size:13px;margin:0;">Escribe el correo usado en tu compra</p>'
+      + '<p style="color:#fff;font-size:17px;font-weight:600;margin:0 0 6px;">' + escapeHtml(t.exclusive) + '</p>'
+      + '<p id="pq-login-sub" style="color:#9b7ec8;font-size:13px;margin:0;">' + escapeHtml(t.emailHelp) + '</p>'
       + '</div>'
       + '<div style="width:100%;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-      + '<label id="pq-login-label" style="color:#d4af37;font-size:14px;font-weight:600;margin:0;">E-mail</label>'
-      + '<button id="pq-login-toggle" type="button" style="background:none;border:none;color:#9b7ec8;font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer;padding:0;">Ingresar con nombre</button>'
+      + '<label id="pq-login-label" for="pq-email-input" style="color:#d4af37;font-size:14px;font-weight:600;margin:0;">' + escapeHtml(t.emailLabel) + '</label>'
+      + '<button id="pq-login-toggle" type="button" style="background:none;border:none;color:#9b7ec8;font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer;padding:0;">' + escapeHtml(t.useName) + '</button>'
       + '</div>'
-      + '<input id="pq-email-input" type="email" placeholder="seuemail@email.com" value="' + emailUrl + '" autocomplete="email" style="width:100%;box-sizing:border-box;background:#1a1025;border:2px solid #3a2560;border-radius:12px;padding:14px 16px;color:#fff;font-size:16px;outline:none;">'
-      + '<p id="pq-email-erro" style="color:#f87171;font-size:13px;margin:6px 0 0;min-height:18px;display:none;"></p>'
+      + '<input id="pq-email-input" type="email" inputmode="email" maxlength="254" placeholder="' + escapeHtml(t.emailPlaceholder) + '" value="' + escapeHtml(emailUrl) + '" autocomplete="email" style="width:100%;box-sizing:border-box;background:#1a1025;border:2px solid #3a2560;border-radius:12px;padding:14px 16px;color:#fff;font-size:16px;outline:none;">'
+      + '<p id="pq-email-erro" role="alert" aria-live="polite" style="color:#f87171;font-size:13px;margin:6px 0 0;min-height:18px;display:none;"></p>'
       + '</div>'
-      + '<button id="pq-email-btn" style="width:100%;padding:16px;background:#d4af37;color:#0d1a1f;border:none;border-radius:14px;font-size:18px;font-weight:700;cursor:pointer;font-family:Cinzel,serif;letter-spacing:1px;">Ingresar</button>'
+      + '<button id="pq-email-btn" type="button" style="width:100%;padding:16px;background:#d4af37;color:#0d1a1f;border:none;border-radius:14px;font-size:18px;font-weight:700;cursor:pointer;font-family:Cinzel,serif;letter-spacing:1px;">' + escapeHtml(t.enter) + '</button>'
       + '</div>'
       + '<div style="height:3px;background:linear-gradient(90deg,transparent,#d4af37,transparent);"></div>'
       + '</div>';
@@ -298,87 +361,102 @@
     var subEl = document.getElementById('pq-login-sub');
     var labelEl = document.getElementById('pq-login-label');
     var modoNome = false;
+    var requisicaoAtual = null;
 
     function mostrarErro(msg) { erroEl.textContent = msg; erroEl.style.display = 'block'; }
-    function esconderErro() { erroEl.style.display = 'none'; }
+    function esconderErro() { erroEl.textContent = ''; erroEl.style.display = 'none'; }
+    function setCarregando(ativo) {
+      btn.disabled = ativo;
+      btn.textContent = ativo ? t.checking : t.enter;
+      btn.style.opacity = ativo ? '0.7' : '1';
+      btn.style.cursor = ativo ? 'wait' : 'pointer';
+    }
 
-    // ─── Alternar entre login por e-mail ou por nome ─────────────────────────
-    // Apenas troca o modo do mesmo campo/tela existente; não cria tela nova.
     toggleBtn.addEventListener('click', function() {
       modoNome = !modoNome;
       esconderErro();
       if (modoNome) {
-        labelEl.textContent = 'Nome';
-        subEl.textContent = 'Digite o nome usado na sua compra';
-        toggleBtn.textContent = 'Ingresar com e-mail';
+        labelEl.textContent = t.nameLabel;
+        subEl.textContent = t.nameHelp;
+        toggleBtn.textContent = t.useEmail;
         input.type = 'text';
-        input.placeholder = 'Seu nome completo';
+        input.inputMode = 'text';
+        input.maxLength = 100;
+        input.placeholder = t.namePlaceholder;
         input.value = '';
         input.autocomplete = 'name';
       } else {
-        labelEl.textContent = 'E-mail';
-        subEl.textContent = 'Escribe el correo usado en tu compra';
-        toggleBtn.textContent = 'Ingresar con nombre';
+        labelEl.textContent = t.emailLabel;
+        subEl.textContent = t.emailHelp;
+        toggleBtn.textContent = t.useName;
         input.type = 'email';
-        input.placeholder = 'seuemail@email.com';
+        input.inputMode = 'email';
+        input.maxLength = 254;
+        input.placeholder = t.emailPlaceholder;
         input.value = '';
         input.autocomplete = 'email';
       }
       input.focus();
     });
 
-    // ─── Tela de bloqueio (status diferente de ATIVO) ────────────────────────
-    // Substitui o conteúdo do mesmo overlay já aberto — não é uma tela nova
-    // nem pede e-mail novamente, e só aparece como resultado da verificação.
-    function mostrarBloqueado(mensagem) {
+    function mostrarBloqueado(motivo, mensagemFallback) {
+      var mensagem = mensagemAcessoPorMotivo(motivo, mensagemFallback);
       overlay.innerHTML =
         '<div style="width:100%;max-width:420px;background:linear-gradient(160deg,rgba(42,26,64,0.98),rgba(26,16,37,0.99));border:1px solid rgba(212,175,55,0.35);border-radius:24px;overflow:hidden;box-shadow:0 0 60px rgba(212,175,55,0.15),0 32px 64px rgba(0,0,0,0.6);">'
         + '<div style="height:3px;background:linear-gradient(90deg,transparent,#d4af37,transparent);"></div>'
         + '<div style="padding:36px 32px 40px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;">'
         + '<div style="width:56px;height:56px;border-radius:50%;background:rgba(255,138,138,0.12);border:1px solid rgba(255,138,138,0.35);display:flex;align-items:center;justify-content:center;font-size:26px;">🔒</div>'
-        + '<h2 style="color:#d4af37;font-family:Cinzel,serif;font-size:20px;font-weight:700;letter-spacing:1px;margin:0;">Acesso indisponível</h2>'
-        + '<p style="color:#c9a8f0;font-size:15px;line-height:1.5;margin:0;">' + (mensagem || 'Não foi possível liberar seu acesso.') + '</p>'
-        + '<button id="pq-blocked-retry" style="width:100%;padding:14px 18px;border-radius:999px;background:transparent;border:1px solid rgba(212,175,55,0.45);color:#d4af37;font-weight:700;font-family:Cinzel,serif;letter-spacing:1px;font-size:14.5px;cursor:pointer;">Tentar novamente</button>'
-        + '<a href="https://wa.me/5519982532156" target="_blank" rel="noopener" style="color:#25D366;font-size:14px;font-weight:600;text-decoration:none;">Falar com o suporte no WhatsApp 📲</a>'
+        + '<h2 style="color:#d4af37;font-family:Cinzel,serif;font-size:20px;font-weight:700;letter-spacing:1px;margin:0;">' + escapeHtml(t.unavailableTitle) + '</h2>'
+        + '<p id="pq-blocked-message" style="color:#c9a8f0;font-size:15px;line-height:1.5;margin:0;"></p>'
+        + '<button id="pq-blocked-retry" type="button" style="width:100%;padding:14px 18px;border-radius:999px;background:transparent;border:1px solid rgba(212,175,55,0.45);color:#d4af37;font-weight:700;font-family:Cinzel,serif;letter-spacing:1px;font-size:14.5px;cursor:pointer;">' + escapeHtml(t.retry) + '</button>'
+        + '<a href="https://wa.me/5519982532156" target="_blank" rel="noopener noreferrer" style="color:#25D366;font-size:14px;font-weight:600;text-decoration:none;">' + escapeHtml(t.whatsapp) + '</a>'
         + '</div>'
         + '<div style="height:3px;background:linear-gradient(90deg,transparent,#d4af37,transparent);"></div>'
         + '</div>';
+      document.getElementById('pq-blocked-message').textContent = mensagem;
       document.getElementById('pq-blocked-retry').addEventListener('click', function () {
         overlay.remove();
         mostrarLogin();
       });
     }
 
-    // Se a revalidação automática (ao abrir/atualizar o app) já identificou
-    // que o acesso não está disponível, mostra a tela de bloqueio direto,
-    // sem obrigar o usuário a digitar o e-mail e clicar em "Ingresar" de novo.
-    if (mensagemBloqueio) {
-      mostrarBloqueado(mensagemBloqueio);
+    if (bloqueio) {
+      if (typeof bloqueio === 'object') mostrarBloqueado(bloqueio.motivo, bloqueio.mensagem);
+      else mostrarBloqueado('', bloqueio);
       return;
     }
 
     function tentarIngresar(transferir) {
-      var valor = input.value.trim();
-      var email = modoNome ? '' : valor.toLowerCase();
-      var nome = modoNome ? valor : '';
+      var valor = input.value;
+      var email = modoNome ? '' : String(valor || '').trim().toLowerCase().slice(0, 254);
+      var nome = modoNome ? normalizarNome(valor) : '';
 
       if (modoNome) {
-        if (!nome) { mostrarErro('Escribe tu nombre.'); return; }
-      } else {
-        if (!email || !email.includes('@')) { mostrarErro('Digite um e-mail válido.'); return; }
+        if (nome.length < 2) { mostrarErro(t.invalidName); return; }
+      } else if (!emailValido(email)) {
+        mostrarErro(t.invalidEmail);
+        return;
       }
 
-      btn.disabled = true;
-      btn.textContent = 'Verificando…';
+      if (requisicaoAtual) requisicaoAtual.abort();
+      requisicaoAtual = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      var timeoutId = setTimeout(function () { if (requisicaoAtual) requisicaoAtual.abort(); }, 15000);
+      setCarregando(true);
       esconderErro();
 
       fetch('/api/verificar-acesso', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email, nome: nome, deviceId: getDeviceId(), transferirDispositivo: !!transferir })
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email: email, nome: nome, deviceId: getDeviceId(), transferirDispositivo: !!transferir }),
+        signal: requisicaoAtual ? requisicaoAtual.signal : undefined
       })
-      .then(function(r) { return r.json(); })
+      .then(function(r) {
+        if (!r.ok && r.status >= 500) throw new Error('server');
+        return r.json();
+      })
       .then(function(res) {
+        clearTimeout(timeoutId);
         if (res.acesso) {
           window.__pq_auth_ok = true;
           try {
@@ -387,27 +465,18 @@
           auth = { loggedIn: true, nome: res.nome || nome || '', email: email };
           overlay.remove();
           injetarNavBar();
-          // Login concluído com sucesso: dispara o popup de instalação do
-          // PWA automaticamente (definido no index.html). Se o usuário já
-          // tiver o app instalado, ou o navegador não suportar o prompt
-          // nesse momento, a própria função trata isso e não faz nada.
-          if (typeof window.__pqTriggerInstallAfterLogin === 'function') {
-            window.__pqTriggerInstallAfterLogin();
-          }
+          if (typeof window.__pqTriggerInstallAfterLogin === 'function') window.__pqTriggerInstallAfterLogin();
         } else if (res.motivo === 'OUTRO_DISPOSITIVO') {
-          mostrarConfirmacao(res.mensagem, function() { tentarIngresar(true); }, function() {
-            btn.disabled = false; btn.textContent = 'Ingresar';
-          });
+          setCarregando(false);
+          mostrarConfirmacao(mensagemAcessoPorMotivo('OUTRO_DISPOSITIVO', res.mensagem), function() { tentarIngresar(true); }, function() {});
         } else {
-          // Status diferente de ATIVO (bloqueado, cancelado, reembolsado,
-          // inativo, desativado) ou e-mail não encontrado: mostra a tela
-          // de bloqueio com WhatsApp, sem pedir e-mail novamente.
-          mostrarBloqueado(res.mensagem);
+          mostrarBloqueado(res.motivo, res.mensagem);
         }
       })
       .catch(function() {
-        mostrarErro('Erro de conexão. Tente novamente.');
-        btn.disabled = false; btn.textContent = 'Ingresar';
+        clearTimeout(timeoutId);
+        mostrarErro(t.connectionError);
+        setCarregando(false);
       });
     }
 
@@ -455,14 +524,14 @@
 
   // ─── Sistema de abas: Clases / Bonos ─────────────────────────────────────
   var BONUS_PDFS = [
-    { titulo: 'Zumos detox saludables.pdf', id: '1p7fOIGVTfImSOuuZ6RQ9RTYNX2mtG35V' },
-    { titulo: 'Vitaminas poderosas.pdf', id: '1NqdZUgen8c9sAeeqBGpuWVpyfdHm7oyR' },
-    { titulo: 'Té casero Mounjaro Natural.pdf', id: '1ouMQO8Zbo57qjLCuQec10I749pTAc_wT' },
-    { titulo: 'Guía alimentaria.pdf', id: '1HE1Ku2DvutwffGTCQ0SQid3l2rWExQu8' },
-    { titulo: 'Guía alimentaria para diabéticos.pdf', id: '1wH72qqDPZWeJFXoAhq0m1RW7Xu2ElIo7' },
-    { titulo: 'Guía adiós a la ansiedad.pdf', id: '1sY-3bLKVfozlSdv_1th1qeoMc8tRfoCo' },
-    { titulo: 'Dulces y postres sin azúcar.pdf', id: '1fODdS57zqgk3fsuG8UbWc14I84o9Okvh' },
-    { titulo: '55 recetas sin gluten para Airfryer listas.pdf', id: '1McVSUU0grhMBP8NKSYXcO1C2U2HavOXa' }
+    { key: 'detox', titulo: 'Jugos detox saludables.pdf', id: '1p7fOIGVTfImSOuuZ6RQ9RTYNX2mtG35V' },
+    { key: 'vitaminas', titulo: 'Vitaminas poderosas.pdf', id: '1NqdZUgen8c9sAeeqBGpuWVpyfdHm7oyR' },
+    { key: 'mounjaro', titulo: 'Té casero Mounjaro Natural.pdf', id: '1ouMQO8Zbo57qjLCuQec10I749pTAc_wT' },
+    { key: 'alimentaria', titulo: 'Guía alimentaria.pdf', id: '1HE1Ku2DvutwffGTCQ0SQid3l2rWExQu8' },
+    { key: 'diabeticos', titulo: 'Guía alimentaria para diabéticos.pdf', id: '1wH72qqDPZWeJFXoAhq0m1RW7Xu2ElIo7' },
+    { key: 'ansiedad', titulo: 'Guía adiós a la ansiedad.pdf', id: '1sY-3bLKVfozlSdv_1th1qeoMc8tRfoCo' },
+    { key: 'postres', titulo: 'Dulces y postres sin azúcar.pdf', id: '1fODdS57zqgk3fsuG8UbWc14I84o9Okvh' },
+    { key: 'airfryer', titulo: '55 recetas sin gluten para Airfryer.pdf', id: '1McVSUU0grhMBP8NKSYXcO1C2U2HavOXa' }
   ];
 
   function getViewUrl(id) {
@@ -506,11 +575,11 @@
     nav.innerHTML =
       '<button id="pq-tab-aulas" onclick="window.__pqMudarAba(\'aulas\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#9b7ec8;border-top:2px solid transparent;">'
       + '<span style="font-size:20px">🧘‍♀️</span>'
-      + '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;">Clases</span>'
+      + '<span id="pq-tab-aulas-label" style="font-size:11px;font-weight:700;letter-spacing:0.5px;">' + getBonusI18n().clasesLabel + '</span>'
       + '</button>'
       + '<button id="pq-tab-bonus" onclick="window.__pqMudarAba(\'bonus\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#9b7ec8;border-top:2px solid transparent;">'
       + '<span style="font-size:20px">🎁</span>'
-      + '<span style="font-size:11px;font-weight:700;letter-spacing:0.5px;">' + getBonusI18n().tabLabel + '</span>'
+      + '<span id="pq-tab-bonus-label" style="font-size:11px;font-weight:700;letter-spacing:0.5px;">' + getBonusI18n().tabLabel + '</span>'
       + '</button>';
 
     document.body.appendChild(nav);
@@ -574,7 +643,7 @@
     var cardsHtml = BONUS_PDFS.map(function(pdf, idx) {
       var thumb = getThumbUrl(pdf.id);
       var viewUrl = getViewUrl(pdf.id);
-      var tituloTraduzido = traduzirTituloPdf(pdf.titulo);
+      var tituloTraduzido = traduzirTituloPdf(pdf);
       // No modo demonstração, apenas os 2 primeiros bônus ficam liberados;
       // os demais mostram a capa desfocada com cadeado e, ao serem tocados,
       // levam à mesma oferta nativa do app (bloco #comprovante-block),
@@ -661,6 +730,21 @@
     abrirPdf(id, titulo);
   };
 
+  function atualizarInterfaceAuxiliarPorIdioma() {
+    var t = getBonusI18n();
+    var aulasLabel = document.getElementById('pq-tab-aulas-label');
+    var bonusLabel = document.getElementById('pq-tab-bonus-label');
+    if (aulasLabel) aulasLabel.textContent = t.clasesLabel;
+    if (bonusLabel) bonusLabel.textContent = t.tabLabel;
+    if (abaAtiva === 'bonus' && document.getElementById('pq-bonus-screen')) mostrarTelaBonus();
+    document.querySelectorAll('#pq-cert-lock p').forEach(function (el) { el.textContent = textoIdioma('Bloqueado'); });
+  }
+
+  window.addEventListener('pilates:lang', atualizarInterfaceAuxiliarPorIdioma);
+  window.addEventListener('storage', function (e) {
+    if (e.key === LANG_KEY) atualizarInterfaceAuxiliarPorIdioma();
+  });
+
   // Injetar nav bar após login
   function iniciarNavBar() {
     // NÃO injeta a nav bar aqui com base no localStorage: quem decide se o
@@ -738,7 +822,7 @@
       lock.id = 'pq-cert-lock';
       lock.style.cssText = 'position:absolute;left:0;right:0;top:0;bottom:0;z-index:11;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:8%;gap:10px;pointer-events:none;';
       lock.innerHTML = LOCK_SVG
-        + '<p style="color:#d4af37;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0;text-shadow:0 1px 4px rgba(0,0,0,0.6);">Bloqueado</p>';
+        + '<p style="color:#d4af37;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0;text-shadow:0 1px 4px rgba(0,0,0,0.6);">' + escapeHtml(textoIdioma('Bloqueado')) + '</p>';
       if (imgWrap) {
         imgWrap.appendChild(lock);
       } else {

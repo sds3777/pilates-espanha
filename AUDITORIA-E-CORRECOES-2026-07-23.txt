@@ -1,0 +1,327 @@
+AUDITORIA E CORREÇÕES — APP PILATES EN CASA
+Data: 23/07/2026
+Projeto analisado: pilates-espanha-pronto(1).zip
+
+============================================================
+1. MAPEAMENTO DA ESTRUTURA ENCONTRADA
+============================================================
+
+O ZIP contém uma versão compilada de React/Vite. A pasta-fonte `src` e os componentes React originais não estão presentes. Por isso, as correções do front-end precisaram ser aplicadas diretamente nos arquivos finais compilados.
+
+• Traduções principais, módulos, aulas e botão fixo de idioma:
+  assets/index-Dk7Fq3Ln.js
+
+  Nesse bundle estão:
+  - catálogo de idiomas e países;
+  - textos gerais do aplicativo;
+  - títulos e descrições dos módulos;
+  - títulos das aulas e níveis de dificuldade;
+  - componente do seletor fixo de idioma;
+  - certificado e textos relacionados.
+
+• Tela de login, mensagens de erro/bloqueio, navegação e PDFs:
+  quiz.js
+
+  Nesse arquivo estão:
+  - formulário de acesso por e-mail ou nome;
+  - tela exibida quando o acesso é recusado;
+  - contato único via WhatsApp;
+  - barra de navegação inferior;
+  - lista, nomes e links dos PDFs da aba Bônus;
+  - revalidação do acesso no backend;
+  - identificação do dispositivo.
+
+• Popups iniciais e popups informativos:
+  index.html
+
+  Nesse arquivo estão:
+  - popup para instalar o aplicativo;
+  - popup de seleção de idioma;
+  - popup de novas aulas em produção;
+  - popup do certificado;
+  - integração entre login, instalação e idioma.
+
+• APIs/backend:
+  api/verificar-acesso.js
+  api/hotmart-webhook.js
+
+• Configuração de deploy e segurança:
+  vercel.json
+  .htaccess
+
+• Manifesto do aplicativo:
+  manifest.json
+
+• Botão fixo de troca de idioma:
+  Está dentro do bundle React assets/index-Dk7Fq3Ln.js, com posicionamento fixo na parte inferior esquerda (`fixed bottom-24 left-4`).
+
+============================================================
+2. CAUSAS DOS QUATRO BUGS INFORMADOS
+============================================================
+
+BUG 1 — Tela de erro do login sem tradução
+
+Causa encontrada:
+A função de bloqueio em quiz.js estava com textos fixos em português. Além disso, mensagens retornadas pelo backend também misturavam português e espanhol.
+
+BUG 2 — Apenas títulos das aulas mudavam de idioma
+
+Causas encontradas:
+1. O React trabalhava com seis códigos completos:
+   es-ES, es-AR, es-MX, es-CO, es-PE e es-CL.
+
+2. quiz.js e trechos de index.html ainda esperavam códigos antigos:
+   es, pt-BR, pt-PT, en e fr.
+
+3. Parte dos dicionários internos usava somente a chave-base `es`, mas funções de descrição, dificuldade e outros campos tentavam buscar diretamente `es-ES`, `es-AR` etc.
+
+4. O mapa de tradução dos PDFs usava títulos-base em português, enquanto a lista real de PDFs estava em espanhol. Assim, a tradução não encontrava a chave correspondente.
+
+BUG 3 — Preferência de idioma desaparecia ou reiniciava
+
+Causa encontrada:
+A preferência era gravada, mas diferentes partes do aplicativo validavam códigos diferentes. Uma escolha válida para o React podia ser tratada como inválida pelos scripts auxiliares, provocando reset, popup repetido ou conteúdo sem atualização.
+
+BUG 4 — Botão fixo de idioma
+
+Causa encontrada:
+O botão React já existia e tinha posicionamento fixo, mas os scripts externos não reconheciam corretamente a nova escolha feita por ele. Assim, o botão aparentava funcionar apenas parcialmente.
+
+============================================================
+3. CORREÇÕES APLICADAS
+============================================================
+
+3.1. Sistema multilíngue unificado
+
+• Padronizados os seis idiomas/países em todo o aplicativo:
+  - Español (España) — es-ES
+  - Español (Argentina) — es-AR
+  - Español (México) — es-MX
+  - Español (Colombia) — es-CO
+  - Español (Perú) — es-PE
+  - Español (Chile) — es-CL
+
+• Criada normalização para que dicionários com chave-base `es` funcionem com todos os códigos `es-*`.
+
+• Adicionadas adaptações de vocabulário para Espanha e Argentina onde o aplicativo já precisava diferenciar variantes.
+
+• Preferências antigas salvas como `es` são migradas automaticamente para `es-CO`.
+
+3.2. Tela de erro/bloqueio do login
+
+• Removidos textos fixos em português.
+• Tela integrada ao idioma atualmente selecionado.
+• Motivos técnicos do backend são convertidos em mensagens amigáveis.
+• Conteúdo vindo de parâmetros ou respostas é escapado antes de entrar no HTML.
+• Mantido um único contato via WhatsApp.
+
+3.3. Tradução de módulos, aulas e PDFs
+
+• Corrigidas as funções de tradução de:
+  - títulos dos módulos;
+  - descrições dos módulos;
+  - títulos das aulas;
+  - nomes alternativos de aula, quando existirem;
+  - níveis de dificuldade;
+  - descrições e campos auxiliares;
+  - nomes/rótulos dos PDFs.
+
+• Corrigido o vínculo entre os nomes reais dos PDFs e o dicionário de tradução.
+
+• A tela de Bônus é atualizada imediatamente quando o idioma muda, sem exigir recarregar a página.
+
+3.4. Persistência do idioma
+
+• A escolha é gravada em `localStorage` na chave `pilates_lang`.
+• A seleção inicial também é marcada em `pq_language_selected`.
+• Na abertura seguinte, o valor é validado e restaurado.
+• A troca manual sobrescreve corretamente a preferência anterior.
+• Valores antigos/inválidos deixam de causar reset silencioso.
+• O idioma padrão do manifesto e da página foi ajustado para es-CO.
+
+3.5. Botão fixo de idioma
+
+• Mantido permanentemente visível na parte inferior.
+• O botão reabre o mesmo popup inicial por meio de uma função pública segura.
+• A nova seleção atualiza React, navegação, PDFs e popups auxiliares.
+• A escolha também fica persistida para acessos posteriores.
+
+3.6. Fluxo de login e carregamento
+
+• Adicionada validação de e-mail/nome antes da requisição.
+• Adicionados limites de tamanho aos campos.
+• Adicionado estado de carregamento para evitar envios repetidos.
+• Adicionado timeout de 15 segundos nas chamadas de login e revalidação.
+• A revalidação agora checa o status HTTP antes de interpretar JSON.
+• Após confirmar uma sessão salva, o fluxo de instalação/idioma é disparado corretamente.
+• Erros de rede recebem tratamento amigável, sem expor detalhes internos.
+
+3.7. Correções auxiliares
+
+• Meses do certificado corrigidos de português para espanhol.
+• Título de compartilhamento do certificado corrigido para espanhol.
+• Popups de certificado e novas aulas passam a acompanhar a variante escolhida.
+• Popup de idioma recebeu atributos de acessibilidade e seleção previamente salva.
+• Tecla Escape fecha o popup informativo.
+
+============================================================
+4. SEGURANÇA — CORREÇÕES APLICADAS
+============================================================
+
+4.1. API de verificação de acesso
+
+• CORS aberto (`*`) removido.
+• Agora são aceitas apenas requisições de mesma origem ou origens presentes em uma lista permitida por variável de ambiente.
+• Adicionados headers de segurança e `Cache-Control: no-store`.
+• Validação e normalização de e-mail, nome e deviceId.
+• Proteção contra uso de curingas `%` e `_` na busca por nome.
+• Consulta ao banco limitada somente às colunas necessárias.
+• Adicionado limite básico em memória de 30 tentativas por 10 minutos por origem/IP.
+• Respostas de erro foram generalizadas para não expor detalhes do Supabase ou stack traces.
+• Configuração ausente do Supabase gera falha controlada.
+
+4.2. Webhook da Hotmart
+
+• Antes, se o token de webhook não estivesse configurado, a validação podia deixar de proteger corretamente a rota.
+• Agora a API falha de forma fechada: sem `HOTMART_WEBHOOK_TOKEN`, o webhook não aceita eventos.
+• Comparação do token feita de forma resistente a diferenças de tempo.
+• Dados recebidos são validados e normalizados.
+• Logs deixam de registrar o e-mail completo do comprador.
+• Erros internos não são devolvidos ao cliente.
+
+4.3. Headers e configuração de hospedagem
+
+Adicionados em vercel.json e .htaccess:
+• redirecionamento para HTTPS no Apache;
+• Strict-Transport-Security;
+• Content-Security-Policy;
+• X-Content-Type-Options;
+• X-Frame-Options;
+• Referrer-Policy;
+• Permissions-Policy.
+
+A política CSP mantém `unsafe-inline` porque esta versão compilada ainda possui scripts e estilos embutidos diretamente em index.html. Retirar essa permissão exigiria reconstruir o aplicativo a partir do código-fonte original, usando nonce/hash ou arquivos externos.
+
+============================================================
+5. RESULTADOS DA AUDITORIA POR GRAVIDADE
+============================================================
+
+CRÍTICO
+
+1. Conteúdo protegido apenas pela interface do navegador
+Os IDs dos vídeos, dados das aulas e parte da lógica estão no bundle público. Uma pessoa com conhecimento técnico pode inspecionar os arquivos carregados pelo navegador e descobrir links/IDs sem passar pela interface de login.
+
+Não foi alterado porque a solução correta é arquitetural: hospedar vídeos de forma privada e fornecer URLs assinadas/temporárias após autorização no backend, ou usar uma plataforma de vídeo com controle de domínio/token.
+
+ALTO
+
+1. Login por nome não comprova identidade
+Nomes podem ser repetidos ou adivinhados. A sanitização foi corrigida, mas segurança real exige OTP/código por e-mail, magic link ou autenticação equivalente.
+
+2. Transferência de dispositivo
+O fluxo ainda pode ser solicitado com e-mail/nome e confirmação visual. O ideal é exigir código enviado ao e-mail da compra antes de substituir o dispositivo vinculado.
+
+3. Dependências não puderam ser totalmente auditadas
+Foi tentado gerar lockfile e executar auditoria de dependências, mas a consulta ao registro npm expirou no ambiente de análise. Portanto, não é possível afirmar que `@supabase/supabase-js` e dependências transitivas estejam livres de vulnerabilidades. O projeto também não contém package-lock.json.
+
+MÉDIO
+
+1. Rota `/teste`
+Existe tratamento especial que ignora o login nessa rota. É preciso confirmar se ela deve continuar pública e garantir que contenha apenas demonstração limitada.
+
+2. CSP permite código inline
+Necessário no build atual, mas reduz a proteção contra XSS. A correção definitiva depende do projeto-fonte React/Vite.
+
+3. html2canvas carregado externamente
+O certificado importa html2canvas por CDN. O ideal é incluir a dependência no build local e travar sua versão/integridade.
+
+4. Rate limit em memória
+Ajuda contra abuso simples, mas pode reiniciar em ambiente serverless e não é compartilhado entre instâncias. Para proteção forte, usar Redis/KV, WAF ou rate limiting da plataforma.
+
+BAIXO
+
+1. Texto social muito pequeno em telas móveis
+Há elementos com fonte próxima de 5,5 px. Isso prejudica legibilidade e acessibilidade, mas parece ser decisão visual; não foi alterado.
+
+2. Projeto entregue somente compilado
+Editar o bundle minificado aumenta o risco de manutenção e dificulta testes. O ideal é guardar e versionar a pasta `src`, arquivos de tradução e configuração Vite.
+
+============================================================
+6. ITENS IDENTIFICADOS, MAS NÃO ALTERADOS SEM CONFIRMAÇÃO
+============================================================
+
+1. Marca/nome da instrutora
+Há referências visíveis a “Daniela”, enquanto trechos antigos do bundle podem conter “Ana Rita”. Não foi feita substituição global porque é necessário confirmar qual nome é oficial.
+
+2. Desativar login por nome
+Seria mais seguro aceitar somente e-mail ou autenticação por código, mas isso muda a experiência atual do produto.
+
+3. Desativar ou limitar `/teste`
+Precisa de confirmação sobre a função comercial dessa rota.
+
+4. Proteção real dos vídeos/PDFs
+Exige mudança de hospedagem e backend, não apenas uma correção no arquivo compilado.
+
+============================================================
+7. TESTES EXECUTADOS
+============================================================
+
+• Validação de sintaxe com Node em:
+  - quiz.js;
+  - api/verificar-acesso.js;
+  - api/hotmart-webhook.js;
+  - assets/index-Dk7Fq3Ln.js;
+  - todos os quatro scripts embutidos em index.html.
+
+• Verificação de referências locais de arquivos: nenhuma referência local quebrada encontrada.
+• Verificação de IDs HTML duplicados: nenhum encontrado.
+• Verificação estática dos seis códigos de idioma.
+• Verificação de leitura e gravação da preferência no localStorage.
+• Verificação do botão fixo de idioma.
+• Verificação da normalização de variantes no React.
+• Verificação de CORS sem wildcard.
+• Verificação de falha fechada do webhook.
+• Verificação dos headers de segurança.
+
+Testes simulados das APIs:
+• preflight OPTIONS: aprovado;
+• origem não permitida: bloqueada;
+• e-mail inválido: bloqueado;
+• acesso ativo: autorizado;
+• webhook sem token configurado: bloqueado;
+• webhook com token errado: bloqueado;
+• webhook válido: processado.
+
+Limitações do ambiente de teste:
+• A auditoria npm não concluiu por timeout de acesso ao registro.
+• O navegador Chromium headless não iniciou corretamente no contêiner; por isso não foi possível executar um teste visual E2E completo. Foram feitos testes estáticos, de sintaxe e simulações das APIs.
+
+============================================================
+8. VARIÁVEIS DE AMBIENTE RECOMENDADAS
+============================================================
+
+Obrigatórias:
+• SUPABASE_URL
+• SUPABASE_SERVICE_KEY
+• HOTMART_WEBHOOK_TOKEN
+
+Recomendada quando houver mais de um domínio válido:
+• ALLOWED_ORIGINS
+  Exemplo de formato:
+  https://seudominio.com,https://www.seudominio.com
+
+Nunca colocar essas chaves dentro de index.html, quiz.js, bundle React ou qualquer outro arquivo público.
+
+============================================================
+9. ARQUIVOS PRINCIPAIS ALTERADOS
+============================================================
+
+• index.html
+• quiz.js
+• assets/index-Dk7Fq3Ln.js
+• api/verificar-acesso.js
+• api/hotmart-webhook.js
+• manifest.json
+• vercel.json
+• .htaccess
+
