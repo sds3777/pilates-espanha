@@ -1,0 +1,25 @@
+ALTERAÇÃO DOS NOMES DOS MÓDULOS — 24/07/2026
+
+Os títulos dos módulos foram ajustados para corresponder aos nomes das playlists do YouTube mostradas na imagem enviada. A numeração inicial (1-, 2-, etc.) não foi repetida no título porque o cartão do aplicativo já exibe “Módulo 1”, “Módulo 2” e assim por diante.
+
+1. Primeros Pasos en Pilates
+   Aprende los fundamentos del Pilates con clases simples, suaves y seguras para comenzar.
+
+2. Fortalecimiento con Pilates
+   Fortalece todo el cuerpo con ejercicios progresivos para ganar firmeza, estabilidad y resistencia.
+
+3. Pilates en la Pared
+   Usa la pared como apoyo para mejorar el equilibrio, la fuerza y la tonificación corporal.
+
+4. Pilates Restaurativo y Movilidad
+   Recupera la movilidad, mejora la flexibilidad y libera tensiones con movimientos suaves.
+
+5. Alivio del Dolor
+   Alivia molestias y tensiones con ejercicios suaves para la espalda, el cuello y las articulaciones.
+
+6. Pilates Intermedio y Avanzado
+   Avanza con clases más intensas para desarrollar fuerza, control, resistencia y definición.
+
+Também foi corrigido o gatilho da conquista “Especialista de la Pared”, que agora corresponde ao módulo 3, e a conquista do módulo 6 foi atualizada para “Nivel Intermedio y Avanzado”.
+
+Fonte, cor, tamanho, espaçamento e layout dos cartões foram preservados.

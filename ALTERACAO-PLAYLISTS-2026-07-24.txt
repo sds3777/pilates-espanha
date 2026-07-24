@@ -1,0 +1,24 @@
+ALTERAÇÃO DOS TÍTULOS E DESCRIÇÕES DAS PLAYLISTS
+
+Foram atualizadas as 6 playlists do aplicativo para usar exatamente os nomes dos respectivos módulos:
+
+1. Empieza con Confianza
+   Aprende los movimientos básicos del Pilates de forma simple, segura y sin complicaciones.
+
+2. Menos Dolor, Más Movilidad
+   Ejercicios para aliviar tensiones, mejorar la postura y recuperar la movilidad diaria.
+
+3. 7 Días para un Cuerpo Más Fuerte
+   Fortalece piernas, glúteos, brazos, abdomen y zona lumbar en solo 7 días.
+
+4. Elimina la Pancita
+   Fortalece el abdomen, afina la cintura y consigue un vientre más firme.
+
+5. Transforma tu Cuerpo con la Pared
+   Entrenamientos con la pared para fortalecer y tonificar todo el cuerpo.
+
+6. Transformación Completa con Pilates
+   Fortalece, define tu cuerpo y mejora tu calidad de vida con Pilates.
+
+Nenhuma classe visual, fonte, cor, espaçamento ou tamanho foi alterado.
+O bundle recebeu um novo nome para evitar cache da versão anterior.
