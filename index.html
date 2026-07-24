@@ -303,6 +303,7 @@
         <p>Elige la variante de español que deseas usar. Tu elección quedará guardada en este dispositivo.</p>
         <div class="pq-lang-grid">
           <button class="pq-lang-option" data-lang="es-ES"><span class="pq-lang-flag">🇪🇸</span><span class="pq-lang-name">España</span></button>
+          <button class="pq-lang-option" data-lang="es-AR"><span class="pq-lang-flag">🇦🇷</span><span class="pq-lang-name">Argentina</span></button>
           <button class="pq-lang-option" data-lang="es-MX"><span class="pq-lang-flag">🇲🇽</span><span class="pq-lang-name">México</span></button>
           <button class="pq-lang-option" data-lang="es-CO"><span class="pq-lang-flag">🇨🇴</span><span class="pq-lang-name">Colombia</span></button>
           <button class="pq-lang-option" data-lang="es-PE"><span class="pq-lang-flag">🇵🇪</span><span class="pq-lang-name">Perú</span></button>
@@ -702,7 +703,7 @@
         border: 1px solid rgba(212, 175, 55, 0.3);
         display: flex;
         flex-direction: column;
-        cursor: default;
+        cursor: pointer;
       }
       #pq-coming-soon-card .pq-cs-cover {
         position: relative;
@@ -882,5 +883,53 @@
         document.addEventListener('DOMContentLoaded', fixCertCard);
       })();
     </script>
+  
+    <style>
+      #pq-info-modal{display:none;position:fixed;inset:0;z-index:100000;background:rgba(8,5,14,.84);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;font-family:Inter,system-ui,sans-serif}
+      #pq-info-modal.pq-visible{display:flex}
+      #pq-info-modal .pq-info-card{width:min(420px,100%);background:linear-gradient(160deg,#2a1a40,#1a1025);border:1px solid rgba(212,175,55,.5);border-radius:22px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.6);text-align:center;color:#fff}
+      #pq-info-modal .pq-info-icon{font-size:42px;margin-bottom:8px}
+      #pq-info-modal h2{color:#d4af37;font-family:'Cinzel',serif;font-size:20px;margin:0 0 10px}
+      #pq-info-modal p{color:#d8cce3;font-size:14px;line-height:1.55;margin:0 0 20px}
+      #pq-info-ok{width:100%;border:0;border-radius:999px;padding:13px;background:#d4af37;color:#21152f;font-weight:800;font-size:15px;cursor:pointer}
+    </style>
+    <div id="pq-info-modal" role="dialog" aria-modal="true">
+      <div class="pq-info-card">
+        <div class="pq-info-icon" id="pq-info-icon">✨</div>
+        <h2 id="pq-info-title"></h2>
+        <p id="pq-info-message"></p>
+        <button id="pq-info-ok" type="button">OK</button>
+      </div>
+    </div>
+    <script>
+      (function(){
+        var modal=document.getElementById('pq-info-modal');
+        var title=document.getElementById('pq-info-title');
+        var message=document.getElementById('pq-info-message');
+        var icon=document.getElementById('pq-info-icon');
+        function openInfo(type){
+          if(type==='soon'){
+            icon.textContent='🚀';
+            title.textContent='¡Nuevas clases en camino!';
+            message.textContent='Estamos preparando nuevas clases, ejercicios y actualizaciones para que sigas avanzando con Pilates en Casa. Muy pronto encontrarás nuevos contenidos dentro de la aplicación.';
+          }else{
+            icon.textContent='🎓';
+            title.textContent='Tu certificado personalizado';
+            message.textContent='Cuando completes todas las clases del programa, desbloquearás un certificado de finalización personalizado con tu nombre, como reconocimiento por haber concluido tu recorrido en Pilates en Casa.';
+          }
+          modal.classList.add('pq-visible');
+        }
+        function closeInfo(){modal.classList.remove('pq-visible')}
+        document.getElementById('pq-info-ok').addEventListener('click',closeInfo);
+        modal.addEventListener('click',function(e){if(e.target===modal)closeInfo()});
+        document.addEventListener('click',function(e){
+          var soon=e.target.closest&&e.target.closest('#pq-coming-soon-card');
+          if(soon){e.preventDefault();e.stopPropagation();openInfo('soon');return}
+          var card=e.target.closest&&e.target.closest('[class*="col-span-2"]');
+          if(card&&(card.querySelector('img[src*="capa7"]')||/certificado/i.test(card.textContent||''))){e.preventDefault();e.stopPropagation();openInfo('certificate')}
+        },true);
+      })();
+    </script>
+
   </body>
 </html>

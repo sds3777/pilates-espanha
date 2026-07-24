@@ -455,38 +455,14 @@
 
   // ─── Sistema de abas: Clases / Bonos ─────────────────────────────────────
   var BONUS_PDFS = [
-    {
-      titulo: 'Guia Xô, Ansiedade',
-      id: '1XbEgKvAZu3LIdloFfPGqKvIQVJwrUlBm'
-    },
-    {
-      titulo: 'Doces e Sobremesas Zero',
-      id: '1TEWlwQ6HD7tkiPCLSi-BEcCGJZhtwPse'
-    },
-    {
-      titulo: 'Chá Caseiro Mounjaro Natural',
-      id: '1Qv-CELx4d-H-dttVtQN-JBBNxO4V0rAX'
-    },
-    {
-      titulo: 'Sucos Detox Saudáveis',
-      id: '1nCkYElZS4GHCRUt0JbHbnXnAD53nmai8'
-    },
-    {
-      titulo: '55 Receitas Sem Glúten na Airfryer',
-      id: '1KQ4w2B96yrl6tkzyiNltrJzLrfaWof1b'
-    },
-    {
-      titulo: 'Guia Alimentar Diabéticos',
-      id: '1BwhtTPjQJzimZDteYGeWe3-Rhb1GtJax'
-    },
-    {
-      titulo: 'Vitaminas Poderosas',
-      id: '1aDBgZiOBgeZUR9vKUUApqMXQpDCwLJeG'
-    },
-    {
-      titulo: 'Guia Alimentar',
-      id: '1DeBR6DmxtsBasZUA_FUvEWJksgc7SCV-'
-    }
+    { titulo: 'Zumos detox saludables.pdf', id: '1p7fOIGVTfImSOuuZ6RQ9RTYNX2mtG35V' },
+    { titulo: 'Vitaminas poderosas.pdf', id: '1NqdZUgen8c9sAeeqBGpuWVpyfdHm7oyR' },
+    { titulo: 'Té casero Mounjaro Natural.pdf', id: '1ouMQO8Zbo57qjLCuQec10I749pTAc_wT' },
+    { titulo: 'Guía alimentaria.pdf', id: '1HE1Ku2DvutwffGTCQ0SQid3l2rWExQu8' },
+    { titulo: 'Guía alimentaria para diabéticos.pdf', id: '1wH72qqDPZWeJFXoAhq0m1RW7Xu2ElIo7' },
+    { titulo: 'Guía adiós a la ansiedad.pdf', id: '1sY-3bLKVfozlSdv_1th1qeoMc8tRfoCo' },
+    { titulo: 'Dulces y postres sin azúcar.pdf', id: '1fODdS57zqgk3fsuG8UbWc14I84o9Okvh' },
+    { titulo: '55 recetas sin gluten para Airfryer listas.pdf', id: '1McVSUU0grhMBP8NKSYXcO1C2U2HavOXa' }
   ];
 
   function getViewUrl(id) {
