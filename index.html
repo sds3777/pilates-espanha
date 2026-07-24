@@ -8,7 +8,31 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1a1025">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-    <script type="module" crossorigin src="/assets/index-playlists-v4.js"></script>
+    <script>
+      window.pqVideoThumbFallback = function (img) {
+        if (!img) return;
+        var id = img.getAttribute('data-video-id') || '';
+        var step = Number(img.getAttribute('data-thumb-step') || '0');
+        if (!/^[A-Za-z0-9_-]{11}$/.test(id)) {
+          img.onerror = null;
+          img.src = '/logo-pilates-en-casa.png';
+          return;
+        }
+        if (step === 0) {
+          img.setAttribute('data-thumb-step', '1');
+          img.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+          return;
+        }
+        if (step === 1) {
+          img.setAttribute('data-thumb-step', '2');
+          img.src = 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
+          return;
+        }
+        img.onerror = null;
+        img.src = '/logo-pilates-en-casa.png';
+      };
+    </script>
+    <script type="module" crossorigin src="/assets/index-thumbnails-difficulty-v5.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-BQ8LcfVF.css">
   </head>
   <body>

@@ -1,0 +1,22 @@
+CORREÇÕES — CAPAS DOS VÍDEOS E NÍVEIS DE DIFICULDADE
+
+1. Capas dos vídeos
+- As miniaturas deixaram de depender diretamente do domínio de imagens do YouTube no celular.
+- Foi criada a rota interna /api/youtube-thumbnail, que busca a capa real do YouTube e permite cache pela CDN.
+- Há tentativas em maxresdefault e hqdefault, em dois servidores oficiais do YouTube.
+- Caso uma tentativa falhe, o componente passa automaticamente para outra fonte.
+
+2. Dificuldades por duração
+- Tranquilo: de 0:00 até 9:59.
+- Moderado: de 10:00 até 24:59.
+- Desafiante: 25:00 ou mais.
+- Aulas analisadas: 89.
+- Aulas que tiveram o nível alterado: 18.
+- Distribuição final: {'Tranquilo': 10, 'Moderado': 70, 'Desafiante': 9}.
+
+3. Indicadores visuais
+- Corrigida a comparação dos nomes Tranquilo e Moderado.
+- Tranquilo aparece em verde, Moderado em amarelo e Desafiante em vermelho.
+
+4. Cache
+- O bundle foi renomeado para impedir o navegador de reutilizar a versão anterior.
