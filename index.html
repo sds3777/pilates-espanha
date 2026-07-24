@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es-CO">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +8,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1a1025">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-    <script type="module" crossorigin src="/assets/index-Dk7Fq3Ln.js"></script>
+    <script type="module" crossorigin src="/assets/index-b35a3e96.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-BQ8LcfVF.css">
   </head>
   <body>
@@ -26,8 +26,10 @@
         font-weight: 700;
         font-family: 'Cinzel', serif;
         letter-spacing: 0.5px;
-        font-size: 14px;
-        padding: 12px 24px;
+        font-size: 12px;
+        padding: 9px 18px;
+        white-space: nowrap;
+        line-height: 1.2;
         border: none;
         border-radius: 999px;
         box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35), 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -302,12 +304,12 @@
         <h2 id="pq-language-title">Selecciona tu idioma</h2>
         <p>Elige la variante de español que deseas usar. Tu elección quedará guardada en este dispositivo.</p>
         <div class="pq-lang-grid">
-          <button class="pq-lang-option" type="button" data-lang="es-ES" aria-label="Español de España"><span class="pq-lang-flag">🇪🇸</span><span class="pq-lang-name">España</span></button>
-          <button class="pq-lang-option" type="button" data-lang="es-AR" aria-label="Español de Argentina"><span class="pq-lang-flag">🇦🇷</span><span class="pq-lang-name">Argentina</span></button>
-          <button class="pq-lang-option" type="button" data-lang="es-MX" aria-label="Español de México"><span class="pq-lang-flag">🇲🇽</span><span class="pq-lang-name">México</span></button>
-          <button class="pq-lang-option" type="button" data-lang="es-CO" aria-label="Español de Colombia"><span class="pq-lang-flag">🇨🇴</span><span class="pq-lang-name">Colombia</span></button>
-          <button class="pq-lang-option" type="button" data-lang="es-PE" aria-label="Español de Perú"><span class="pq-lang-flag">🇵🇪</span><span class="pq-lang-name">Perú</span></button>
-          <button class="pq-lang-option" type="button" data-lang="es-CL" aria-label="Español de Chile"><span class="pq-lang-flag">🇨🇱</span><span class="pq-lang-name">Chile</span></button>
+          <button class="pq-lang-option" data-lang="es-ES"><span class="pq-lang-flag">🇪🇸</span><span class="pq-lang-name">España</span></button>
+          <button class="pq-lang-option" data-lang="es-AR"><span class="pq-lang-flag">🇦🇷</span><span class="pq-lang-name">Argentina</span></button>
+          <button class="pq-lang-option" data-lang="es-MX"><span class="pq-lang-flag">🇲🇽</span><span class="pq-lang-name">México</span></button>
+          <button class="pq-lang-option" data-lang="es-CO"><span class="pq-lang-flag">🇨🇴</span><span class="pq-lang-name">Colombia</span></button>
+          <button class="pq-lang-option" data-lang="es-PE"><span class="pq-lang-flag">🇵🇪</span><span class="pq-lang-name">Perú</span></button>
+          <button class="pq-lang-option" data-lang="es-CL"><span class="pq-lang-flag">🇨🇱</span><span class="pq-lang-name">Chile</span></button>
         </div>
         <button id="pq-language-confirm" type="button" disabled>Aceptar</button>
       </div>
@@ -344,41 +346,56 @@
         var languagePopup = document.getElementById('pq-language-popup');
         var languageConfirm = document.getElementById('pq-language-confirm');
         var selectedLanguage = null;
+        var INSTALL_I18N = {
+          'es-ES': { button: '⬇ Instalar aplicación', title: 'Instalar Pilates en Casa', text: 'Añade la aplicación a la pantalla de inicio para acceder a tus clases con un toque.', accept: 'Instalar aplicación', decline: 'Ahora no', langTitle: 'Selecciona tu idioma', langText: 'Elige la variante de español que quieres usar. La elección quedará guardada.', confirm: 'Aceptar' },
+          'es-AR': { button: '⬇ Instalá la aplicación', title: 'Instalá Pilates en Casa', text: 'Agregá la aplicación a tu pantalla de inicio para entrar a tus clases con un toque.', accept: 'Instalar ahora', decline: 'Ahora no', langTitle: 'Elegí tu idioma', langText: 'Elegí la variante de español que querés usar. Tu elección va a quedar guardada.', confirm: 'Aceptar' },
+          'es-MX': { button: '⬇ Instalar app', title: 'Instalar Pilates en Casa', text: 'Agrega la app a tu pantalla de inicio para entrar a tus clases con un toque.', accept: 'Instalar app', decline: 'En otro momento', langTitle: 'Selecciona tu idioma', langText: 'Elige la variante de español que deseas usar. La elección quedará guardada.', confirm: 'Aceptar' },
+          'es-CO': { button: '⬇ Instalar la aplicación', title: 'Instalar Pilates en Casa', text: 'Agrega la aplicación a la pantalla de inicio para entrar a tus clases fácilmente.', accept: 'Instalar la aplicación', decline: 'Ahora no', langTitle: 'Selecciona tu idioma', langText: 'Elige la variante de español que deseas usar. Tu elección quedará guardada.', confirm: 'Aceptar' },
+          'es-PE': { button: '⬇ Instalar aplicación', title: 'Instalar Pilates en Casa', text: 'Agrega la aplicación a tu pantalla de inicio para acceder rápidamente a tus clases.', accept: 'Instalar aplicación', decline: 'Más tarde', langTitle: 'Selecciona tu idioma', langText: 'Elige la variante de español que deseas usar. La selección quedará guardada.', confirm: 'Aceptar' },
+          'es-CL': { button: '⬇ Instalar la app', title: 'Instala Pilates en Casa', text: 'Agrega la app a tu pantalla de inicio para entrar a tus clases de forma rápida.', accept: 'Instalar la app', decline: 'Por ahora no', langTitle: 'Elige tu idioma', langText: 'Elige la variante de español que quieres usar. La selección quedará guardada.', confirm: 'Aceptar' }
+        };
 
-        var VALID_LANGUAGES = ['es-ES','es-AR','es-MX','es-CO','es-PE','es-CL'];
-        function getSavedLanguage() {
+        function getCurrentInstallLang() {
           try {
-            var saved = localStorage.getItem('pilates_lang');
-            if (saved === 'es') {
-              localStorage.setItem('pilates_lang', 'es-CO');
-              return 'es-CO';
-            }
-            return VALID_LANGUAGES.indexOf(saved) !== -1 ? saved : null;
-          } catch (e) { return null; }
+            var lang = localStorage.getItem('pilates_lang');
+            if (INSTALL_I18N[lang]) return lang;
+          } catch (e) {}
+          return 'es-CO';
         }
+
+        function aplicarIdiomaInstalacao() {
+          var t = INSTALL_I18N[getCurrentInstallLang()];
+          installBtn.textContent = t.button;
+          var popupTitle = popupOverlay && popupOverlay.querySelector('h2');
+          var popupText = popupOverlay && popupOverlay.querySelector('p');
+          if (popupTitle) popupTitle.textContent = t.title;
+          if (popupText) popupText.textContent = t.text;
+          if (popupAceitar) popupAceitar.textContent = t.accept;
+          if (popupRecusar) popupRecusar.textContent = t.decline;
+          var iosTitle = iosModal.querySelector('h2');
+          var iosText = iosModal.querySelector('.pq-ios-sub');
+          if (iosTitle) iosTitle.textContent = t.title;
+          if (iosText) iosText.textContent = t.text;
+          var langTitle = document.getElementById('pq-language-title');
+          var langText = languagePopup.querySelector('p');
+          if (langTitle) langTitle.textContent = t.langTitle;
+          if (langText) langText.textContent = t.langText;
+          languageConfirm.textContent = t.confirm;
+        }
+
         function idiomaJaSelecionado() {
-          var saved = getSavedLanguage();
-          try {
-            if (!saved) localStorage.removeItem(LANGUAGE_DONE_KEY);
-            return !!saved && localStorage.getItem(LANGUAGE_DONE_KEY) === '1';
-          } catch (e) { return !!saved; }
+          try { return localStorage.getItem(LANGUAGE_DONE_KEY) === '1'; } catch (e) { return false; }
         }
-        function selecionarIdiomaVisual(lang) {
-          selectedLanguage = lang || null;
-          Array.prototype.forEach.call(document.querySelectorAll('.pq-lang-option'), function (item) {
-            item.classList.toggle('pq-selected', item.getAttribute('data-lang') === selectedLanguage);
-          });
-          languageConfirm.disabled = !selectedLanguage;
-        }
-        function mostrarPopupIdioma(force) {
-          if (!force && idiomaJaSelecionado()) return;
-          selecionarIdiomaVisual(getSavedLanguage());
+        function mostrarPopupIdioma() {
+          if (idiomaJaSelecionado()) return;
           setTimeout(function () { languagePopup.classList.add('pq-visible'); }, 250);
         }
-        window.__pqOpenLanguagePopup = function () { mostrarPopupIdioma(true); };
         Array.prototype.forEach.call(document.querySelectorAll('.pq-lang-option'), function (button) {
           button.addEventListener('click', function () {
-            selecionarIdiomaVisual(button.getAttribute('data-lang'));
+            selectedLanguage = button.getAttribute('data-lang');
+            Array.prototype.forEach.call(document.querySelectorAll('.pq-lang-option'), function (item) { item.classList.remove('pq-selected'); });
+            button.classList.add('pq-selected');
+            languageConfirm.disabled = false;
           });
         });
         languageConfirm.addEventListener('click', function () {
@@ -432,9 +449,9 @@
         function hideIOSModal() {
           iosModal.classList.remove('pq-visible');
         }
-        iosModalClose.addEventListener('click', hideIOSModal);
+        iosModalClose.addEventListener('click', function () { hideIOSModal(); mostrarPopupIdioma(); });
         iosModal.addEventListener('click', function (e) {
-          if (e.target === iosModal) hideIOSModal();
+          if (e.target === iosModal) { hideIOSModal(); mostrarPopupIdioma(); }
         });
 
         window.addEventListener('beforeinstallprompt', function (e) {
@@ -470,21 +487,20 @@
           }
           if (!deferredPrompt) {
             // Ainda não há prompt disponível neste momento; mantém/mostra o botão
-            // para o usuário tentar novamente quando o navegador disponibilizar o evento.
-            if (onDismiss) onDismiss();
+            // e continua o fluxo normalmente.
+            if (onDismiss) onDismiss('unavailable');
             return;
           }
           var promptEvent = deferredPrompt;
           promptEvent.prompt();
           promptEvent.userChoice.then(function (choice) {
-            // Independentemente de aceitar ou recusar, o botão só desaparece de fato
-            // quando o evento "appinstalled" confirmar a instalação. Se o usuário
-            // recusar, garantimos que o botão continue visível.
-            if (choice.outcome !== 'accepted' && onDismiss) {
-              onDismiss();
-            }
+            if (choice.outcome === 'accepted') hideInstallBtn();
+            if (onDismiss) onDismiss(choice.outcome);
             // Cada evento só pode ser usado uma vez; aguarda o navegador
             // disparar um novo beforeinstallprompt para futuras tentativas.
+            deferredPrompt = null;
+          }).catch(function () {
+            if (onDismiss) onDismiss('dismissed');
             deferredPrompt = null;
           });
         }
@@ -532,11 +548,12 @@
 
         popupAceitar.addEventListener('click', function () {
           esconderPopupInstalacao();
-          // Inicia a instalação de verdade. Se o usuário aceitar o prompt
-          // nativo (ou seguir o passo a passo no iOS), o botão "Instalar App"
-          // só some quando o evento 'appinstalled' confirmar a instalação —
-          // igual ao clique direto no botão inferior.
-          triggerInstallPrompt(showInstallBtn);
+          // Após a decisão do prompt nativo, segue para o seletor de idioma
+          // sem exigir atualização manual da página.
+          triggerInstallPrompt(function (outcome) {
+            if (outcome !== 'accepted' && outcome !== 'installed') showInstallBtn();
+            mostrarPopupIdioma();
+          });
         });
 
         popupRecusar.addEventListener('click', function () {
@@ -560,12 +577,17 @@
         window.addEventListener('appinstalled', function () { esconderPopupInstalacao(); mostrarPopupIdioma(); });
 
         window.__pqTriggerInstallAfterLogin = function () {
+          aplicarIdiomaInstalacao();
           if (isAppInstalled() || foiRecusadoNestaSessao()) {
             mostrarPopupIdioma();
           } else {
             mostrarPopupInstalacao();
           }
         };
+
+        window.addEventListener('pilates:lang', aplicarIdiomaInstalacao);
+        window.addEventListener('storage', function (e) { if (e.key === 'pilates_lang') aplicarIdiomaInstalacao(); });
+        aplicarIdiomaInstalacao();
 
       })();
     </script>
@@ -804,12 +826,12 @@
         var LANG_STORAGE_KEY = 'pilates_lang';
         var DEFAULT_LANG = 'es-CO';
         var TRANSLATIONS = {
-          'es-ES': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
-          'es-AR': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
-          'es-MX': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
-          'es-CO': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
-          'es-PE': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' },
-          'es-CL': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en producción' }
+          'es-ES': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en preparación' },
+          'es-AR': { comingSoon: 'Muy pronto', newLessons: '🚀 Estamos preparando nuevas clases' },
+          'es-MX': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en camino' },
+          'es-CO': { comingSoon: 'Muy pronto', newLessons: '🚀 Nuevas clases en preparación' },
+          'es-PE': { comingSoon: 'Próximamente', newLessons: '🚀 Nuevas clases en desarrollo' },
+          'es-CL': { comingSoon: 'Pronto', newLessons: '🚀 Se vienen nuevas clases' }
         };
 
         function getCurrentLang() {
@@ -906,6 +928,29 @@
       })();
     </script>
   
+    <script>
+      (function () {
+        document.addEventListener('error', function (event) {
+          var img = event.target;
+          if (!img || img.tagName !== 'IMG') return;
+          var src = String(img.currentSrc || img.src || '');
+          if (!/youtube\.com\/vi\/|ytimg\.com\/vi\//.test(src)) return;
+          var match = src.match(/\/vi\/([^/]+)\//);
+          if (!match) return;
+          var stage = Number(img.getAttribute('data-pq-youtube-fallback') || '0');
+          if (stage === 0) {
+            img.setAttribute('data-pq-youtube-fallback', '1');
+            img.src = 'https://i.ytimg.com/vi/' + match[1] + '/hqdefault.jpg';
+          } else {
+            img.setAttribute('data-pq-youtube-fallback', '2');
+            img.src = '/logo-pilates-en-casa.png';
+            img.style.objectFit = 'cover';
+            img.style.background = '#1a1025';
+          }
+        }, true);
+      })();
+    </script>
+
     <style>
       #pq-info-modal{display:none;position:fixed;inset:0;z-index:100000;background:rgba(8,5,14,.84);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;font-family:Inter,system-ui,sans-serif}
       #pq-info-modal.pq-visible{display:flex}
@@ -929,31 +974,33 @@
         var title=document.getElementById('pq-info-title');
         var message=document.getElementById('pq-info-message');
         var icon=document.getElementById('pq-info-icon');
-        function currentLang(){try{return localStorage.getItem('pilates_lang')||'es-CO'}catch(e){return'es-CO'}}
-        function dialect(text){
-          var lang=currentLang(),t=text;
-          if(lang==='es-AR')t=t.replace(/Continúa/g,'Seguí').replace(/continúa/g,'seguí').replace(/encontrarás/g,'vas a encontrar');
-          if(lang==='es-ES')t=t.replace(/aplicación/g,'aplicación');
-          return t;
-        }
-        function content(type){
-          if(type==='soon')return{icon:'🚀',title:'¡Nuevas clases en camino!',message:'Estamos preparando nuevas clases, ejercicios y actualizaciones para que sigas avanzando con Pilates en Casa. Muy pronto encontrarás nuevos contenidos dentro de la aplicación.'};
-          return{icon:'🎓',title:'Tu certificado personalizado',message:'Cuando completes todas las clases del programa, desbloquearás un certificado de finalización personalizado con tu nombre, como reconocimiento por haber concluido tu recorrido en Pilates en Casa.'};
-        }
+        var TEXTS={
+          'es-ES':{soonTitle:'¡Nuevas clases en camino!',soonText:'Estamos preparando nuevas clases, ejercicios y actualizaciones para que continúes avanzando. Muy pronto encontrarás contenido nuevo dentro de la aplicación.',certTitle:'Tu certificado personalizado',certText:'Cuando completes todas las clases, desbloquearás un certificado de finalización personalizado con tu nombre.'},
+          'es-AR':{soonTitle:'¡Se vienen nuevas clases!',soonText:'Estamos preparando nuevas clases, ejercicios y actualizaciones para que sigas avanzando. Muy pronto vas a encontrar contenido nuevo en la aplicación.',certTitle:'Tu certificado personalizado',certText:'Cuando completes todas las clases, vas a desbloquear un certificado de finalización personalizado con tu nombre.'},
+          'es-MX':{soonTitle:'¡Nuevas clases muy pronto!',soonText:'Estamos preparando nuevas clases, ejercicios y mejoras para que continúes avanzando. Pronto encontrarás contenido nuevo en la app.',certTitle:'Tu certificado personalizado',certText:'Al completar todas las clases, desbloquearás un certificado de finalización personalizado con tu nombre.'},
+          'es-CO':{soonTitle:'¡Nuevas clases en camino!',soonText:'Estamos preparando nuevas clases, ejercicios y actualizaciones para que sigas avanzando. Muy pronto encontrarás contenido nuevo en la aplicación.',certTitle:'Tu certificado personalizado',certText:'Cuando completes todas las clases, desbloquearás un certificado de finalización personalizado con tu nombre.'},
+          'es-PE':{soonTitle:'¡Próximamente habrá nuevas clases!',soonText:'Estamos desarrollando nuevas clases, ejercicios y actualizaciones para que continúes avanzando. Pronto encontrarás recursos nuevos en la aplicación.',certTitle:'Tu certificado personalizado',certText:'Cuando completes todas las clases, obtendrás un certificado de finalización personalizado con tu nombre.'},
+          'es-CL':{soonTitle:'¡Se vienen nuevas clases!',soonText:'Estamos preparando nuevas clases, ejercicios y mejoras para que sigas avanzando. Pronto vas a encontrar contenido nuevo en la app.',certTitle:'Tu certificado personalizado',certText:'Cuando completes todas las clases, vas a desbloquear un certificado de finalización con tu nombre.'}
+        };
+        function current(){try{return TEXTS[localStorage.getItem('pilates_lang')]||TEXTS['es-CO']}catch(e){return TEXTS['es-CO']}}
         function openInfo(type){
-          var c=content(type); modal.dataset.type=type; icon.textContent=c.icon; title.textContent=dialect(c.title); message.textContent=dialect(c.message); modal.classList.add('pq-visible');
+          var t=current();
+          if(type==='soon'){
+            icon.textContent='🚀'; title.textContent=t.soonTitle; message.textContent=t.soonText;
+          }else{
+            icon.textContent='🎓'; title.textContent=t.certTitle; message.textContent=t.certText;
+          }
+          modal.classList.add('pq-visible');
         }
         function closeInfo(){modal.classList.remove('pq-visible')}
         document.getElementById('pq-info-ok').addEventListener('click',closeInfo);
         modal.addEventListener('click',function(e){if(e.target===modal)closeInfo()});
-        document.addEventListener('keydown',function(e){if(e.key==='Escape')closeInfo()});
         document.addEventListener('click',function(e){
           var soon=e.target.closest&&e.target.closest('#pq-coming-soon-card');
           if(soon){e.preventDefault();e.stopPropagation();openInfo('soon');return}
           var card=e.target.closest&&e.target.closest('[class*="col-span-2"]');
           if(card&&(card.querySelector('img[src*="capa7"]')||/certificado/i.test(card.textContent||''))){e.preventDefault();e.stopPropagation();openInfo('certificate')}
         },true);
-        window.addEventListener('pilates:lang',function(){if(modal.classList.contains('pq-visible'))openInfo(modal.dataset.type||'soon')});
       })();
     </script>
 

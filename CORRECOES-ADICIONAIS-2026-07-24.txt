@@ -1,0 +1,35 @@
+CORREÇÕES ADICIONAIS — 24/07/2026
+
+1. Tela após o login
+- O React agora recebe um evento de autenticação assim que o backend confirma o acesso.
+- A tela principal é liberada sem atualização manual.
+- Login por nome passa a salvar também o e-mail real retornado pelo backend.
+
+2. Linha atravessando os vídeos
+- A barra de progresso deixou de usar posição fixa.
+- Ela permanece no fluxo da página e não atravessa o player durante a rolagem.
+
+3. Capas dos vídeos
+- Miniaturas alteradas para hqdefault.
+- Adicionado domínio alternativo automático e fallback local caso o YouTube não carregue.
+
+4. Capas dos PDFs
+- Fonte primária alterada para googleusercontent.
+- Adicionada segunda tentativa pelo endpoint de thumbnail do Drive.
+- Caso ambas falhem, é exibida uma capa local em vez de espaço vazio.
+
+5. Idiomas regionais
+- Os seis códigos agora atualizam React, login, abas, PDFs e cards auxiliares.
+- Foram adicionadas diferenças visíveis de vocabulário e redação para Espanha, Argentina, México, Colômbia, Peru e Chile.
+
+6. Instalação
+- Aceitar ou recusar o prompt continua o fluxo sem travar.
+- No iOS, fechar as instruções abre a seleção de idioma.
+- Botão “Instalar aplicación” reduzido e mantido em uma linha.
+
+VALIDAÇÕES FINAIS
+- Sintaxe validada em todos os JavaScripts do projeto e nos 5 scripts embutidos no HTML.
+- Nenhuma referência local principal quebrada.
+- Nenhum ID HTML duplicado.
+- Bundle renomeado para evitar cache da versão anterior.
+- Testadas isoladamente as variações de texto dos seis países.

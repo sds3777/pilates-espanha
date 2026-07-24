@@ -24,6 +24,9 @@
   localStorage.setItem = function(key, value) {
     if (key === AUTH_KEY && !window.__pq_auth_ok) return;
     origSetItem(key, value);
+    if (key === LANG_KEY) {
+      try { window.dispatchEvent(new CustomEvent('pilates:lang', { detail: value })); } catch (e) {}
+    }
   };
 
   // ─── Idioma: mesma fonte de verdade usada pelo app React ────────────────
@@ -47,11 +50,16 @@
     if (typeof texto !== 'string') return texto;
     var t = texto;
     if (lang === 'es-ES') {
-      t = t.replace(/\bcelular\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Móvil' : 'móvil'; })
+      return t.replace(/\bcelular\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Móvil' : 'móvil'; })
         .replace(/\bcomputadora\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Ordenador' : 'ordenador'; })
-        .replace(/\bjugos\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Zumos' : 'zumos'; });
-    } else if (lang === 'es-AR') {
-      t = t.replace(/\bIngresa\b/g, 'Ingresá').replace(/\bingresa\b/g, 'ingresá')
+        .replace(/\bjugos\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Zumos' : 'zumos'; })
+        .replace(/Bonos Exclusivos/g, 'Extras exclusivos')
+        .replace(/Materiales extra/g, 'Material adicional')
+        .replace(/^Bonos$/, 'Extras');
+    }
+    if (lang === 'es-AR') {
+      return t.replace(/\bIngresa\b/g, 'Ingresá').replace(/\bingresa\b/g, 'ingresá')
+        .replace(/\bIngresar\b/g, 'Ingresar')
         .replace(/\bEscribe\b/g, 'Escribí').replace(/\bescribe\b/g, 'escribí')
         .replace(/\bSelecciona\b/g, 'Seleccioná').replace(/\bselecciona\b/g, 'seleccioná')
         .replace(/\bElige\b/g, 'Elegí').replace(/\belige\b/g, 'elegí')
@@ -59,12 +67,19 @@
         .replace(/\bAgrega\b/g, 'Agregá').replace(/\bagrega\b/g, 'agregá')
         .replace(/\bIntenta\b/g, 'Intentá').replace(/\bintenta\b/g, 'intentá')
         .replace(/\bContinúa\b/g, 'Seguí').replace(/\bcontinúa\b/g, 'seguí')
+        .replace(/\bEmpieza\b/g, 'Empezá').replace(/\bempieza\b/g, 'empezá')
+        .replace(/\bComienza\b/g, 'Empezá').replace(/\bcomienza\b/g, 'empezá')
         .replace(/\bpuedes\b/g, 'podés').replace(/\bquieres\b/g, 'querés')
+        .replace(/Bonos Exclusivos/g, 'Beneficios exclusivos')
+        .replace(/^Bonos$/, 'Beneficios')
         .replace(/\bzumos\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Jugos' : 'jugos'; });
-    } else if (lang !== 'es-ES') {
-      t = t.replace(/\bzumos\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Jugos' : 'jugos'; })
-        .replace(/\bmóvil\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Celular' : 'celular'; });
     }
+    t = t.replace(/\bzumos\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Jugos' : 'jugos'; })
+      .replace(/\bmóvil\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Celular' : 'celular'; });
+    if (lang === 'es-MX') return t.replace(/Bienvenida de nuevo/g, '¡Qué gusto verte de nuevo!').replace(/\bIngresar\b/g, 'Entrar').replace(/Bonos Exclusivos/g, 'Material extra exclusivo').replace(/Materiales extra/g, 'Contenido adicional').replace(/^Bonos$/, 'Extras');
+    if (lang === 'es-CO') return t.replace(/Bienvenida de nuevo/g, '¡Bienvenida otra vez!').replace(/\bIngresar\b/g, 'Entrar').replace(/Bonos Exclusivos/g, 'Beneficios exclusivos').replace(/Materiales extra/g, 'Material adicional').replace(/^Bonos$/, 'Beneficios');
+    if (lang === 'es-PE') return t.replace(/Bienvenida de nuevo/g, '¡Bienvenida nuevamente!').replace(/\bIngresar\b/g, 'Entrar').replace(/Bonos Exclusivos/g, 'Recursos exclusivos').replace(/Materiales extra/g, 'Recursos adicionales').replace(/^Bonos$/, 'Recursos').replace(/^Clases$/, 'Clases disponibles');
+    if (lang === 'es-CL') return t.replace(/Bienvenida de nuevo/g, '¡Bienvenida de vuelta!').replace(/\bIngresar\b/g, 'Entrar').replace(/\bToca\b/g, 'Presiona').replace(/\btoca\b/g, 'presiona').replace(/Ahora no/g, 'Por ahora no').replace(/Bonos Exclusivos/g, 'Extras exclusivos').replace(/Materiales extra/g, 'Contenido adicional').replace(/^Bonos$/, 'Extras');
     return t;
   }
 
@@ -243,6 +258,9 @@
           auth = { loggedIn: true, nome: res.nome || (auth && auth.nome) || '', email: emailSalvo };
           var loginAberto = document.getElementById('pq-email-login');
           if (loginAberto) loginAberto.remove();
+          var rootLiberado = document.getElementById('root');
+          if (rootLiberado) rootLiberado.style.display = '';
+          try { window.dispatchEvent(new CustomEvent('pilates:auth', { detail: { nome: auth.nome, email: auth.email } })); } catch (e) {}
           injetarNavBar();
           if (typeof window.__pqTriggerInstallAfterLogin === 'function') {
             window.__pqTriggerInstallAfterLogin();
@@ -459,11 +477,15 @@
         clearTimeout(timeoutId);
         if (res.acesso) {
           window.__pq_auth_ok = true;
+          var emailConfirmado = res.email || email || '';
           try {
-            origSetItem(AUTH_KEY, JSON.stringify({ loggedIn: true, nome: res.nome || nome || '', email: email }));
+            origSetItem(AUTH_KEY, JSON.stringify({ loggedIn: true, nome: res.nome || nome || '', email: emailConfirmado }));
           } catch(e) {}
-          auth = { loggedIn: true, nome: res.nome || nome || '', email: email };
+          auth = { loggedIn: true, nome: res.nome || nome || '', email: emailConfirmado };
           overlay.remove();
+          var rootLiberado = document.getElementById('root');
+          if (rootLiberado) rootLiberado.style.display = '';
+          try { window.dispatchEvent(new CustomEvent('pilates:auth', { detail: { nome: auth.nome, email: auth.email } })); } catch (e) {}
           injetarNavBar();
           if (typeof window.__pqTriggerInstallAfterLogin === 'function') window.__pqTriggerInstallAfterLogin();
         } else if (res.motivo === 'OUTRO_DISPOSITIVO') {
@@ -538,8 +560,24 @@
     return 'https://drive.google.com/file/d/' + id + '/preview';
   }
   function getThumbUrl(id) {
-    return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w400';
+    return 'https://lh3.googleusercontent.com/d/' + id + '=w600';
   }
+
+  window.__pqPdfThumbFallback = function(img, id) {
+    var etapa = Number(img.getAttribute('data-pq-fallback') || '0');
+    if (etapa === 0) {
+      img.setAttribute('data-pq-fallback', '1');
+      img.src = 'https://drive.google.com/thumbnail?id=' + id + '&sz=w600';
+      return;
+    }
+    img.setAttribute('data-pq-fallback', '2');
+    img.onerror = null;
+    img.src = '/logo-pilates-en-casa.png';
+    img.style.objectFit = 'cover';
+    img.style.padding = '12px';
+    img.style.boxSizing = 'border-box';
+    img.style.background = 'linear-gradient(160deg,#2a1a40,#1a1025)';
+  };
 
   var abaAtiva = 'aulas'; // 'aulas' ou 'bonus'
   var ROOT_EL = null;
@@ -654,7 +692,7 @@
         : ('onclick="window.__pqAbrirPdf(\'' + pdf.id + '\',\'' + tituloTraduzido.replace(/'/g, "\\'") + '\')"');
       return '<div ' + onClickAttr + ' style="cursor:pointer;background:#1a1035;border-radius:12px;overflow:hidden;border:1px solid rgba(212,175,55,0.15);transition:transform 0.15s;active:scale-95;position:relative;" onmousedown="this.style.transform=\'scale(0.97)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(0.97)\'" ontouchend="this.style.transform=\'scale(1)\'">'
         + '<div style="width:100%;aspect-ratio:3/4;overflow:hidden;background:#2a1a40;position:relative;' + (bloqueado ? 'filter:blur(4px);' : '') + '">'
-        + '<img src="' + thumb + '" alt="' + tituloTraduzido + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+        + '<img src="' + thumb + '" alt="' + tituloTraduzido + '" data-pq-pdf-id="' + pdf.id + '" style="width:100%;height:100%;object-fit:cover;" onerror="window.__pqPdfThumbFallback(this,\'' + pdf.id + '\')">'
         + '<div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a1a40,#1a1035);flex-direction:column;gap:8px;">'
         + '<span style="font-size:40px">📄</span>'
         + '</div>'

@@ -205,11 +205,11 @@ module.exports = async (req, res) => {
       return res.status(500).json({ acesso: false, motivo: 'ERRO_INTERNO' });
     }
 
-    return res.status(200).json({ acesso: true, nome: data.nome, primeiroAcesso: true });
+    return res.status(200).json({ acesso: true, nome: data.nome, email: data.email, primeiroAcesso: true });
   }
 
   if (deviceAtual === deviceId) {
-    return res.status(200).json({ acesso: true, nome: data.nome });
+    return res.status(200).json({ acesso: true, nome: data.nome, email: data.email });
   }
 
   if (transferirDispositivo) {
@@ -226,6 +226,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({
       acesso: true,
       nome: data.nome,
+      email: data.email,
       dispositivo_transferido: true,
     });
   }
