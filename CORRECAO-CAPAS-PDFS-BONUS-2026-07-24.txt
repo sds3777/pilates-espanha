@@ -1,0 +1,16 @@
+CORREÇÃO — CAPAS DOS PDFs DA GUIA BÔNUS
+
+1. Foi criada a rota interna /api/pdf-thumbnail.
+- A rota busca a miniatura real de cada PDF no Google Drive pelo servidor.
+- Ela tenta múltiplas fontes e também procura a imagem declarada pelo visualizador do Drive.
+- As imagens válidas ficam armazenadas em cache pela CDN para carregar mais rapidamente.
+
+2. A guia Bônus agora carrega as capas pelo próprio domínio do aplicativo.
+- Isso reduz bloqueios de hotlink do Google Drive, principalmente em celulares e no PWA instalado.
+- Se a rota interna estiver temporariamente indisponível, o app tenta duas fontes diretas adicionais.
+
+3. Foram adicionadas oito capas locais de segurança.
+- Cada bônus tem sua própria capa identificada pelo título.
+- Assim, nenhum card fica vazio nem mostra o logotipo genérico caso o Google Drive não entregue a miniatura.
+
+4. Foram preservados os links, nomes, bloqueios do modo demonstração, traduções e visual dos cards.

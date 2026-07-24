@@ -560,23 +560,35 @@
     return 'https://drive.google.com/file/d/' + id + '/preview';
   }
   function getThumbUrl(id) {
-    return 'https://lh3.googleusercontent.com/d/' + id + '=w600';
+    // A capa é buscada pelo próprio domínio do app. Isso evita bloqueios de
+    // hotlink do Google Drive em celulares e permite cache pela CDN.
+    return '/api/pdf-thumbnail?id=' + encodeURIComponent(id);
   }
 
   window.__pqPdfThumbFallback = function(img, id) {
+    if (!img) return;
     var etapa = Number(img.getAttribute('data-pq-fallback') || '0');
+    var key = String(img.getAttribute('data-pq-pdf-key') || '').replace(/[^a-z0-9_-]/gi, '');
+
     if (etapa === 0) {
       img.setAttribute('data-pq-fallback', '1');
-      img.src = 'https://drive.google.com/thumbnail?id=' + id + '&sz=w600';
+      img.src = 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(id) + '&sz=w1200';
       return;
     }
-    img.setAttribute('data-pq-fallback', '2');
+    if (etapa === 1) {
+      img.setAttribute('data-pq-fallback', '2');
+      img.src = 'https://lh3.googleusercontent.com/d/' + encodeURIComponent(id) + '=w1200';
+      return;
+    }
+
+    // Última garantia: nunca deixa o card vazio ou com logotipo genérico.
+    img.setAttribute('data-pq-fallback', '3');
     img.onerror = null;
-    img.src = '/logo-pilates-en-casa.png';
+    img.src = '/pdf-covers/' + (key || 'detox') + '.svg';
     img.style.objectFit = 'cover';
-    img.style.padding = '12px';
+    img.style.padding = '0';
     img.style.boxSizing = 'border-box';
-    img.style.background = 'linear-gradient(160deg,#2a1a40,#1a1025)';
+    img.style.background = '#1a1035';
   };
 
   var abaAtiva = 'aulas'; // 'aulas' ou 'bonus'
@@ -692,7 +704,7 @@
         : ('onclick="window.__pqAbrirPdf(\'' + pdf.id + '\',\'' + tituloTraduzido.replace(/'/g, "\\'") + '\')"');
       return '<div ' + onClickAttr + ' style="cursor:pointer;background:#1a1035;border-radius:12px;overflow:hidden;border:1px solid rgba(212,175,55,0.15);transition:transform 0.15s;active:scale-95;position:relative;" onmousedown="this.style.transform=\'scale(0.97)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(0.97)\'" ontouchend="this.style.transform=\'scale(1)\'">'
         + '<div style="width:100%;aspect-ratio:3/4;overflow:hidden;background:#2a1a40;position:relative;' + (bloqueado ? 'filter:blur(4px);' : '') + '">'
-        + '<img src="' + thumb + '" alt="' + tituloTraduzido + '" data-pq-pdf-id="' + pdf.id + '" style="width:100%;height:100%;object-fit:cover;" onerror="window.__pqPdfThumbFallback(this,\'' + pdf.id + '\')">'
+        + '<img src="' + thumb + '" alt="' + tituloTraduzido + '" data-pq-pdf-id="' + pdf.id + '" data-pq-pdf-key="' + pdf.key + '" data-pq-fallback="0" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="window.__pqPdfThumbFallback(this,\'' + pdf.id + '\')">'
         + '<div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a1a40,#1a1035);flex-direction:column;gap:8px;">'
         + '<span style="font-size:40px">📄</span>'
         + '</div>'
