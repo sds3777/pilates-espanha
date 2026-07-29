@@ -78,7 +78,7 @@
       .replace(/\bmóvil\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Celular' : 'celular'; });
     if (lang === 'es-MX') return t.replace(/Bienvenida de nuevo/g, '¡Qué gusto verte de nuevo!').replace(/\bIngresar\b/g, 'Entrar').replace(/Bonos Exclusivos/g, 'Material extra exclusivo').replace(/Materiales extra/g, 'Contenido adicional').replace(/^Bonos$/, 'Extras');
     if (lang === 'es-CO') return t.replace(/Bienvenida de nuevo/g, '¡Bienvenida otra vez!').replace(/\bIngresar\b/g, 'Entrar').replace(/Bonos Exclusivos/g, 'Beneficios exclusivos').replace(/Materiales extra/g, 'Material adicional').replace(/^Bonos$/, 'Beneficios');
-    if (lang === 'es-PE') return t.replace(/Bienvenida de nuevo/g, '¡Bienvenida nuevamente!').replace(/\bIngresar\b/g, 'Entrar').replace(/Bonos Exclusivos/g, 'Recursos exclusivos').replace(/Materiales extra/g, 'Recursos adicionales').replace(/^Bonos$/, 'Recursos').replace(/^Clases$/, 'Clases disponibles');
+    if (lang === 'es-PE') return t.replace(/Bienvenida de nuevo/g, '¡Bienvenida nuevamente!').replace(/\bIngresar\b/g, 'Entrar').replace(/Bonos Exclusivos/g, 'Recursos exclusivos').replace(/Materiales extra/g, 'Recursos adicionales').replace(/^Bonos$/, 'Recursos');
     if (lang === 'es-CL') return t.replace(/Bienvenida de nuevo/g, '¡Bienvenida de vuelta!').replace(/\bIngresar\b/g, 'Entrar').replace(/\bToca\b/g, 'Presiona').replace(/\btoca\b/g, 'presiona').replace(/Ahora no/g, 'Por ahora no').replace(/Bonos Exclusivos/g, 'Extras exclusivos').replace(/Materiales extra/g, 'Contenido adicional').replace(/^Bonos$/, 'Extras');
     return t;
   }
@@ -96,12 +96,12 @@
       .replace(/'/g, '&#39;');
   }
 
-  // ─── Traduções da tela de Bonos ──────────────────────────────────────────
+  // ─── Textos de la sección de bienestar ───────────────────────────────────
   var BONUS_I18N_BASE = {
-    titulo: '🎁 Bonos Exclusivos',
-    chamada: 'Estos bonos te ayudarán a acelerar tus resultados 🚀',
-    subtitulo: 'Materiales extra incluidos en tu acceso',
-    tabLabel: 'Bonos',
+    titulo: 'Bienestar',
+    chamada: 'Guías para cuidar tu alimentación y bienestar',
+    subtitulo: 'Material adicional incluido en tu acceso',
+    tabLabel: 'Bienestar',
     clasesLabel: 'Clases'
   };
 
@@ -133,16 +133,16 @@
 
   var LOGIN_I18N_BASE = {
     subtitle: 'con Daniela',
-    exclusive: 'Acceso exclusivo para alumnas 💛',
+    exclusive: 'Acceso exclusivo para alumnas',
     emailHelp: 'Escribe el correo usado en tu compra',
     nameHelp: 'Escribe el nombre usado en tu compra',
     emailLabel: 'E-mail',
     nameLabel: 'Nombre',
-    useName: 'Ingresar con nombre',
-    useEmail: 'Ingresar con e-mail',
+    useName: 'Entrar con nombre',
+    useEmail: 'Entrar con e-mail',
     emailPlaceholder: 'tuemail@email.com',
     namePlaceholder: 'Tu nombre completo',
-    enter: 'Ingresar',
+    enter: 'Entrar',
     checking: 'Verificando…',
     invalidEmail: 'Escribe un correo electrónico válido.',
     invalidName: 'Escribe un nombre válido de al menos 2 caracteres.',
@@ -619,16 +619,17 @@
       'font-family:Inter,system-ui,sans-serif'
     ].join(';');
 
-    // Sem estado ativo fixo no HTML: o estado real (Clases ou Bonos) é sempre
-    // aplicado logo depois via atualizarAbas(), para nunca ficar dessincronizado
-    // com a tela que está de fato visível.
+    var clasesIcon = '<svg class="pq-nav-icon" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="6.8" r="2.7"></circle><path d="M16 10.8v7.4m0-4.8-6.2 3.2m6.2-1 6.3 3.6M9.8 16.6l-4.3 5.1m10.5-3.5-4.2 7.1m4.2-7.1 5.1 6.7m-10.3.4h10.7"></path></svg>';
+    var bienestarIcon = '<svg class="pq-nav-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M16.2 26.5c-.3-7.8 2.6-13.6 8.5-17.5"></path><path d="M16.7 20.5C11.2 20.1 7.2 17 5 11.2c5.7-1 10.2.7 12.9 5.1"></path><path d="M18.7 15.1c.8-5.3 4-8.4 9.1-9.6.6 5.5-1.8 9.3-7.1 11.2"></path></svg>';
+
+    // El estado activo real se aplica después mediante actualizarAbas().
     nav.innerHTML =
       '<button id="pq-tab-aulas" onclick="window.__pqMudarAba(\'aulas\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#9b7ec8;border-top:2px solid transparent;">'
-      + '<span style="font-size:20px">🧘‍♀️</span>'
+      + clasesIcon
       + '<span id="pq-tab-aulas-label" style="font-size:11px;font-weight:700;letter-spacing:0.5px;">' + getBonusI18n().clasesLabel + '</span>'
       + '</button>'
       + '<button id="pq-tab-bonus" onclick="window.__pqMudarAba(\'bonus\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px 0 8px;background:none;border:none;cursor:pointer;color:#9b7ec8;border-top:2px solid transparent;">'
-      + '<span style="font-size:20px">🎁</span>'
+      + bienestarIcon
       + '<span id="pq-tab-bonus-label" style="font-size:11px;font-weight:700;letter-spacing:0.5px;">' + getBonusI18n().tabLabel + '</span>'
       + '</button>';
 
@@ -720,9 +721,11 @@
         + '</div>';
     }).join('');
 
+    var bienestarHeadingIcon = '<svg class="pq-wellness-heading-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M16.2 26.5c-.3-7.8 2.6-13.6 8.5-17.5"></path><path d="M16.7 20.5C11.2 20.1 7.2 17 5 11.2c5.7-1 10.2.7 12.9 5.1"></path><path d="M18.7 15.1c.8-5.3 4-8.4 9.1-9.6.6 5.5-1.8 9.3-7.1 11.2"></path></svg>';
+
     tela.innerHTML =
       '<div style="padding:20px 16px 16px;">'
-      + '<h2 style="color:#d4af37;font-size:18px;font-weight:700;margin:0 0 4px;letter-spacing:1px;">' + t.titulo + '</h2>'
+      + '<h2 style="color:#d4af37;font-size:18px;font-weight:700;margin:0 0 4px;letter-spacing:1px;">' + bienestarHeadingIcon + '<span>' + t.titulo + '</span></h2>'
       + '<p style="color:#d4af37;font-size:13px;font-weight:600;margin:0 0 6px;">' + t.chamada + '</p>'
       + '<p style="color:#9b7ec8;font-size:13px;margin:0 0 20px;">' + t.subtitulo + '</p>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">'

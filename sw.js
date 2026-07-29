@@ -1,6 +1,6 @@
-// Service worker mínimo — apenas para habilitar a instalação do PWA.
-// Não faz cache de conteúdo, para não arriscar exibir dados desatualizados
-// (progresso, vídeos, acesso liberado etc.).
+// Service worker mínimo para habilitar la instalación de la PWA.
+// No guarda contenido en caché para evitar datos desactualizados
+// (progreso, videos, acceso habilitado, etc.).
 
 self.addEventListener('install', function () {
   self.skipWaiting();
