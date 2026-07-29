@@ -59,5 +59,5 @@ module.exports = async (req, res) => {
   }
 
   res.setHeader('Cache-Control', 'no-store');
-  return res.redirect(302, `/logo-pilates-en-casa.png?thumb=${encodeURIComponent(id)}`);
+  return res.redirect(302, `/logo-pilates-en-casa.webp?thumb=${encodeURIComponent(id)}`);
 };

@@ -348,7 +348,7 @@
       '<div style="width:100%;max-width:420px;background:linear-gradient(160deg,rgba(42,26,64,0.98),rgba(26,16,37,0.99));border:1px solid rgba(212,175,55,0.35);border-radius:24px;overflow:hidden;box-shadow:0 0 60px rgba(212,175,55,0.15),0 32px 64px rgba(0,0,0,0.6);">'
       + '<div style="height:3px;background:linear-gradient(90deg,transparent,#d4af37,transparent);"></div>'
       + '<div style="padding:30px 28px 34px;display:flex;flex-direction:column;align-items:center;gap:20px;">'
-      + '<img src="/logo-pilates-en-casa.png" alt="Pilates en Casa" style="width:88px;height:88px;border-radius:50%;border:2px solid rgba(212,175,55,0.5);object-fit:cover;" onerror="this.style.display=\'none\'">'
+      + '<img src="/logo-pilates-en-casa.webp" alt="Pilates en Casa" style="width:88px;height:88px;border-radius:50%;border:2px solid rgba(212,175,55,0.5);object-fit:cover;" onerror="this.style.display=\'none\'">'
       + '<div style="text-align:center;">'
       + '<h1 style="color:#d4af37;font-size:22px;font-weight:700;letter-spacing:2px;margin:0 0 6px;font-family:Cinzel,serif;">PILATES EN CASA</h1>'
       + '<p style="color:#c9a8f0;font-size:13px;letter-spacing:4px;margin:0;font-family:Cinzel,serif;">' + escapeHtml(t.subtitle) + '</p>'

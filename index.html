@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,7 +15,7 @@
         var step = Number(img.getAttribute('data-thumb-step') || '0');
         if (!/^[A-Za-z0-9_-]{11}$/.test(id)) {
           img.onerror = null;
-          img.src = '/logo-pilates-en-casa.png';
+          img.src = '/logo-pilates-en-casa.webp';
           return;
         }
         if (step === 0) {
@@ -29,11 +29,12 @@
           return;
         }
         img.onerror = null;
-        img.src = '/logo-pilates-en-casa.png';
+        img.src = '/logo-pilates-en-casa.webp';
       };
     </script>
     <script type="module" crossorigin src="/assets/index-thumbnails-difficulty-v5.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-BQ8LcfVF.css">
+    <link rel="stylesheet" href="/professional-v7.css">
   </head>
   <body>
 
@@ -877,7 +878,7 @@
         }
 
         function fixCertCard() {
-          // Encontrar o card do certificado (agora col-span-1) pela imagem capa7.png
+          // Encontrar o card do certificado (agora col-span-1) pela imagem capa7.webp
           var cards = document.querySelectorAll('[class*="col-span-2"]');
           var certCard = null;
           cards.forEach(function(card) {
@@ -900,7 +901,7 @@
           card.setAttribute('aria-disabled', 'true');
           card.innerHTML =
             '<div class="pq-cs-cover">' +
-              '<img src="/capa6.png" alt="Nuevo módulo próximamente" />' +
+              '<img src="/capa6.webp" alt="Nuevo módulo próximamente" />' +
               '<div class="pq-cs-overlay"></div>' +
               '<div class="pq-cs-content">' +
                 '<svg class="pq-cs-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
@@ -967,7 +968,7 @@
             img.src = 'https://i.ytimg.com/vi/' + match[1] + '/hqdefault.jpg';
           } else {
             img.setAttribute('data-pq-youtube-fallback', '2');
-            img.src = '/logo-pilates-en-casa.png';
+            img.src = '/logo-pilates-en-casa.webp';
             img.style.objectFit = 'cover';
             img.style.background = '#1a1025';
           }
@@ -1022,11 +1023,18 @@
         document.addEventListener('click',function(e){
           var soon=e.target.closest&&e.target.closest('#pq-coming-soon-card');
           if(soon){e.preventDefault();e.stopPropagation();openInfo('soon');return}
-          var card=e.target.closest&&e.target.closest('[class*="col-span-2"]');
-          if(card&&(card.querySelector('img[src*="capa7"]')||/certificado/i.test(card.textContent||''))){e.preventDefault();e.stopPropagation();openInfo('certificate')}
+          var card=e.target.closest&&e.target.closest('[data-pq-certificate-card],[class*="col-span-2"]');
+          if(card&&(card.querySelector('img[src*="capa7"]')||/certificado/i.test(card.textContent||''))){
+            if(card.className.indexOf('cursor-not-allowed')!==-1){
+              e.preventDefault();
+              e.stopPropagation();
+              openInfo('certificate');
+            }
+          }
         },true);
       })();
     </script>
 
+    <script src="/professional-v7.js"></script>
   </body>
 </html>
