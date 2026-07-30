@@ -38,7 +38,7 @@ body {
     radial-gradient(circle at 92% 7%, rgba(218, 229, 210, 0.9), transparent 29rem),
     radial-gradient(circle at 56% 19%, rgba(255, 239, 204, 0.72), transparent 23rem),
     linear-gradient(145deg, #fbf6ef 0%, #f8f4ef 38%, #f5eff7 72%, #edf2e8 100%) !important;
-  background-attachment: fixed !important;
+  background-attachment: scroll !important;
 }
 
 #root > div {
@@ -240,6 +240,12 @@ input:focus-visible {
 /* Módulos, clases y niveles de intensidad */
 [data-pq-view="module"] > div:first-child {
   box-shadow: 0 13px 32px rgba(47, 26, 57, 0.17);
+}
+
+[data-pq-view="module"] > div:nth-child(2) > button,
+[data-pq-view="module"] > div:nth-child(2) > div {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 142px;
 }
 
 [data-pq-view="module"] > div:nth-child(2) span {
@@ -981,6 +987,8 @@ input:focus-visible {
     linear-gradient(135deg, #21102b, #361943) !important;
   border-top-color: rgba(227, 182, 40, 0.58) !important;
   box-shadow: 0 -9px 28px rgba(39, 19, 48, 0.2) !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 #pq-bottom-nav button {
@@ -1015,6 +1023,11 @@ input:focus-visible {
 }
 
 @media (max-width: 560px) {
+  [data-pq-view="module"] > div:nth-child(2) > button,
+  [data-pq-view="module"] > div:nth-child(2) > div {
+    box-shadow: 0 5px 16px rgba(54, 34, 62, 0.075) !important;
+  }
+
   #pq-profile-greeting .pq-greeting-icon {
     width: 49px;
     height: 49px;
