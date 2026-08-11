@@ -227,6 +227,18 @@ input:focus-visible {
   background: linear-gradient(145deg, #dcefe3, #edf6ed);
 }
 
+/* Nas conquistas bloqueadas, o cadeado fica entre o título e o botão. */
+.pq-achievement-card.is-locked .pq-achievement-state {
+  width: 32px;
+  height: 32px;
+  margin: 9px 0 7px;
+}
+
+.pq-achievement-card.is-locked .pq-achievement-state svg {
+  width: 18px;
+  height: 18px;
+}
+
 .pq-achievement-card .pq-achievement-label {
   color: #73528b;
   background: #eee5f4;
@@ -267,6 +279,32 @@ input:focus-visible {
   color: #956c08 !important;
   background: #fff2cb !important;
   border-color: #eadba5;
+}
+
+/* Navegação das aulas: impede que “Bloqueada” perca a primeira letra. */
+[data-pq-view="lesson"] div[class*="col-span-1"]:has(.lucide-lock) {
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+}
+
+[data-pq-view="lesson"] div[class*="col-span-1"]:has(.lucide-lock) > span:last-child {
+  display: flex !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  text-overflow: clip !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: initial !important;
+  gap: 4px !important;
+  font-size: clamp(13px, 4vw, 16px) !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0 !important;
+}
+
+[data-pq-view="lesson"] div[class*="col-span-1"]:has(.lucide-lock) .lucide-lock {
+  width: 18px !important;
+  height: 18px !important;
+  margin-left: 2px !important;
 }
 
 [data-pq-view="module"] .pq-intensity.pq-intensity-challenging {
@@ -1077,5 +1115,1094 @@ input:focus-visible {
 @media print {
   body {
     background: #fff !important;
+  }
+}
+
+/* Transferência de acesso: mesmo tema sálvia, creme e lilás */
+#pq-device-transfer-modal.pq-transfer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200020;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 20px;
+  background: rgba(52, 31, 59, 0.48);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
+}
+
+#pq-device-transfer-modal .pq-transfer-card {
+  width: min(100%, 405px);
+  box-sizing: border-box;
+  padding: 29px 25px 24px;
+  border: 1px solid rgba(120, 91, 145, 0.2);
+  border-radius: 26px;
+  color: #321e3b;
+  background:
+    radial-gradient(circle at 92% 2%, rgba(211, 229, 204, 0.88), transparent 43%),
+    radial-gradient(circle at 5% 4%, rgba(232, 217, 241, 0.92), transparent 42%),
+    linear-gradient(145deg, #fff8ee, #f7eff8 55%, #edf3e9);
+  box-shadow: 0 28px 80px rgba(45, 25, 52, 0.25), 0 0 0 5px rgba(255, 253, 249, 0.3);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-align: center;
+}
+
+#pq-device-transfer-modal .pq-transfer-icon {
+  width: 66px;
+  height: 66px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 14px;
+  border: 1px solid rgba(121, 91, 143, 0.18);
+  border-radius: 50%;
+  color: #68447c;
+  background: linear-gradient(145deg, #e8f0e3, #eee4f3);
+  font-size: 31px;
+  font-weight: 800;
+}
+
+#pq-device-transfer-modal h2 {
+  margin: 0 0 9px;
+  color: #372042;
+  font-size: 23px;
+  line-height: 1.2;
+  font-weight: 850;
+}
+
+#pq-device-transfer-modal p {
+  margin: 0 0 24px;
+  color: #675d6b;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+#pq-device-transfer-modal .pq-transfer-actions {
+  display: grid;
+  grid-template-columns: 0.85fr 1.25fr;
+  gap: 11px;
+}
+
+#pq-device-transfer-modal button {
+  min-height: 49px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+#pq-device-transfer-modal #pq-nao {
+  border: 1.5px solid #bcaac6;
+  color: #60496c;
+  background: rgba(255, 253, 249, 0.72);
+}
+
+#pq-device-transfer-modal #pq-sim {
+  border: 0;
+  color: #2d1937;
+  background: linear-gradient(135deg, #f2ca32, #e4b31b);
+  box-shadow: 0 9px 22px rgba(190, 139, 13, 0.24);
+}
+
+/* Avatar da saudação: menos moldura e retrato ligeiramente maior */
+#pq-profile-greeting .pq-greeting-icon {
+  border-width: 1px !important;
+  box-shadow: 0 8px 20px rgba(68, 42, 76, 0.13), 0 0 0 1.5px rgba(255, 253, 249, 0.62) !important;
+}
+
+#pq-profile-greeting .pq-greeting-icon img {
+  transform: scale(1.045);
+}
+
+/* Demonstração: chamada de acesso mais viva em todas as aulas bloqueadas */
+[data-pq-full-access-badge="1"] {
+  padding: 7px 11px !important;
+  border: 1px solid #b88608 !important;
+  border-radius: 999px !important;
+  color: #32143e !important;
+  background: linear-gradient(135deg, #ffd94d, #efb915) !important;
+  box-shadow: 0 7px 18px rgba(196, 139, 5, 0.3) !important;
+  font-size: 11px !important;
+  line-height: 1.1 !important;
+  font-weight: 950 !important;
+  letter-spacing: 0.25px !important;
+}
+
+[data-pq-view="module"] > div:nth-child(2) > div:has([data-pq-full-access-badge="1"]) {
+  border: 1px solid rgba(121, 87, 140, 0.22) !important;
+  background: linear-gradient(145deg, rgba(255, 253, 249, 0.98), rgba(241, 233, 245, 0.98)) !important;
+  box-shadow: 0 9px 24px rgba(55, 31, 65, 0.1) !important;
+}
+
+/* Ícones renovados e destaque do Bem-estar somente na demonstração */
+#pq-bottom-nav .pq-nav-icon {
+  width: 29px;
+  height: 29px;
+}
+
+#pq-bottom-nav .pq-nav-icon-classes,
+#pq-bottom-nav .pq-nav-icon-food {
+  filter: drop-shadow(0 3px 5px rgba(15, 7, 24, 0.28));
+}
+
+/* Idioma: chama a atenção até a primeira escolha e desaparece depois */
+.pq-language-selector-pulse {
+  opacity: 1 !important;
+  animation: pq-language-selector-pulse 1.65s ease-in-out infinite !important;
+}
+
+.pq-language-selector-hidden {
+  display: none !important;
+}
+
+@keyframes pq-language-selector-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(120, 91, 145, 0.16);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(120, 91, 145, 0.13);
+    filter: brightness(1.18) drop-shadow(0 0 5px rgba(227, 182, 40, 0.35));
+  }
+}
+
+/* WhatsApp: somente “Dúvidas”, com contraste e alinhamento melhores */
+body:has(#pq-bottom-nav) .fixed.bottom-6.right-4.z-50 {
+  right: 10px !important;
+}
+
+body:has(#pq-bottom-nav) .fixed.bottom-6.right-4.z-50 > a {
+  gap: 6px !important;
+}
+
+body:has(#pq-bottom-nav) .fixed.bottom-6.right-4.z-50 > a > div:first-child {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  color: #4b3456 !important;
+  text-shadow: none !important;
+  font-size: 12.5px !important;
+  font-weight: 750 !important;
+}
+
+#pq-tab-bonus.pq-demo-wellness-pulse .pq-nav-icon,
+#pq-tab-bonus.pq-demo-wellness-pulse span {
+  transform-origin: center;
+  animation: pq-demo-wellness-pulse 1.8s ease-in-out infinite;
+}
+
+/* Aula: a barra de progresso acompanha o conteúdo, sem ficar presa à tela ao rolar */
+[data-pq-view="lesson"] > div:first-child:has(> div[style*="width"]) {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+}
+
+/* Orientação exibida uma única vez ao abrir o primeiro módulo */
+#pq-module-guide-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 99996;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(42, 24, 48, 0.5);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+#pq-module-guide-modal.pq-visible {
+  display: flex;
+  animation: pq-v8-fade-in 180ms ease-out;
+}
+
+.pq-module-guide-card {
+  position: relative;
+  width: min(100%, 390px);
+  padding: 30px 26px 25px;
+  border: 1px solid rgba(126, 96, 147, 0.26);
+  border-radius: 27px;
+  color: var(--pq-text);
+  text-align: center;
+  background:
+    radial-gradient(circle at 92% 4%, rgba(217, 232, 209, 0.92), transparent 36%),
+    radial-gradient(circle at 5% 5%, rgba(235, 220, 243, 0.9), transparent 38%),
+    rgba(255, 252, 246, 0.99);
+  box-shadow: 0 24px 64px rgba(48, 28, 55, 0.24);
+}
+
+.pq-module-guide-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  color: #6f5879;
+  background: rgba(241, 233, 245, 0.86);
+  font-size: 23px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pq-module-guide-icon {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 15px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #4d8d65;
+  background: linear-gradient(145deg, #e5efe0, #efe5f4);
+}
+
+.pq-module-guide-icon svg {
+  width: 34px;
+  height: 34px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#pq-module-guide-title {
+  margin: 0 24px 10px;
+  color: #321e3b;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: clamp(21px, 5.5vw, 25px);
+  line-height: 1.18;
+  font-weight: 800;
+}
+
+.pq-module-guide-copy {
+  margin: 0;
+  color: #675d6b;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#pq-module-guide-start {
+  width: 100%;
+  margin-top: 21px;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 999px;
+  color: #2d1937;
+  background: linear-gradient(135deg, #f2ca32, #e4b31b);
+  box-shadow: 0 9px 22px rgba(190, 139, 13, 0.24);
+  font-size: 15px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+#pq-module-guide-start:focus-visible,
+.pq-module-guide-close:focus-visible {
+  outline: 3px solid rgba(120, 91, 145, 0.36);
+  outline-offset: 3px;
+}
+
+@media (max-width: 420px) {
+  .pq-module-guide-card {
+    padding: 27px 20px 21px;
+    border-radius: 23px;
+  }
+
+  .pq-module-guide-copy {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+}
+
+@keyframes pq-demo-wellness-pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(233, 188, 44, 0));
+    opacity: 0.82;
+  }
+  50% {
+    transform: scale(1.12);
+    filter: drop-shadow(0 0 7px rgba(239, 193, 43, 0.72));
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pq-language-selector-pulse,
+  #pq-tab-bonus.pq-demo-wellness-pulse .pq-nav-icon,
+  #pq-tab-bonus.pq-demo-wellness-pulse span {
+    animation: none;
+  }
+}
+
+/* Refinamento final: leitura dos módulos e duração total */
+[data-pq-module-card] > div:last-child > h3 {
+  color: #321d3d !important;
+  font-size: 13px !important;
+  line-height: 1.28 !important;
+  font-weight: 800 !important;
+}
+
+[data-pq-module-card] > div:last-child > p:first-of-type {
+  color: #5d5063 !important;
+  font-size: 11.5px !important;
+  line-height: 1.42 !important;
+  font-weight: 600 !important;
+}
+
+/* ── Refinamentos solicitados: oferta, navegação e conclusões ───────────── */
+
+/* Preço da oferta: mantém a tipografia existente e melhora a separação. */
+#comprovante-block p:has(> [data-pq-old-price="1"]) {
+  font-weight: 900 !important;
+}
+
+#comprovante-block [data-pq-old-price="1"] {
+  color: #ff3535 !important;
+  font-weight: 950 !important;
+}
+
+#comprovante-block p:has(> [data-pq-new-price="1"]) {
+  display: block !important;
+  white-space: nowrap !important;
+  font-weight: 800 !important;
+}
+
+#comprovante-block [data-pq-new-price="1"] {
+  margin-left: 6px !important;
+  color: #39c978 !important;
+  text-shadow: 0 2px 14px rgba(57, 201, 120, 0.36) !important;
+}
+
+#comprovante-block p[class*="tracking-widest"] {
+  font-weight: 950 !important;
+}
+
+/* Botão principal: pulsação um pouco mais perceptível, sem alterar cor ou layout. */
+#comprovante-block > div > a[href*="wa.me"] {
+  transform-origin: center;
+  animation: pq-offer-cta-pulse 2.25s ease-in-out infinite !important;
+}
+
+@keyframes pq-offer-cta-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.35);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 7px 31px rgba(37, 211, 102, 0.56);
+  }
+}
+
+/* Garantia mais compacta, com o novo selo ligeiramente maior. */
+#comprovante-block div:has(> img[src*="garantia-30-dias.png"]) {
+  gap: 9px !important;
+  padding: 8px 11px !important;
+}
+
+#comprovante-block img[src*="garantia-30-dias.png"] {
+  width: 88px !important;
+  height: 88px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+
+#comprovante-block img[src*="garantia-30-dias.png"] + p {
+  font-size: 13px !important;
+  line-height: 1.38 !important;
+}
+
+#comprovante-block img[src*="garantia-30-dias.png"] + p strong {
+  font-size: 15px !important;
+  line-height: 1.3 !important;
+}
+
+/* Idioma e WhatsApp usam o mesmo ritmo e o mesmo movimento. */
+.pq-language-selector-pulse {
+  --pq-shared-pulse-ring: rgba(120, 91, 145, 0.16);
+  --pq-shared-pulse-glow: rgba(227, 182, 40, 0.32);
+  transform-origin: center;
+  animation: pq-shared-floating-pulse 1.65s ease-in-out infinite !important;
+}
+
+body:has(#pq-bottom-nav) .fixed.bottom-6.right-4.z-50 > a[aria-label="WhatsApp"] > div:last-child {
+  --pq-shared-pulse-ring: rgba(37, 211, 102, 0.18);
+  --pq-shared-pulse-glow: rgba(37, 211, 102, 0.38);
+  transform-origin: center;
+  animation: pq-shared-floating-pulse 1.65s ease-in-out infinite !important;
+}
+
+@keyframes pq-shared-floating-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 var(--pq-shared-pulse-ring);
+    filter: brightness(1) drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    transform: scale(1.07);
+    box-shadow: 0 0 0 8px var(--pq-shared-pulse-ring);
+    filter: brightness(1.13) drop-shadow(0 0 5px var(--pq-shared-pulse-glow));
+  }
+}
+
+/* Movimento leve nos dois itens da barra, em ambas as versões. */
+#pq-tab-aulas,
+#pq-tab-bonus {
+  transform-origin: center bottom;
+  animation: pq-bottom-nav-soft-breathe 3.6s ease-in-out infinite;
+}
+
+#pq-tab-bonus {
+  animation-delay: 0.45s;
+}
+
+@keyframes pq-bottom-nav-soft-breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-1px) scale(1.018); }
+}
+
+/* O destaque já existente da Alimentação continua mais chamativo na demo. */
+#pq-tab-bonus.pq-demo-wellness-pulse .pq-nav-icon,
+#pq-tab-bonus.pq-demo-wellness-pulse span {
+  animation-duration: 1.7s;
+}
+
+/* Aula concluída: tique maior e card discretamente realçado. */
+[data-pq-view="module"] button:has(.lucide-circle-check) {
+  border: 1px solid rgba(212, 175, 55, 0.58) !important;
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.13) !important;
+  background: linear-gradient(145deg, #2a1a40, #302047) !important;
+}
+
+[data-pq-view="module"] button .absolute.top-2.right-2:has(> .lucide-circle-check) {
+  padding: 4px !important;
+  background: #d4af37 !important;
+  border: 2px solid rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 3px 12px rgba(212, 175, 55, 0.5) !important;
+}
+
+[data-pq-view="module"] .lucide-circle-check {
+  width: 24px !important;
+  height: 24px !important;
+  color: #24112e !important;
+  stroke-width: 2.7 !important;
+}
+
+/* Confirmação antes de efetivar uma troca de idioma. */
+#pq-language-confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 999997;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(13, 7, 24, 0.68);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.pq-language-confirm-card {
+  width: min(100%, 390px);
+  padding: 25px 22px 20px;
+  border: 1px solid rgba(212, 175, 55, 0.34);
+  border-radius: 22px;
+  background: linear-gradient(155deg, #2a1a40, #1a1025);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.48);
+  text-align: center;
+}
+
+.pq-language-confirm-card h2 {
+  margin: 0 0 9px;
+  color: #d4af37;
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.pq-language-confirm-card p {
+  margin: 0 0 20px;
+  color: #e2d9f3;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.pq-language-confirm-actions {
+  display: grid;
+  gap: 9px;
+}
+
+#pq-language-confirm-yes,
+#pq-language-confirm-no {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+#pq-language-confirm-yes {
+  border: 0;
+  color: #2d1937;
+  background: linear-gradient(135deg, #f2ca32, #e4b31b);
+  box-shadow: 0 8px 20px rgba(190, 139, 13, 0.26);
+}
+
+#pq-language-confirm-no {
+  border: 1px solid rgba(212, 175, 55, 0.28);
+  color: #c9a8f0;
+  background: transparent;
+}
+
+/* Depoimentos e FAQ da oferta de demonstração. */
+#pq-social-proof-faq {
+  display: grid;
+  gap: 14px;
+}
+
+.pq-offer-extra-section {
+  padding: 18px;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 16px;
+  background: linear-gradient(155deg, rgba(42, 26, 64, 0.94), rgba(31, 18, 48, 0.96));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.pq-offer-extra-title {
+  margin: 0 0 14px;
+  color: #d4af37;
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 900;
+  text-align: center;
+}
+
+.pq-testimonial-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.pq-testimonial-card {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.16);
+  border-radius: 14px;
+  background: rgba(26, 16, 37, 0.64);
+}
+
+.pq-testimonial-photo {
+  width: 58px;
+  height: 58px;
+  border: 2px solid rgba(212, 175, 55, 0.62);
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.3);
+}
+
+.pq-testimonial-name {
+  display: block;
+  margin-bottom: 1px;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 850;
+}
+
+.pq-testimonial-stars {
+  display: block;
+  margin-bottom: 5px;
+  color: #f2c94c;
+  font-size: 13px;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.pq-testimonial-text {
+  margin: 0;
+  color: #e2d9f3;
+  font-size: 12.5px;
+  line-height: 1.42;
+}
+
+.pq-faq-list {
+  display: grid;
+  gap: 8px;
+}
+
+.pq-faq-item {
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.17);
+  border-radius: 12px;
+  background: rgba(26, 16, 37, 0.62);
+}
+
+.pq-faq-item summary {
+  position: relative;
+  padding: 12px 38px 12px 13px;
+  color: #fff;
+  font-size: 13.5px;
+  line-height: 1.35;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+}
+
+.pq-faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.pq-faq-item summary::after {
+  content: "+";
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  color: #d4af37;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.pq-faq-item[open] summary::after {
+  content: "−";
+}
+
+.pq-faq-answer {
+  margin: 0;
+  padding: 0 13px 13px;
+  color: #c9a8f0;
+  font-size: 13px;
+  line-height: 1.48;
+}
+
+@media (min-width: 640px) {
+  .pq-testimonial-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pq-testimonial-card {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #comprovante-block > div > a[href*="wa.me"],
+  .pq-language-selector-pulse,
+  body:has(#pq-bottom-nav) .fixed.bottom-6.right-4.z-50 > a[aria-label="WhatsApp"] > div:last-child,
+  #pq-tab-aulas,
+  #pq-tab-bonus {
+    animation: none !important;
+  }
+}
+
+[data-pq-module-card] > div:last-child > p:nth-of-type(2) {
+  width: fit-content;
+  margin-top: 1px;
+  padding: 5px 8px;
+  border: 1px solid rgba(120, 91, 145, 0.14);
+  border-radius: 999px;
+  color: #4a2d57 !important;
+  background: linear-gradient(90deg, rgba(232, 220, 240, 0.78), rgba(223, 233, 218, 0.82));
+  font-size: 11.5px !important;
+  line-height: 1.2 !important;
+  font-weight: 850 !important;
+}
+
+/* Quiz: perguntas com tipografia mais limpa e legível */
+.pq-demo-step h1 {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.45px;
+}
+
+/* Oferta da demonstração */
+#comprovante-block [data-pq-old-price="1"] {
+  display: inline-block;
+  margin-left: 3px;
+  font-size: 23px !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  text-decoration-thickness: 4px !important;
+}
+
+#comprovante-block [data-pq-new-price="1"] {
+  font-size: clamp(50px, 12vw, 66px) !important;
+  line-height: 1 !important;
+  font-weight: 950 !important;
+  letter-spacing: -1.4px;
+}
+
+/* Login: fundo menos branco e tipografia mais legível */
+#pq-email-login {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+#pq-email-login > div {
+  background:
+    radial-gradient(circle at 92% 5%, rgba(205, 222, 197, 0.94), transparent 46%),
+    radial-gradient(circle at 5% 4%, rgba(226, 209, 237, 0.96), transparent 44%),
+    linear-gradient(145deg, rgba(252, 238, 224, 0.98), rgba(243, 232, 245, 0.98) 53%, rgba(229, 238, 224, 0.98)) !important;
+}
+
+#pq-email-login p,
+#pq-email-login label,
+#pq-email-login input,
+#pq-email-login button,
+#pq-email-login #pq-login-sub {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+#pq-email-login p[style*="color:#fff"] {
+  font-size: 20px !important;
+  line-height: 1.35 !important;
+  font-weight: 800 !important;
+}
+
+#pq-email-login #pq-login-sub {
+  color: #665a6b !important;
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+  font-weight: 550 !important;
+}
+
+#pq-email-login label {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+}
+
+#pq-email-login #pq-login-toggle {
+  font-size: 13px !important;
+  font-weight: 750 !important;
+}
+
+#pq-email-login #pq-email-btn {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 19px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.15px !important;
+}
+
+/* Pop-ups informativos do certificado e de novas aulas */
+#pq-info-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200010;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#pq-info-modal.pq-visible {
+  display: flex;
+}
+
+#pq-info-modal .pq-info-card {
+  position: relative;
+  width: min(100%, 410px);
+  box-sizing: border-box;
+  padding: 30px 25px 25px;
+  border: 1px solid rgba(120, 91, 145, 0.2);
+  border-radius: 25px;
+  text-align: center;
+}
+
+#pq-info-modal .pq-info-close {
+  position: absolute;
+  top: 11px;
+  right: 13px;
+  width: 37px;
+  height: 37px;
+  border: 0;
+  border-radius: 50%;
+  color: #694c7b;
+  background: rgba(236, 226, 242, 0.9);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#pq-info-modal .pq-info-icon {
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 15px;
+  border: 1px solid rgba(122, 151, 116, 0.24);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #e8f0e4, #eee5f3);
+  font-size: 32px;
+}
+
+#pq-info-modal h2 {
+  margin: 0 0 9px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 850;
+}
+
+#pq-info-modal .pq-info-copy {
+  margin: 0 0 22px;
+  color: #665b6b !important;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+#pq-info-ok {
+  width: 100%;
+  min-height: 51px;
+  border: 0;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+#pq-coming-soon-card[role="button"] {
+  cursor: pointer !important;
+}
+
+/* Certificado clássico escolhido: formato horizontal para tela e impressão */
+[data-pq-view="certificate"] > div:last-child {
+  overflow-x: auto;
+}
+
+[data-pq-view="certificate"] > div:last-child > div {
+  max-width: 960px !important;
+}
+
+#cert-card[data-pq-model="classic"] {
+  width: 100%;
+  max-width: 960px;
+  aspect-ratio: 297 / 210;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 0 !important;
+  border-radius: 4px !important;
+  background: #f7eedb !important;
+  box-shadow: 0 18px 55px rgba(47, 28, 55, 0.22);
+  container-type: inline-size;
+}
+
+.pq-certificate-classic {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 4.2cqw 8cqw 3.5cqw;
+  overflow: hidden;
+  color: #43234e;
+  background:
+    radial-gradient(circle at 50% 47%, rgba(255, 255, 255, 0.56), transparent 38%),
+    linear-gradient(145deg, #fbf3df, #f6ead2 72%, #f1e0c4);
+  border: 1.2cqw solid #532761;
+  outline: 0.34cqw solid #d5aa2d;
+  outline-offset: -2.15cqw;
+  text-align: center;
+}
+
+.pq-certificate-classic::before,
+.pq-certificate-classic::after {
+  content: "";
+  position: absolute;
+  width: 14cqw;
+  height: 14cqw;
+  opacity: 0.2;
+  border: 0.35cqw solid #d0a12a;
+  border-radius: 50% 0 50% 0;
+  transform: rotate(35deg);
+}
+
+.pq-certificate-classic::before {
+  top: -6cqw;
+  left: -4cqw;
+}
+
+.pq-certificate-classic::after {
+  right: -4cqw;
+  bottom: -6cqw;
+}
+
+.pq-certificate-watermark {
+  position: absolute;
+  left: 50%;
+  top: 51%;
+  transform: translate(-50%, -50%);
+  color: rgba(105, 64, 120, 0.05);
+  font-size: 38cqw;
+  line-height: 1;
+}
+
+.pq-certificate-logo {
+  width: 7.6cqw;
+  height: 7.6cqw;
+  margin-bottom: 0.8cqw;
+  border: 0.2cqw solid rgba(202, 153, 31, 0.7);
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0.8cqw 1.8cqw rgba(74, 38, 83, 0.13);
+}
+
+.pq-certificate-classic h1 {
+  margin: 0;
+  color: #4c2358;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 4.2cqw;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: 0.18cqw;
+  text-transform: uppercase;
+}
+
+.pq-certificate-ornament {
+  width: 36cqw;
+  display: flex;
+  align-items: center;
+  gap: 1.2cqw;
+  margin: 1.2cqw 0 1.4cqw;
+  color: #c99b25;
+}
+
+.pq-certificate-ornament span {
+  flex: 1;
+  height: 0.13cqw;
+  background: linear-gradient(90deg, transparent, #c99b25);
+}
+
+.pq-certificate-ornament span:last-child {
+  background: linear-gradient(90deg, #c99b25, transparent);
+}
+
+.pq-certificate-ornament b {
+  font-size: 1.25cqw;
+}
+
+.pq-certificate-certify,
+.pq-certificate-completion {
+  margin: 0;
+  color: #735b75;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 1.65cqw;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.pq-certificate-name {
+  min-width: 58%;
+  margin: 0.8cqw 0 1cqw;
+  padding: 0 2cqw 0.5cqw;
+  border-bottom: 0.18cqw solid #c99b25;
+  color: #4c2358;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 4.2cqw;
+  line-height: 1.05;
+  font-weight: 800;
+}
+
+.pq-certificate-classic h2 {
+  margin: 0.55cqw 0 0;
+  color: #5b2c66;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 2.55cqw;
+  line-height: 1.1;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.pq-certificate-meta {
+  margin: 0.55cqw 0 1.8cqw;
+  color: #8f6b16;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 1.35cqw;
+  font-weight: 800;
+  letter-spacing: 0.08cqw;
+}
+
+.pq-certificate-footer {
+  width: 76%;
+  display: grid;
+  grid-template-columns: 1fr 8cqw 1fr;
+  align-items: end;
+  gap: 2.2cqw;
+}
+
+.pq-certificate-footer > div:not(.pq-certificate-seal) {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35cqw;
+  padding-top: 0.7cqw;
+  border-top: 0.15cqw solid rgba(83, 39, 97, 0.56);
+}
+
+.pq-certificate-footer strong {
+  color: #4c2358;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.75cqw;
+  line-height: 1.1;
+}
+
+.pq-certificate-footer span {
+  color: #7a687b;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 1.05cqw;
+  font-weight: 700;
+  letter-spacing: 0.08cqw;
+  text-transform: uppercase;
+}
+
+.pq-certificate-seal {
+  width: 6.3cqw;
+  height: 6.3cqw;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  border: 0.3cqw double #d0a12a;
+  border-radius: 50%;
+  color: #d0a12a;
+  background: rgba(255, 250, 235, 0.84);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 2.8cqw;
+  font-weight: 900;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #cert-card,
+  #cert-card * {
+    visibility: visible !important;
+  }
+
+  #cert-card[data-pq-model="classic"] {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 297mm !important;
+    max-width: none !important;
+    height: 210mm !important;
+    aspect-ratio: auto !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }

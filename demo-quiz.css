@@ -490,3 +490,150 @@ html.pq-demo-quiz-pending #pq-ios-install-modal {
     transition: none !important;
   }
 }
+
+/* ── Convite exibido imediatamente após a conclusão do quiz ────────────── */
+#pq-teacher-intro-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 999997;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(13, 7, 24, 0.7);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  animation: pq-teacher-modal-fade 180ms ease-out;
+}
+
+.pq-teacher-intro-card {
+  width: min(100%, 390px);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.36);
+  border-radius: 23px;
+  background: linear-gradient(155deg, #2a1a40, #1a1025);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  animation: pq-teacher-card-in 220ms ease-out;
+}
+
+.pq-teacher-intro-photo-wrap {
+  position: relative;
+  width: 100%;
+  height: 164px;
+  overflow: hidden;
+  background: #1a1025;
+}
+
+.pq-teacher-intro-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 24%;
+}
+
+.pq-teacher-intro-photo-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 58%, rgba(26, 16, 37, 0.72));
+  pointer-events: none;
+}
+
+.pq-teacher-intro-icon {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 255, 255, 0.64);
+  border-radius: 50%;
+  color: #2d1937;
+  background: rgba(242, 202, 50, 0.95);
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+  font-size: 21px;
+}
+
+.pq-teacher-intro-content {
+  padding: 19px 22px 20px;
+}
+
+.pq-teacher-intro-card h2 {
+  margin: 0 0 10px;
+  color: #d4af37;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 23px;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pq-teacher-intro-card p {
+  margin: 0 0 19px;
+  color: #e2d9f3;
+  font-size: 14.5px;
+  line-height: 1.52;
+}
+
+@media (max-height: 650px) {
+  .pq-teacher-intro-photo-wrap {
+    height: 132px;
+  }
+
+  .pq-teacher-intro-content {
+    padding-top: 15px;
+  }
+}
+
+.pq-teacher-intro-actions {
+  display: grid;
+  gap: 9px;
+}
+
+#pq-teacher-intro-continue,
+#pq-teacher-intro-later {
+  width: 100%;
+  padding: 13px 17px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+#pq-teacher-intro-continue {
+  border: 0;
+  color: #2d1937;
+  background: linear-gradient(135deg, #f2ca32, #e4b31b);
+  box-shadow: 0 9px 23px rgba(190, 139, 13, 0.28);
+}
+
+#pq-teacher-intro-later {
+  border: 1px solid rgba(212, 175, 55, 0.24);
+  color: #c9a8f0;
+  background: transparent;
+  font-weight: 700;
+}
+
+@keyframes pq-teacher-modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pq-teacher-card-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pq-teacher-intro-modal,
+  .pq-teacher-intro-card {
+    animation: none !important;
+  }
+}

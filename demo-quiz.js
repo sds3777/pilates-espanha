@@ -4,7 +4,7 @@
   var IS_DEMO = window.location.pathname.replace(/\/+$/, '') === '/teste';
   if (!IS_DEMO) return;
 
-  var STORAGE_KEY = 'pilates_demo_quiz_v1';
+  var STORAGE_KEY = 'pilates_demo_quiz_v2';
   var stored = null;
   try { stored = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (error) {}
   if (stored && stored.completed === true) return;
@@ -264,6 +264,82 @@
     window.requestAnimationFrame(frame);
   }
 
+  function closeTeacherIntro() {
+    var modal = document.getElementById('pq-teacher-intro-modal');
+    if (modal) modal.remove();
+    document.body.style.overflow = '';
+  }
+
+  function openFirstPresentationVideo() {
+    closeTeacherIntro();
+    if (typeof window.__pqMudarAba === 'function') window.__pqMudarAba('aulas');
+    window.scrollTo(0, 0);
+
+    var attempts = 0;
+    function openModule() {
+      var firstModule = document.querySelector('[data-pq-module-card]');
+      if (!firstModule && attempts < 12) {
+        attempts += 1;
+        window.setTimeout(openModule, 120);
+        return;
+      }
+      if (!firstModule) return;
+      firstModule.click();
+
+      var lessonAttempts = 0;
+      function openLesson() {
+        var moduleView = document.querySelector('[data-pq-view="module"]');
+        var firstLesson = moduleView && Array.prototype.find.call(
+          moduleView.querySelectorAll('button'),
+          function (button) { return !!button.querySelector('img[data-video-id]'); }
+        );
+        if (!firstLesson && lessonAttempts < 12) {
+          lessonAttempts += 1;
+          window.setTimeout(openLesson, 120);
+          return;
+        }
+        if (firstLesson) firstLesson.click();
+      }
+      window.setTimeout(openLesson, 100);
+    }
+    openModule();
+  }
+
+  function showTeacherIntro() {
+    if (document.getElementById('pq-teacher-intro-modal')) return;
+    var modal = document.createElement('div');
+    modal.id = 'pq-teacher-intro-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'pq-teacher-intro-title');
+    modal.innerHTML =
+      '<div class="pq-teacher-intro-card">' +
+        '<div class="pq-teacher-intro-photo-wrap">' +
+          '<img class="pq-teacher-intro-photo" src="/professora-daniela.webp" alt="Profesora Daniela en un estudio de Pilates">' +
+          '<div class="pq-teacher-intro-icon" aria-hidden="true">▶</div>' +
+        '</div>' +
+        '<div class="pq-teacher-intro-content">' +
+          '<h2 id="pq-teacher-intro-title">Conoce a tu profesora</h2>' +
+          '<p>Antes de comenzar, mira la presentación de Daniela y conoce a quien te acompañará durante el programa.</p>' +
+          '<div class="pq-teacher-intro-actions">' +
+            '<button type="button" id="pq-teacher-intro-continue">Continuar</button>' +
+            '<button type="button" id="pq-teacher-intro-later">Ahora no</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+    modal.querySelector('#pq-teacher-intro-continue').addEventListener('click', openFirstPresentationVideo);
+    modal.querySelector('#pq-teacher-intro-later').addEventListener('click', closeTeacherIntro);
+    modal.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closeTeacherIntro();
+    });
+    window.setTimeout(function () {
+      var continueButton = document.getElementById('pq-teacher-intro-continue');
+      if (continueButton) continueButton.focus();
+    }, 40);
+  }
+
   function finish(overlay) {
     var payload = {
       completed: true,
@@ -286,6 +362,7 @@
       document.body.style.overflow = '';
       window.scrollTo(0, 0);
       window.dispatchEvent(new CustomEvent('pilates:demo-ready', { detail: payload }));
+      window.setTimeout(showTeacherIntro, 80);
     }, 230);
   }
 

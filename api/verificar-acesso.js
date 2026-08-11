@@ -163,25 +163,50 @@ module.exports = async (req, res) => {
       .from(TABELA_ACESSOS)
       .select('id,email,nome,status,device_id')
       .eq('email', email)
-      .maybeSingle();
+      .limit(2);
   } else {
     // Escapa curingas de LIKE para impedir que %, _ ou \\ alterem a consulta.
     consulta = supabase
       .from(TABELA_ACESSOS)
       .select('id,email,nome,status,device_id')
       .ilike('nome', escapeLikePattern(nome))
-      .maybeSingle();
+      .limit(2);
   }
 
-  const { data, error } = await consulta;
+  const { data: resultados, error } = await consulta;
 
   if (error) {
     console.error('Falha ao consultar acesso.', { code: error.code });
     return res.status(500).json({ acesso: false, motivo: 'ERRO_INTERNO' });
   }
 
-  if (!data) {
+  const acessos = Array.isArray(resultados) ? resultados : [];
+
+  if (acessos.length === 0) {
     return res.status(200).json({ acesso: false, motivo: 'NAO_ENCONTRADO' });
+  }
+
+  if (email && acessos.length > 1) {
+    console.error('Mais de um acesso encontrado para o mesmo e-mail.');
+    return res.status(500).json({ acesso: false, motivo: 'ERRO_INTERNO' });
+  }
+
+  let data = acessos[0];
+
+  if (nome && acessos.length > 1) {
+    const vinculadosAoDispositivo = acessos.filter(
+      (acesso) => String(acesso.device_id || '') === deviceId,
+    );
+
+    if (vinculadosAoDispositivo.length === 1) {
+      data = vinculadosAoDispositivo[0];
+    } else {
+      return res.status(200).json({
+        acesso: false,
+        motivo: 'NOME_DUPLICADO',
+        mensagem: 'Existe más de un acceso con este nombre. Entra con el correo usado en la compra.',
+      });
+    }
   }
 
   if (data.status === 'PROCESSANDO') {

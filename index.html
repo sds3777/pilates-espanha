@@ -35,8 +35,8 @@
     <script type="module" crossorigin src="/assets/index-thumbnails-difficulty-v5.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-BQ8LcfVF.css">
     <link rel="stylesheet" href="/professional-v7.css">
-    <link rel="stylesheet" href="/professional-v8.css">
-    <link rel="stylesheet" href="/demo-quiz.css">
+    <link rel="stylesheet" href="/professional-v8.css?v=20260811-2">
+    <link rel="stylesheet" href="/demo-quiz.css?v=20260811-2">
   </head>
   <body>
 
@@ -53,8 +53,8 @@
         font-weight: 700;
         font-family: 'Cinzel', serif;
         letter-spacing: 0.5px;
-        font-size: 12px;
-        padding: 9px 18px;
+        font-size: 14px;
+        padding: 12px 24px;
         white-space: nowrap;
         line-height: 1.2;
         border: none;
@@ -123,6 +123,12 @@
         justify-content: center;
         font-size: 26px;
         margin: 0 auto 14px;
+      }
+      #pq-ios-install-modal .pq-ios-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: inherit;
       }
       #pq-ios-install-modal h2 {
         color: #d4af37;
@@ -344,7 +350,7 @@
     <div id="pq-ios-install-modal">
       <div class="pq-ios-sheet">
         <div class="pq-ios-handle"></div>
-        <div class="pq-ios-icon">📲</div>
+        <div class="pq-ios-icon"><img src="/logo-pilates-en-casa.webp" alt="" aria-hidden="true"></div>
         <h2>Instalar Pilates en Casa</h2>
         <p class="pq-ios-sub">Agrega la aplicación a tu pantalla de inicio para acceder a tus clases con un toque.</p>
         <div class="pq-ios-steps">
@@ -362,323 +368,76 @@
         <button id="pq-ios-modal-close" type="button">Entendido</button>
       </div>
     </div>
-    <script>
-      (function () {
-        var deferredPrompt = null;
-        var installBtn = document.getElementById('pq-install-btn');
-        var iosModal = document.getElementById('pq-ios-install-modal');
-        var iosModalClose = document.getElementById('pq-ios-modal-close');
-        var installed = false;
-        var LANGUAGE_DONE_KEY = 'pq_language_selected';
-        var languagePopup = document.getElementById('pq-language-popup');
-        var languageConfirm = document.getElementById('pq-language-confirm');
-        var selectedLanguage = null;
-        var INSTALL_I18N = {
-          'es-ES': { button: '⬇ Instalar aplicación', title: 'Instalar Pilates en Casa', text: 'Añade la aplicación a la pantalla de inicio para acceder a tus clases con un toque.', accept: 'Instalar aplicación', decline: 'Ahora no', langTitle: 'Selecciona tu idioma', langText: 'Elige la variante de español que quieres usar. La elección quedará guardada.', confirm: 'Aceptar' },
-          'es-AR': { button: '⬇ Instalá la aplicación', title: 'Instalá Pilates en Casa', text: 'Agregá la aplicación a tu pantalla de inicio para entrar a tus clases con un toque.', accept: 'Instalar ahora', decline: 'Ahora no', langTitle: 'Elegí tu idioma', langText: 'Elegí la variante de español que querés usar. Tu elección va a quedar guardada.', confirm: 'Aceptar' },
-          'es-MX': { button: '⬇ Instalar app', title: 'Instalar Pilates en Casa', text: 'Agrega la app a tu pantalla de inicio para entrar a tus clases con un toque.', accept: 'Instalar app', decline: 'En otro momento', langTitle: 'Selecciona tu idioma', langText: 'Elige la variante de español que deseas usar. La elección quedará guardada.', confirm: 'Aceptar' },
-          'es-CO': { button: '⬇ Instalar la aplicación', title: 'Instalar Pilates en Casa', text: 'Agrega la aplicación a la pantalla de inicio para entrar a tus clases fácilmente.', accept: 'Instalar la aplicación', decline: 'Ahora no', langTitle: 'Selecciona tu idioma', langText: 'Elige la variante de español que deseas usar. Tu elección quedará guardada.', confirm: 'Aceptar' },
-          'es-PE': { button: '⬇ Instalar aplicación', title: 'Instalar Pilates en Casa', text: 'Agrega la aplicación a tu pantalla de inicio para acceder rápidamente a tus clases.', accept: 'Instalar aplicación', decline: 'Más tarde', langTitle: 'Selecciona tu idioma', langText: 'Elige la variante de español que deseas usar. La selección quedará guardada.', confirm: 'Aceptar' },
-          'es-CL': { button: '⬇ Instalar la app', title: 'Instala Pilates en Casa', text: 'Agrega la app a tu pantalla de inicio para entrar a tus clases de forma rápida.', accept: 'Instalar la app', decline: 'Por ahora no', langTitle: 'Elige tu idioma', langText: 'Elige la variante de español que quieres usar. La selección quedará guardada.', confirm: 'Aceptar' }
-        };
-
-        function getCurrentInstallLang() {
-          try {
-            var lang = localStorage.getItem('pilates_lang');
-            if (INSTALL_I18N[lang]) return lang;
-          } catch (e) {}
-          return 'es-CO';
-        }
-
-        function aplicarIdiomaInstalacao() {
-          var t = INSTALL_I18N[getCurrentInstallLang()];
-          installBtn.textContent = t.button;
-          var popupTitle = popupOverlay && popupOverlay.querySelector('h2');
-          var popupText = popupOverlay && popupOverlay.querySelector('p');
-          if (popupTitle) popupTitle.textContent = t.title;
-          if (popupText) popupText.textContent = t.text;
-          if (popupAceitar) popupAceitar.textContent = t.accept;
-          if (popupRecusar) popupRecusar.textContent = t.decline;
-          var iosTitle = iosModal.querySelector('h2');
-          var iosText = iosModal.querySelector('.pq-ios-sub');
-          if (iosTitle) iosTitle.textContent = t.title;
-          if (iosText) iosText.textContent = t.text;
-          var langTitle = document.getElementById('pq-language-title');
-          var langText = languagePopup.querySelector('p');
-          if (langTitle) langTitle.textContent = t.langTitle;
-          if (langText) langText.textContent = t.langText;
-          languageConfirm.textContent = t.confirm;
-        }
-
-        function idiomaJaSelecionado() {
-          try { return localStorage.getItem(LANGUAGE_DONE_KEY) === '1'; } catch (e) { return false; }
-        }
-        function mostrarPopupIdioma() {
-          if (idiomaJaSelecionado()) return;
-          setTimeout(function () { languagePopup.classList.add('pq-visible'); }, 250);
-        }
-        Array.prototype.forEach.call(document.querySelectorAll('.pq-lang-option'), function (button) {
-          button.addEventListener('click', function () {
-            selectedLanguage = button.getAttribute('data-lang');
-            Array.prototype.forEach.call(document.querySelectorAll('.pq-lang-option'), function (item) { item.classList.remove('pq-selected'); });
-            button.classList.add('pq-selected');
-            languageConfirm.disabled = false;
-          });
-        });
-        languageConfirm.addEventListener('click', function () {
-          if (!selectedLanguage) return;
-          try {
-            localStorage.setItem('pilates_lang', selectedLanguage);
-            localStorage.setItem(LANGUAGE_DONE_KEY, '1');
-          } catch (e) {}
-          window.dispatchEvent(new CustomEvent('pilates:lang', { detail: selectedLanguage }));
-          languagePopup.classList.remove('pq-visible');
-        });
-
-        // ── Fonte única de verdade: o app já está instalado/rodando como app? ──
-        // Android/Chrome/Edge: display-mode "standalone".
-        // iOS Safari: navigator.standalone === true.
-        function isStandalone() {
-          return window.matchMedia('(display-mode: standalone)').matches ||
-            window.navigator.standalone === true;
-        }
-        function isAppInstalled() {
-          return installed || isStandalone();
-        }
-
-        // Detecta Safari no iPhone/iPad (iOS não dispara beforeinstallprompt).
-        function isIOSSafari() {
-          var ua = window.navigator.userAgent || '';
-          var isIOS = /iPad|iPhone|iPod/.test(ua) ||
-            (ua.includes('Macintosh') && 'ontouchend' in document); // iPadOS 13+ se identifica como Mac
-          if (!isIOS) return false;
-          var isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS|Chrome|Android/.test(ua);
-          return isSafari;
-        }
-
-        function hideInstallBtn() {
-          installBtn.classList.remove('pq-visible');
-        }
-        function showInstallBtn() {
-          // Nunca exibe o botão se o app já estiver instalado.
-          if (isAppInstalled()) {
-            hideInstallBtn();
-            return;
-          }
-          installBtn.classList.add('pq-visible');
-        }
-
-        function showIOSModal() {
-          // Nunca exibe o modal se o app já estiver instalado.
-          if (isAppInstalled()) return;
-          iosModal.classList.add('pq-visible');
-        }
-        function hideIOSModal() {
-          iosModal.classList.remove('pq-visible');
-        }
-        iosModalClose.addEventListener('click', function () { hideIOSModal(); mostrarPopupIdioma(); });
-        iosModal.addEventListener('click', function (e) {
-          if (e.target === iosModal) { hideIOSModal(); mostrarPopupIdioma(); }
-        });
-
-        window.addEventListener('beforeinstallprompt', function (e) {
-          e.preventDefault();
-          // Se o app já estiver instalado, ignora o evento (não guarda o prompt).
-          if (isAppInstalled()) return;
-          deferredPrompt = e;
-          // O navegador sinalizou que a instalação está disponível: exibe o botão
-          // imediatamente (independe de ter feito login ainda).
-          showInstallBtn();
-        });
-
-        window.addEventListener('appinstalled', function () {
-          installed = true;
-          deferredPrompt = null;
-          // Só agora, com a instalação de fato concluída, o botão some.
-          hideInstallBtn();
-          hideIOSModal();
-        });
-
-        function triggerInstallPrompt(onDismiss) {
-          // Trava de segurança: se o app já estiver instalado, não faz nada.
-          if (isAppInstalled()) {
-            hideInstallBtn();
-            return;
-          }
-          // iOS Safari não suporta beforeinstallprompt: mostra o passo a passo manual.
-          if (isIOSSafari()) {
-            showIOSModal();
-            // O botão continua disponível para o usuário abrir o passo a passo de novo.
-            if (onDismiss) onDismiss();
-            return;
-          }
-          if (!deferredPrompt) {
-            // Ainda não há prompt disponível neste momento; mantém/mostra o botão
-            // e continua o fluxo normalmente.
-            if (onDismiss) onDismiss('unavailable');
-            return;
-          }
-          var promptEvent = deferredPrompt;
-          promptEvent.prompt();
-          promptEvent.userChoice.then(function (choice) {
-            if (choice.outcome === 'accepted') hideInstallBtn();
-            if (onDismiss) onDismiss(choice.outcome);
-            // Cada evento só pode ser usado uma vez; aguarda o navegador
-            // disparar um novo beforeinstallprompt para futuras tentativas.
-            deferredPrompt = null;
-          }).catch(function () {
-            if (onDismiss) onDismiss('dismissed');
-            deferredPrompt = null;
-          });
-        }
-
-        installBtn.addEventListener('click', function () {
-          triggerInstallPrompt(showInstallBtn);
-          mostrarPopupIdioma();
-        });
-
-        // Ao carregar a página, se o app ainda não estiver instalado, o botão
-        // já fica disponível (não depende de aguardar o login para aparecer).
-        // Em iOS Safari, mostramos direto (não há beforeinstallprompt).
-        // Nos demais navegadores, mostramos como fallback manual enquanto
-        // aguardamos (ou não) o beforeinstallprompt — que, se disparar, também
-        // chama showInstallBtn() acima.
-        if (!isAppInstalled()) {
-          showInstallBtn();
-        }
-
-        // ── Popup automático de instalação após login ──────────────────────
-        // Some(o gancho): quiz.js chama window.__pqTriggerInstallAfterLogin()
-        // assim que um login é concluído com sucesso (manual ou revalidação).
-        var SESSION_DISMISS_KEY = 'pq_install_popup_dismissed';
-        var popupOverlay = document.getElementById('pq-install-popup');
-        var popupAceitar = document.getElementById('pq-install-popup-aceitar');
-        var popupRecusar = document.getElementById('pq-install-popup-recusar');
-
-        function foiRecusadoNestaSessao() {
-          try { return sessionStorage.getItem(SESSION_DISMISS_KEY) === '1'; } catch (e) { return false; }
-        }
-        function marcarRecusadoNestaSessao() {
-          try { sessionStorage.setItem(SESSION_DISMISS_KEY, '1'); } catch (e) {}
-        }
-
-        function esconderPopupInstalacao() {
-          popupOverlay.classList.remove('pq-visible');
-        }
-
-        function mostrarPopupInstalacao() {
-          // Nunca mostra se já instalado, se o usuário já recusou nesta
-          // sessão, ou se outra tela de instalação (modal iOS) já está aberta.
-          if (isAppInstalled() || foiRecusadoNestaSessao() || iosModal.classList.contains('pq-visible')) return;
-          popupOverlay.classList.add('pq-visible');
-        }
-
-        popupAceitar.addEventListener('click', function () {
-          esconderPopupInstalacao();
-          // Após a decisão do prompt nativo, segue para o seletor de idioma
-          // sem exigir atualização manual da página.
-          triggerInstallPrompt(function (outcome) {
-            if (outcome !== 'accepted' && outcome !== 'installed') showInstallBtn();
-            mostrarPopupIdioma();
-          });
-        });
-
-        popupRecusar.addEventListener('click', function () {
-          esconderPopupInstalacao();
-          // Não mostra o popup de novo nesta sessão, mas o botão "Instalar
-          // App" continua disponível na parte inferior para instalação manual.
-          marcarRecusadoNestaSessao();
-          mostrarPopupIdioma();
-        });
-
-        popupOverlay.addEventListener('click', function (e) {
-          if (e.target === popupOverlay) {
-            esconderPopupInstalacao();
-            marcarRecusadoNestaSessao();
-            mostrarPopupIdioma();
-          }
-        });
-
-        // Se a instalação for concluída enquanto o popup estiver aberto
-        // (ex.: usuário aceitou o prompt nativo), some com o popup também.
-        window.addEventListener('appinstalled', function () { esconderPopupInstalacao(); mostrarPopupIdioma(); });
-
-        window.__pqTriggerInstallAfterLogin = function () {
-          aplicarIdiomaInstalacao();
-          if (isAppInstalled() || foiRecusadoNestaSessao()) {
-            mostrarPopupIdioma();
-          } else {
-            mostrarPopupInstalacao();
-          }
-        };
-
-        window.addEventListener('pilates:lang', aplicarIdiomaInstalacao);
-        window.addEventListener('storage', function (e) { if (e.key === 'pilates_lang') aplicarIdiomaInstalacao(); });
-        aplicarIdiomaInstalacao();
-
-      })();
-    </script>
+    <script src="/install-pwa.js?v=20260811-2"></script>
 
     <div id="root"></div>
-    <script src="/demo-quiz.js"></script>
-    <script src="/quiz.js"></script>
+    <script src="/demo-quiz.js?v=20260811-2"></script>
+    <script src="/quiz.js?v=20260811-2"></script>
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function () {
-          navigator.serviceWorker.register('/sw.js').catch(function () {});
-        });
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () {});
       }
     </script>
 
     <style>
-      /* ── Popup social proof: reduzir ~50% no mobile ── */
+      /* ── Popup social proof: cartão compacto no tema atual ── */
       [data-spopup="1"] {
-        max-width: 76px !important;
+        left: 12px !important;
+        bottom: 148px !important;
+        max-width: min(68vw, 216px) !important;
       }
       [data-spopup="1"] > div {
-        padding: 5px !important;
-        gap: 5px !important;
+        padding: 8px 9px !important;
+        gap: 7px !important;
+        border: 1px solid rgba(112, 78, 126, 0.24) !important;
+        border-radius: 17px !important;
+        color: #34203e !important;
+        background:
+          radial-gradient(circle at 94% 0%, rgba(211, 228, 204, 0.9), transparent 45%),
+          radial-gradient(circle at 4% 5%, rgba(232, 217, 241, 0.92), transparent 44%),
+          rgba(255, 250, 242, 0.98) !important;
+        box-shadow: 0 15px 42px rgba(46, 27, 53, 0.2) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
       }
-      /* Avatar */
       [data-spopup="1"] > div > div:first-child {
-        width: 14px !important;
-        height: 14px !important;
-        min-width: 14px !important;
-        font-size: 5px !important;
+        width: 29px !important;
+        height: 29px !important;
+        min-width: 29px !important;
+        border: 1px solid rgba(255,255,255,0.75);
+        font-size: 12px !important;
+        box-shadow: 0 5px 14px rgba(75, 44, 85, 0.2) !important;
       }
-      /* Textos */
       [data-spopup="1"] p {
-        font-size: 5.5px !important;
+        margin-bottom: 2px !important;
         line-height: 1.3 !important;
-        margin-bottom: 1px !important;
       }
-      /* Botão fechar */
+      [data-spopup="1"] p:nth-of-type(1) {
+        color: #382143 !important;
+        font-size: 10.5px !important;
+        font-weight: 850 !important;
+      }
+      [data-spopup="1"] p:nth-of-type(2) {
+        color: #7b6d80 !important;
+        font-size: 8.5px !important;
+      }
+      [data-spopup="1"] p:nth-of-type(3) {
+        color: #815f0a !important;
+        font-size: 9.5px !important;
+        font-weight: 750 !important;
+      }
       [data-spopup="1"] button {
-        font-size: 8px !important;
-        padding: 0 !important;
+        padding: 2px !important;
+        color: #765d81 !important;
+        font-size: 16px !important;
       }
-      /* Em telas maiores (tablet+), mantém tamanho original */
+      /* Em telas maiores, dá um pouco mais de respiro ao cartão */
       @media (min-width: 640px) {
         [data-spopup="1"] {
-          max-width: 168px !important;
+          max-width: 230px !important;
         }
         [data-spopup="1"] > div {
-          padding: 8px !important;
-          gap: 6px !important;
-        }
-        [data-spopup="1"] > div > div:first-child {
-          width: 24px !important;
-          height: 24px !important;
-          min-width: 24px !important;
-          font-size: 9px !important;
-        }
-        [data-spopup="1"] p {
-          font-size: inherit !important;
-          line-height: inherit !important;
-          margin-bottom: inherit !important;
-        }
-        [data-spopup="1"] button {
-          font-size: inherit !important;
+          padding: 9px 10px !important;
         }
       }
 
@@ -774,7 +533,7 @@
         border: 1px solid rgba(212, 175, 55, 0.3);
         display: flex;
         flex-direction: column;
-        cursor: pointer;
+        cursor: default;
       }
       #pq-coming-soon-card .pq-cs-cover {
         position: relative;
@@ -904,7 +663,7 @@
           card.setAttribute('aria-disabled', 'true');
           card.innerHTML =
             '<div class="pq-cs-cover">' +
-              '<img src="/capa6.webp" alt="Nuevo módulo próximamente" />' +
+              '<img src="/capa6.webp" alt="Nuevo módulo próximamente" loading="lazy" decoding="async" />' +
               '<div class="pq-cs-overlay"></div>' +
               '<div class="pq-cs-content">' +
                 '<svg class="pq-cs-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
@@ -979,65 +738,6 @@
       })();
     </script>
 
-    <style>
-      #pq-info-modal{display:none;position:fixed;inset:0;z-index:100000;background:rgba(8,5,14,.84);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;font-family:Inter,system-ui,sans-serif}
-      #pq-info-modal.pq-visible{display:flex}
-      #pq-info-modal .pq-info-card{width:min(420px,100%);background:linear-gradient(160deg,#2a1a40,#1a1025);border:1px solid rgba(212,175,55,.5);border-radius:22px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.6);text-align:center;color:#fff}
-      #pq-info-modal .pq-info-icon{font-size:42px;margin-bottom:8px}
-      #pq-info-modal h2{color:#d4af37;font-family:'Cinzel',serif;font-size:20px;margin:0 0 10px}
-      #pq-info-modal p{color:#d8cce3;font-size:14px;line-height:1.55;margin:0 0 20px}
-      #pq-info-ok{width:100%;border:0;border-radius:999px;padding:13px;background:#d4af37;color:#21152f;font-weight:800;font-size:15px;cursor:pointer}
-    </style>
-    <div id="pq-info-modal" role="dialog" aria-modal="true">
-      <div class="pq-info-card">
-        <div class="pq-info-icon" id="pq-info-icon">✨</div>
-        <h2 id="pq-info-title"></h2>
-        <p id="pq-info-message"></p>
-        <button id="pq-info-ok" type="button">OK</button>
-      </div>
-    </div>
-    <script>
-      (function(){
-        var modal=document.getElementById('pq-info-modal');
-        var title=document.getElementById('pq-info-title');
-        var message=document.getElementById('pq-info-message');
-        var icon=document.getElementById('pq-info-icon');
-        var TEXTS={
-          'es-ES':{soonTitle:'¡Nuevas clases en camino!',soonText:'Estamos preparando nuevas clases, ejercicios y actualizaciones para que continúes avanzando. Muy pronto encontrarás contenido nuevo dentro de la aplicación.',certTitle:'Tu certificado personalizado',certText:'Cuando completes todas las clases, desbloquearás un certificado de finalización personalizado con tu nombre.'},
-          'es-AR':{soonTitle:'¡Se vienen nuevas clases!',soonText:'Estamos preparando nuevas clases, ejercicios y actualizaciones para que sigas avanzando. Muy pronto vas a encontrar contenido nuevo en la aplicación.',certTitle:'Tu certificado personalizado',certText:'Cuando completes todas las clases, vas a desbloquear un certificado de finalización personalizado con tu nombre.'},
-          'es-MX':{soonTitle:'¡Nuevas clases muy pronto!',soonText:'Estamos preparando nuevas clases, ejercicios y mejoras para que continúes avanzando. Pronto encontrarás contenido nuevo en la app.',certTitle:'Tu certificado personalizado',certText:'Al completar todas las clases, desbloquearás un certificado de finalización personalizado con tu nombre.'},
-          'es-CO':{soonTitle:'¡Nuevas clases en camino!',soonText:'Estamos preparando nuevas clases, ejercicios y actualizaciones para que sigas avanzando. Muy pronto encontrarás contenido nuevo en la aplicación.',certTitle:'Tu certificado personalizado',certText:'Cuando completes todas las clases, desbloquearás un certificado de finalización personalizado con tu nombre.'},
-          'es-PE':{soonTitle:'¡Próximamente habrá nuevas clases!',soonText:'Estamos desarrollando nuevas clases, ejercicios y actualizaciones para que continúes avanzando. Pronto encontrarás recursos nuevos en la aplicación.',certTitle:'Tu certificado personalizado',certText:'Cuando completes todas las clases, obtendrás un certificado de finalización personalizado con tu nombre.'},
-          'es-CL':{soonTitle:'¡Se vienen nuevas clases!',soonText:'Estamos preparando nuevas clases, ejercicios y mejoras para que sigas avanzando. Pronto vas a encontrar contenido nuevo en la app.',certTitle:'Tu certificado personalizado',certText:'Cuando completes todas las clases, vas a desbloquear un certificado de finalización con tu nombre.'}
-        };
-        function current(){try{return TEXTS[localStorage.getItem('pilates_lang')]||TEXTS['es-CO']}catch(e){return TEXTS['es-CO']}}
-        function openInfo(type){
-          var t=current();
-          if(type==='soon'){
-            icon.textContent='🚀'; title.textContent=t.soonTitle; message.textContent=t.soonText;
-          }else{
-            icon.textContent='🎓'; title.textContent=t.certTitle; message.textContent=t.certText;
-          }
-          modal.classList.add('pq-visible');
-        }
-        function closeInfo(){modal.classList.remove('pq-visible')}
-        document.getElementById('pq-info-ok').addEventListener('click',closeInfo);
-        modal.addEventListener('click',function(e){if(e.target===modal)closeInfo()});
-        document.addEventListener('click',function(e){
-          var soon=e.target.closest&&e.target.closest('#pq-coming-soon-card');
-          if(soon){e.preventDefault();e.stopPropagation();openInfo('soon');return}
-          var card=e.target.closest&&e.target.closest('[data-pq-certificate-card],[class*="col-span-2"]');
-          if(card&&(card.querySelector('img[src*="capa7"]')||/certificado/i.test(card.textContent||''))){
-            if(card.className.indexOf('cursor-not-allowed')!==-1){
-              e.preventDefault();
-              e.stopPropagation();
-              openInfo('certificate');
-            }
-          }
-        },true);
-      })();
-    </script>
-
-    <script src="/professional-v8.js"></script>
+    <script src="/professional-v8.js?v=20260811-2"></script>
   </body>
 </html>

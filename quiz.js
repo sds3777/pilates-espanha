@@ -2,6 +2,7 @@
   var QUIZ_KEY = 'pilates_quiz_done';
   var AUTH_KEY = 'pilates_auth';
   var LANG_KEY = 'pilates_lang';
+  var LANG_CONFIRMED_KEY = 'pq_language_selected';
 
   // ─── Modo demonstração (/teste) ──────────────────
   // Na rota /teste o React já abre sozinho no modo DEMO nativo (aulas
@@ -12,6 +13,12 @@
   // demais rotas.
   var MODO_TESTE = window.location.pathname.replace(/\/+$/, '') === '/teste';
 
+  // Evita que as aulas protegidas apareçam por um instante antes da
+  // revalidação do acesso terminar.
+  if (!MODO_TESTE) {
+    var rootInicial = document.getElementById('root');
+    if (rootInicial) rootInicial.style.display = 'none';
+  }
 
   // window.__pq_auth_ok só vira true depois que o backend confirma o acesso
   // (login manual OU revalidação automática) nesta sessão de página.
@@ -20,14 +27,17 @@
   // ─── Bloquear login antigo do app (nome+senha) ───────────────────────────
   // Definido logo no início: origSetItem precisa existir antes de qualquer
   // função que possa gravar AUTH_KEY (revalidação, login, logout).
-  var origSetItem = localStorage.setItem.bind(localStorage);
-  localStorage.setItem = function(key, value) {
-    if (key === AUTH_KEY && !window.__pq_auth_ok) return;
-    origSetItem(key, value);
-    if (key === LANG_KEY) {
-      try { window.dispatchEvent(new CustomEvent('pilates:lang', { detail: value })); } catch (e) {}
-    }
-  };
+  var origSetItem = function () {};
+  try {
+    origSetItem = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = function(key, value) {
+      if (key === AUTH_KEY && !window.__pq_auth_ok) return;
+      origSetItem(key, value);
+      if (key === LANG_KEY) {
+        try { window.dispatchEvent(new CustomEvent('pilates:lang', { detail: value })); } catch (e) {}
+      }
+    };
+  } catch(e) {}
 
   // ─── Idioma: mesma fonte de verdade usada pelo app React ────────────────
   var IDIOMAS_VALIDOS = ['es-ES', 'es-AR', 'es-MX', 'es-CO', 'es-PE', 'es-CL'];
@@ -45,6 +55,111 @@
     } catch (e) {}
     return lang;
   }
+
+  // Confirma a troca de país/variante feita pelo seletor interno do app.
+  // O popup inicial de países continua independente e não passa por aqui.
+  var codigoIdiomaPendente = null;
+  var CONFIRMACAO_IDIOMA_I18N = {
+    title: 'Confirmar cambio de país',
+    question: '¿Realmente deseas cambiar la variante a {idioma}?',
+    confirm: 'Cambiar',
+    cancel: 'Cancelar'
+  };
+
+  function fecharConfirmacaoIdioma(fecharLista) {
+    var modal = document.getElementById('pq-language-confirm-modal');
+    if (modal) modal.remove();
+    document.body.style.overflow = '';
+    if (fecharLista) {
+      var seletor = document.querySelector('button[aria-haspopup="listbox"]');
+      if (seletor && seletor.getAttribute('aria-expanded') === 'true') seletor.click();
+    }
+  }
+
+  function codigoDaOpcaoIdioma(opcao) {
+    var texto = (opcao.textContent || '').trim().replace(/\s+/g, ' ');
+    var codigosPorNome = {
+      'España': 'es-ES',
+      'Argentina': 'es-AR',
+      'México': 'es-MX',
+      'Colombia': 'es-CO',
+      'Perú': 'es-PE',
+      'Chile': 'es-CL'
+    };
+    var codigo = null;
+    Object.keys(codigosPorNome).some(function (nome) {
+      if (texto.indexOf(nome) === -1) return false;
+      codigo = codigosPorNome[nome];
+      return true;
+    });
+    return codigo;
+  }
+
+  function mostrarConfirmacaoIdioma(opcao) {
+    var codigo = codigoDaOpcaoIdioma(opcao);
+    if (!codigo || codigo === getLangAtual()) return false;
+    fecharConfirmacaoIdioma(false);
+    codigoIdiomaPendente = codigo;
+    var idiomaDestino = (opcao.textContent || '').trim().replace(/\s+/g, ' ');
+    var t = CONFIRMACAO_IDIOMA_I18N;
+    var modal = document.createElement('div');
+    modal.id = 'pq-language-confirm-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'pq-language-confirm-title');
+    modal.innerHTML =
+      '<div class="pq-language-confirm-card">' +
+        '<h2 id="pq-language-confirm-title"></h2>' +
+        '<p id="pq-language-confirm-copy"></p>' +
+        '<div class="pq-language-confirm-actions">' +
+          '<button type="button" id="pq-language-confirm-yes"></button>' +
+          '<button type="button" id="pq-language-confirm-no"></button>' +
+        '</div>' +
+      '</div>';
+    modal.querySelector('#pq-language-confirm-title').textContent = t.title;
+    modal.querySelector('#pq-language-confirm-copy').textContent = t.question.replace('{idioma}', idiomaDestino);
+    modal.querySelector('#pq-language-confirm-yes').textContent = t.confirm;
+    modal.querySelector('#pq-language-confirm-no').textContent = t.cancel;
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+
+    modal.querySelector('#pq-language-confirm-yes').addEventListener('click', function () {
+      var proximo = codigoIdiomaPendente;
+      codigoIdiomaPendente = null;
+      if (proximo && IDIOMAS_VALIDOS.indexOf(proximo) !== -1) {
+        try {
+          localStorage.setItem(LANG_KEY, proximo);
+          localStorage.setItem(LANG_CONFIRMED_KEY, '1');
+        } catch (e) {
+          try { window.dispatchEvent(new CustomEvent('pilates:lang', { detail: proximo })); } catch (erro) {}
+        }
+      }
+      fecharConfirmacaoIdioma(true);
+    });
+    modal.querySelector('#pq-language-confirm-no').addEventListener('click', function () {
+      codigoIdiomaPendente = null;
+      fecharConfirmacaoIdioma(true);
+    });
+    modal.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        codigoIdiomaPendente = null;
+        fecharConfirmacaoIdioma(true);
+      }
+    });
+    window.setTimeout(function () {
+      var confirmar = document.getElementById('pq-language-confirm-yes');
+      if (confirmar) confirmar.focus();
+    }, 30);
+    return true;
+  }
+
+  document.addEventListener('click', function (event) {
+    var opcao = event.target.closest && event.target.closest('[role="option"]');
+    if (!opcao || !mostrarConfirmacaoIdioma(opcao)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+  }, true);
 
   function aplicarDialeto(texto, lang) {
     if (typeof texto !== 'string') return texto;
@@ -151,6 +266,7 @@
     unavailableDefault: 'No fue posible liberar tu acceso.',
     retry: 'Intentar de nuevo',
     whatsapp: 'Hablar con soporte por WhatsApp 📲',
+    transferTitle: '¿Transferir acceso?',
     cancel: 'Cancelar',
     transfer: 'Transferir acceso'
   };
@@ -170,6 +286,7 @@
       PROCESSANDO: 'Tu pago todavía está siendo procesado. Si pagaste por un método con compensación diferida, espera la confirmación e inténtalo más tarde.',
       BLOQUEADO: 'Tu acceso fue cancelado, reembolsado o desactivado. Habla con soporte para revisar tu situación.',
       OUTRO_DISPOSITIVO: 'Este acceso ya está vinculado a otro dispositivo. ¿Deseas transferirlo a este dispositivo? El acceso anterior será desactivado.',
+      NOME_DUPLICADO: 'Existe más de un acceso con este nombre. Entra con el correo usado en la compra.',
       ERRO_INTERNO: 'No fue posible verificar el acceso en este momento. Inténtalo de nuevo.',
       DADOS_INVALIDOS: 'Los datos informados no son válidos. Revísalos e inténtalo de nuevo.',
       MUITAS_TENTATIVAS: 'Se realizaron demasiados intentos. Espera unos minutos e inténtalo de nuevo.',
@@ -182,19 +299,45 @@
   // ─── Modal de transferência de dispositivo ────────────────────────────────
   function mostrarConfirmacao(mensagem, onSim, onNao) {
     var t = getLoginI18n();
+    var anterior = document.getElementById('pq-device-transfer-modal');
+    if (anterior) anterior.remove();
     var modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:20px;';
+    modal.id = 'pq-device-transfer-modal';
+    modal.className = 'pq-transfer-overlay';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', 'pq-transfer-title');
     modal.innerHTML =
-      '<div style="background:#2a1a40;border:1px solid rgba(212,175,55,0.4);border-radius:20px;padding:32px 28px;max-width:380px;width:100%;text-align:center;">'
-      + '<p id="pq-confirm-message" style="color:#fff;font-size:15px;line-height:1.6;margin:0 0 24px;"></p>'
-      + '<div style="display:flex;gap:12px;">'
-      + '<button id="pq-nao" type="button" style="flex:1;padding:12px;background:transparent;border:2px solid #3a2560;color:#9b7ec8;border-radius:12px;font-size:15px;cursor:pointer;">' + escapeHtml(t.cancel) + '</button>'
-      + '<button id="pq-sim" type="button" style="flex:1;padding:12px;background:#d4af37;border:none;color:#0d1a1f;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">' + escapeHtml(t.transfer) + '</button>'
-      + '</div></div>';
+      '<div class="pq-transfer-card">' +
+        '<div class="pq-transfer-icon" aria-hidden="true">↔</div>' +
+        '<h2 id="pq-transfer-title">' + escapeHtml(t.transferTitle) + '</h2>' +
+        '<p>' + escapeHtml(mensagem) + '</p>' +
+        '<div class="pq-transfer-actions">' +
+          '<button id="pq-nao" type="button">' + escapeHtml(t.cancel) + '</button>' +
+          '<button id="pq-sim" type="button">' + escapeHtml(t.transfer) + '</button>' +
+        '</div>' +
+      '</div>';
     document.body.appendChild(modal);
-    document.getElementById('pq-confirm-message').textContent = mensagem;
-    document.getElementById('pq-sim').addEventListener('click', function() { modal.remove(); onSim(); });
-    document.getElementById('pq-nao').addEventListener('click', function() { modal.remove(); onNao(); });
+    document.body.style.overflow = 'hidden';
+
+    function fechar(callback) {
+      modal.remove();
+      document.body.style.overflow = '';
+      if (callback) callback();
+    }
+
+    modal.querySelector('#pq-sim').addEventListener('click', function() { fechar(onSim); });
+    modal.querySelector('#pq-nao').addEventListener('click', function() { fechar(onNao); });
+    modal.addEventListener('click', function (event) {
+      if (event.target === modal) fechar(onNao);
+    });
+    modal.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') fechar(onNao);
+    });
+    window.setTimeout(function () {
+      var cancelar = modal.querySelector('#pq-nao');
+      if (cancelar) cancelar.focus();
+    }, 30);
   }
 
   // Se já tem auth salvo no localStorage, ele NUNCA é usado sozinho para
@@ -619,8 +762,8 @@
       'font-family:Inter,system-ui,sans-serif'
     ].join(';');
 
-    var clasesIcon = '<svg class="pq-nav-icon" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="6.8" r="2.7"></circle><path d="M16 10.8v7.4m0-4.8-6.2 3.2m6.2-1 6.3 3.6M9.8 16.6l-4.3 5.1m10.5-3.5-4.2 7.1m4.2-7.1 5.1 6.7m-10.3.4h10.7"></path></svg>';
-    var bienestarIcon = '<svg class="pq-nav-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M16.2 26.5c-.3-7.8 2.6-13.6 8.5-17.5"></path><path d="M16.7 20.5C11.2 20.1 7.2 17 5 11.2c5.7-1 10.2.7 12.9 5.1"></path><path d="M18.7 15.1c.8-5.3 4-8.4 9.1-9.6.6 5.5-1.8 9.3-7.1 11.2"></path></svg>';
+    var clasesIcon = '<svg class="pq-nav-icon pq-nav-icon-classes" viewBox="0 0 36 36" aria-hidden="true"><rect x="5" y="22" width="26" height="7" rx="3.5" fill="#aa8bc2" stroke="#d9b73c" stroke-width="1.2"></rect><rect x="10" y="5" width="16" height="16" rx="4" fill="#d9b73c" stroke="#f1d675" stroke-width="1.2"></rect><path d="m16 10 6 3.2-6 3.4z" fill="#fffdf9" stroke="none"></path><path d="M9 31h18" stroke="#d9b73c" stroke-width="1.5"></path></svg>';
+    var bienestarIcon = '<svg class="pq-nav-icon pq-nav-icon-food" viewBox="0 0 36 36" aria-hidden="true"><path d="M6 18h24c-.9 7.5-5 11.3-12 11.3S6.9 25.5 6 18Z" fill="#d7ad45" stroke="#f0cf78" stroke-width="1.2"></path><path d="M11 31h14" stroke="#d7ad45" stroke-width="1.7"></path><circle cx="13" cy="16" r="3.2" fill="#e98778" stroke="none"></circle><circle cx="20" cy="15.2" r="3.5" fill="#e46f64" stroke="none"></circle><path d="M19 13c-.4-5.1 2.1-8.8 7.5-11 .5 5.4-1.9 9.1-7.1 11.1Z" fill="#78b26f" stroke="#4d8d65" stroke-width="1"></path><path d="M16.8 14c-4.4-.1-7.7-2.2-9.7-6.2 4.7-.8 8.2.8 10.4 4.8Z" fill="#91c47f" stroke="#4d8d65" stroke-width="1"></path></svg>';
 
     // El estado activo real se aplica después mediante actualizarAbas().
     nav.innerHTML =
@@ -634,6 +777,11 @@
       + '</button>';
 
     document.body.appendChild(nav);
+
+    if (MODO_TESTE) {
+      var wellnessButton = document.getElementById('pq-tab-bonus');
+      if (wellnessButton) wellnessButton.classList.add('pq-demo-wellness-pulse');
+    }
 
     // Ajustar padding inferior do app para não sobrepor a nav
     var root = document.getElementById('root');
@@ -841,6 +989,96 @@
     document.addEventListener('DOMContentLoaded', iniciarNavBar);
   } else {
     iniciarNavBar();
+  }
+
+  // ─── Depoimentos, perguntas e acabamento visual da oferta demo ──────────
+  var OFERTA_EXTRA_I18N = {
+    testimonialsTitle: 'Lo que dicen nuestras alumnas',
+    faqTitle: 'Preguntas frecuentes',
+    testimonials: [
+      ['Helena Ferreira', 'Sentía muchos dolores en el día a día. Desde que empecé las clases, han disminuido mucho y hoy me siento más ligera.', '/depoimento-helena.webp'],
+      ['Isabel Martins', 'Con las clases y cuidando mejor mi alimentación, ya bajé 8 kilos. Tengo más energía y estoy feliz con mi evolución.', '/depoimento-isabel.webp'],
+      ['Ana Rodrigues', '¡Ya estoy en el módulo 5 y me encanta! Las clases son fáciles de seguir y puedo notar mi evolución.', '/depoimento-ana.webp']
+    ],
+    faq: [
+      ['¿El pago es único?', 'Sí. Pagas una sola vez, sin mensualidades, y recibes acceso de por vida al programa.'],
+      ['¿El acceso se libera inmediatamente?', 'Sí. Después de confirmar el pago, recibes inmediatamente las instrucciones para acceder a todas las clases y materiales.'],
+      ['¿Puedo ver las clases en la TV?', 'Sí. Puedes duplicar las clases en tu TV y verlas normalmente, sin ningún problema.'],
+      ['¿El programa es adecuado para principiantes?', 'Sí. Las clases se explican paso a paso y están organizadas para que avances a tu ritmo. También tendrás mi apoyo por WhatsApp cuando lo necesites.'],
+      ['¿Necesito comprar algún equipo?', 'No. Las clases están pensadas para hacerlas en casa, sin equipos especiales. Cuando sea necesario, podrás utilizar objetos sencillos que ya tengas.']
+    ]
+  };
+
+  function atualizarTituloAulasDemo() {
+    if (!MODO_TESTE) return;
+    document.querySelectorAll('h2').forEach(function (titulo) {
+      if ((titulo.textContent || '').trim() === 'Mis Clases') titulo.textContent = 'Tus clases';
+    });
+  }
+
+  function marcarPrecosOferta(oferta) {
+    oferta.querySelectorAll('span,p,strong,div').forEach(function (el) {
+      if (el.children.length) return;
+      var texto = (el.textContent || '').trim();
+      if (texto === '490 MXN') el.setAttribute('data-pq-old-price', '1');
+      if (texto === '150 MXN') el.setAttribute('data-pq-new-price', '1');
+    });
+    var garantia = oferta.querySelector('img[src*="garantia"]');
+    if (garantia) {
+      garantia.src = '/garantia-30-dias.png';
+      garantia.alt = 'Garantía de 30 días';
+    }
+  }
+
+  function montarDepoimentosEFAQ() {
+    if (!MODO_TESTE) return;
+    var oferta = document.getElementById('comprovante-block');
+    if (!oferta) return;
+    marcarPrecosOferta(oferta);
+    if (document.getElementById('pq-social-proof-faq')) return;
+    var t = OFERTA_EXTRA_I18N;
+    var bloco = document.createElement('div');
+    bloco.id = 'pq-social-proof-faq';
+
+    var depoimentos = t.testimonials.map(function (item) {
+      return '<article class="pq-testimonial-card">' +
+        '<img class="pq-testimonial-photo" src="' + escapeHtml(item[2]) + '" alt="' + escapeHtml(item[0]) + '" loading="lazy" decoding="async">' +
+        '<div><strong class="pq-testimonial-name">' + escapeHtml(item[0]) + '</strong>' +
+        '<span class="pq-testimonial-stars" aria-label="5 estrellas">★★★★★</span>' +
+        '<p class="pq-testimonial-text">“' + escapeHtml(item[1]) + '”</p></div>' +
+      '</article>';
+    }).join('');
+
+    var faq = t.faq.map(function (item) {
+      return '<details class="pq-faq-item"><summary>' + escapeHtml(item[0]) + '</summary>' +
+        '<p class="pq-faq-answer">' + escapeHtml(item[1]) + '</p></details>';
+    }).join('');
+
+    bloco.innerHTML =
+      '<section class="pq-offer-extra-section" aria-labelledby="pq-testimonials-title">' +
+        '<h3 class="pq-offer-extra-title" id="pq-testimonials-title">' + escapeHtml(t.testimonialsTitle) + '</h3>' +
+        '<div class="pq-testimonial-grid">' + depoimentos + '</div>' +
+      '</section>' +
+      '<section class="pq-offer-extra-section" aria-labelledby="pq-faq-title">' +
+        '<h3 class="pq-offer-extra-title" id="pq-faq-title">' + escapeHtml(t.faqTitle) + '</h3>' +
+        '<div class="pq-faq-list">' + faq + '</div>' +
+      '</section>';
+    oferta.appendChild(bloco);
+  }
+
+  function aplicarAjustesVisuaisSolicitados() {
+    atualizarTituloAulasDemo();
+    montarDepoimentosEFAQ();
+  }
+
+  if (MODO_TESTE) {
+    var ajusteVisualTimer;
+    var observadorAjustesVisuais = new MutationObserver(function () {
+      clearTimeout(ajusteVisualTimer);
+      ajusteVisualTimer = window.setTimeout(aplicarAjustesVisuaisSolicitados, 80);
+    });
+    observadorAjustesVisuais.observe(document.body, { childList: true, subtree: true });
+    aplicarAjustesVisuaisSolicitados();
   }
 
   // ─── Injetar cadeado grande sobre capa do certificado (estado bloqueado) ──
