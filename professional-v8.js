@@ -257,19 +257,76 @@
   };
 
   function getLang() {
-    return 'es';
+    var valid = ['es-ES', 'es-AR', 'es-MX', 'es-CO', 'es-PE', 'es-CL'];
+    try {
+      var saved = localStorage.getItem('pilates_lang');
+      if (valid.indexOf(saved) !== -1) return saved;
+    } catch (error) {}
+    return 'es-CO';
+  }
+
+  function dialectText(text, lang) {
+    if (typeof text !== 'string') return text;
+    var value = text;
+    function replaceWord(source, pattern, replacement) {
+      return source.replace(pattern, function (match) {
+        return match.charAt(0) === match.charAt(0).toUpperCase()
+          ? replacement.charAt(0).toUpperCase() + replacement.slice(1)
+          : replacement;
+      });
+    }
+    if (lang === 'es-ES') {
+      value = replaceWord(value, /celular/gi, 'móvil');
+      value = replaceWord(value, /computadora/gi, 'ordenador');
+      value = replaceWord(value, /jugos/gi, 'zumos');
+      return value.replace(/Completaste/g, 'Has completado').replace(/completaste/g, 'has completado')
+        .replace(/Llegaste/g, 'Has llegado').replace(/llegaste/g, 'has llegado')
+        .replace(/Practicaste/g, 'Has practicado').replace(/practicaste/g, 'has practicado')
+        .replace(/¡Felicidades!/g, '¡Enhorabuena!');
+    }
+    if (lang === 'es-AR') {
+      return value.replace(/\bAprende\b/g, 'Aprendé').replace(/\baprende\b/g, 'aprendé')
+        .replace(/\bMejora\b/g, 'Mejorá').replace(/\bmejora\b/g, 'mejorá')
+        .replace(/\bPractica\b/g, 'Practicá').replace(/\bpractica\b/g, 'practicá')
+        .replace(/\bCompleta\b/g, 'Completá').replace(/\bcompleta\b/g, 'completá')
+        .replace(/\bElige\b/g, 'Elegí').replace(/\belige\b/g, 'elegí')
+        .replace(/\bEscribe\b/g, 'Escribí').replace(/\bescribe\b/g, 'escribí')
+        .replace(/\bContinúa\b/g, 'Seguí').replace(/\bcontinúa\b/g, 'seguí')
+        .replace(/\bComienza\b/g, 'Empezá').replace(/\bcomienza\b/g, 'empezá')
+        .replace(/\bEmpieza\b/g, 'Empezá').replace(/\bempieza\b/g, 'empezá')
+        .replace(/\bpuedes\b/g, 'podés').replace(/\bquieres\b/g, 'querés')
+        .replace(/\btienes\b/g, 'tenés').replace(/\bcontigo\b/g, 'con vos');
+    }
+    value = replaceWord(value, /móvil/gi, 'celular');
+    value = replaceWord(value, /zumos/gi, 'jugos');
+    if (lang === 'es-MX') return value.replace(/Bienvenida de nuevo/g, 'Qué gusto verte de nuevo').replace(/\bEmpieza\b/g, 'Comienza');
+    if (lang === 'es-CO') return value.replace(/Bienvenida de nuevo/g, 'Qué alegría tenerte de nuevo').replace(/\bComienza\b/g, 'Empieza');
+    if (lang === 'es-PE') return value.replace(/Bienvenida de nuevo/g, 'Bienvenida nuevamente').replace(/\bEmpieza\b/g, 'Comienza');
+    if (lang === 'es-CL') return value.replace(/Bienvenida de nuevo/g, 'Qué bueno verte de nuevo').replace(/\bEmpieza\b/g, 'Comienza').replace(/\bToca\b/g, 'Presiona').replace(/\btoca\b/g, 'presiona');
+    return value;
+  }
+
+  function regionalCopy(value, lang) {
+    if (typeof value === 'string') return dialectText(value, lang);
+    if (Array.isArray(value)) return value.map(function (item) { return regionalCopy(item, lang); });
+    if (value && typeof value === 'object') {
+      var copy = {};
+      Object.keys(value).forEach(function (key) { copy[key] = regionalCopy(value[key], lang); });
+      return copy;
+    }
+    return value;
   }
 
   function i18n() {
-    return UI_TEXTS[getLang()] || UI_TEXTS.es;
+    return regionalCopy(UI_TEXTS.es, getLang());
   }
 
   function infoI18n() {
-    return INFO_TEXTS[getLang()] || INFO_TEXTS.es;
+    return regionalCopy(INFO_TEXTS.es, getLang());
   }
 
   function certificateI18n() {
-    return CERTIFICATE_TEXTS[getLang()] || CERTIFICATE_TEXTS.es;
+    return regionalCopy(CERTIFICATE_TEXTS.es, getLang());
   }
 
   function escapeHtml(value) {
@@ -764,6 +821,11 @@
   }
 
   function ensureGlobalProgress(home, text) {
+    if (IS_DEMO) {
+      var demoProgress = document.getElementById('pq-global-progress');
+      if (demoProgress) demoProgress.remove();
+      return;
+    }
     var journey = document.getElementById('pq-journey-card');
     if (!journey) return;
     var completed = Math.min(completedClassCount(), TOTAL_CLASSES);
@@ -1020,7 +1082,7 @@
 
   function openModuleGuide(card) {
     if (IS_DEMO || hasSeenModuleGuide()) return false;
-    var text = MODULE_GUIDE_TEXTS[getLang()] || MODULE_GUIDE_TEXTS.es;
+    var text = regionalCopy(MODULE_GUIDE_TEXTS.es, getLang());
     var modal = ensureModuleGuideModal();
     pendingModuleCard = card;
     rememberModuleGuide();
@@ -1152,13 +1214,7 @@
   }
 
   function decorateIntensity() {
-    var localized = {
-      'pt-BR': ['Intensidade', 'Suave', 'Moderada', 'Desafiadora'],
-      'pt-PT': ['Intensidade', 'Suave', 'Moderada', 'Desafiante'],
-      es: ['Intensidad', 'Suave', 'Moderada', 'Desafiante'],
-      en: ['Intensity', 'Gentle', 'Moderate', 'Challenging'],
-      fr: ['Intensité', 'Douce', 'Modérée', 'Soutenue']
-    }[getLang()] || ['Intensidade', 'Suave', 'Moderada', 'Desafiadora'];
+    var localized = regionalCopy(['Intensidad', 'Suave', 'Moderada', 'Desafiante'], getLang());
 
     document.querySelectorAll('[data-pq-view="module"] span').forEach(function (element) {
       var colorDot = element.firstElementChild;

@@ -12,6 +12,7 @@
   // mais nada do fluxo normal, que continua abaixo intacto para as
   // demais rotas.
   var MODO_TESTE = window.location.pathname.replace(/\/+$/, '') === '/teste';
+  if (MODO_TESTE) document.documentElement.classList.add('pq-demo-mode');
 
   // Evita que as aulas protegidas apareçam por um instante antes da
   // revalidação do acesso terminar.
@@ -56,6 +57,27 @@
     return lang;
   }
 
+  function idiomaFoiConfirmado() {
+    try { return localStorage.getItem(LANG_CONFIRMED_KEY) === '1'; }
+    catch (e) { return false; }
+  }
+
+  function atualizarConviteIdioma() {
+    if (!MODO_TESTE) return;
+    var seletor = document.querySelector('button[aria-haspopup="listbox"]');
+    if (!seletor) return;
+    var wrapper = seletor.parentElement;
+    if (!wrapper) return;
+    var confirmado = idiomaFoiConfirmado();
+    wrapper.classList.toggle('pq-language-selector-hidden', confirmado);
+    seletor.classList.toggle('pq-language-selector-pulse', !confirmado);
+  }
+
+  function confirmarIdiomaSelecionado() {
+    try { localStorage.setItem(LANG_CONFIRMED_KEY, '1'); } catch (e) {}
+    atualizarConviteIdioma();
+  }
+
   // Confirma a troca de país/variante feita pelo seletor interno do app.
   // O popup inicial de países continua independente e não passa por aqui.
   var codigoIdiomaPendente = null;
@@ -97,11 +119,11 @@
 
   function mostrarConfirmacaoIdioma(opcao) {
     var codigo = codigoDaOpcaoIdioma(opcao);
-    if (!codigo || codigo === getLangAtual()) return false;
+    if (!codigo || (codigo === getLangAtual() && idiomaFoiConfirmado())) return false;
     fecharConfirmacaoIdioma(false);
     codigoIdiomaPendente = codigo;
     var idiomaDestino = (opcao.textContent || '').trim().replace(/\s+/g, ' ');
-    var t = CONFIRMACAO_IDIOMA_I18N;
+    var t = regionalizarValor(JSON.parse(JSON.stringify(CONFIRMACAO_IDIOMA_I18N)), getLangAtual());
     var modal = document.createElement('div');
     modal.id = 'pq-language-confirm-modal';
     modal.setAttribute('role', 'dialog');
@@ -129,7 +151,7 @@
       if (proximo && IDIOMAS_VALIDOS.indexOf(proximo) !== -1) {
         try {
           localStorage.setItem(LANG_KEY, proximo);
-          localStorage.setItem(LANG_CONFIRMED_KEY, '1');
+          confirmarIdiomaSelecionado();
         } catch (e) {
           try { window.dispatchEvent(new CustomEvent('pilates:lang', { detail: proximo })); } catch (erro) {}
         }
@@ -161,6 +183,17 @@
     if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
   }, true);
 
+  window.addEventListener('pilates:lang', function () { window.setTimeout(atualizarConviteIdioma, 20); });
+  window.addEventListener('storage', function (event) {
+    if (event.key === LANG_CONFIRMED_KEY || event.key === LANG_KEY) atualizarConviteIdioma();
+  });
+  function observarConviteIdioma() {
+    atualizarConviteIdioma();
+    new MutationObserver(atualizarConviteIdioma).observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', observarConviteIdioma, { once: true });
+  else observarConviteIdioma();
+
   function aplicarDialeto(texto, lang) {
     if (typeof texto !== 'string') return texto;
     var t = texto;
@@ -173,7 +206,11 @@
         .replace(/^Bonos$/, 'Extras');
     }
     if (lang === 'es-AR') {
-      return t.replace(/\bIngresa\b/g, 'Ingresá').replace(/\bingresa\b/g, 'ingresá')
+      return t.replace(/\bAprende\b/g, 'Aprendé').replace(/\baprende\b/g, 'aprendé')
+        .replace(/\bMejora\b/g, 'Mejorá').replace(/\bmejora\b/g, 'mejorá')
+        .replace(/\bPractica\b/g, 'Practicá').replace(/\bpractica\b/g, 'practicá')
+        .replace(/\bCompleta\b/g, 'Completá').replace(/\bcompleta\b/g, 'completá')
+        .replace(/\bIngresa\b/g, 'Ingresá').replace(/\bingresa\b/g, 'ingresá')
         .replace(/\bIngresar\b/g, 'Ingresar')
         .replace(/\bEscribe\b/g, 'Escribí').replace(/\bescribe\b/g, 'escribí')
         .replace(/\bSelecciona\b/g, 'Seleccioná').replace(/\bselecciona\b/g, 'seleccioná')
@@ -185,6 +222,7 @@
         .replace(/\bEmpieza\b/g, 'Empezá').replace(/\bempieza\b/g, 'empezá')
         .replace(/\bComienza\b/g, 'Empezá').replace(/\bcomienza\b/g, 'empezá')
         .replace(/\bpuedes\b/g, 'podés').replace(/\bquieres\b/g, 'querés')
+        .replace(/\bdeseas\b/g, 'deseás').replace(/\btienes\b/g, 'tenés').replace(/\bcontigo\b/g, 'con vos')
         .replace(/Bonos Exclusivos/g, 'Beneficios exclusivos')
         .replace(/^Bonos$/, 'Beneficios')
         .replace(/\bzumos\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Jugos' : 'jugos'; });
@@ -200,6 +238,13 @@
 
   function textoIdioma(texto) {
     return aplicarDialeto(texto, getLangAtual());
+  }
+
+  function regionalizarValor(valor, lang) {
+    if (typeof valor === 'string') return aplicarDialeto(valor, lang);
+    if (Array.isArray(valor)) return valor.map(function (item) { return regionalizarValor(item, lang); });
+    if (valor && typeof valor === 'object') Object.keys(valor).forEach(function (chave) { valor[chave] = regionalizarValor(valor[chave], lang); });
+    return valor;
   }
 
   function escapeHtml(valor) {
@@ -221,16 +266,10 @@
   };
 
   var BONUS_TITULOS_I18N = {
-    lowcarb: 'REGALO - 100 recetas low carb.pdf',
-    desafio21: 'Plan alimentario - Reto de 21 días.pdf',
-    detox: 'Jugos detox saludables.pdf',
-    vitaminas: 'Vitaminas poderosas.pdf',
-    mounjaro: 'Té casero Mounjaro Natural.pdf',
-    alimentaria: 'Guía alimentaria.pdf',
-    diabeticos: 'Guía alimentaria para diabéticos.pdf',
-    ansiedad: 'Guía adiós a la ansiedad.pdf',
-    postres: 'Dulces y postres sin azúcar.pdf',
-    airfryer: '55 recetas sin gluten para Airfryer.pdf'
+    lowcarb: 'REGALO - 100 recetas low carb', desafio21: 'Plan alimentario - Reto de 21 días',
+    detox: 'Jugos detox saludables', vitaminas: 'Vitaminas poderosas', mounjaro: 'Té casero Mounjaro Natural',
+    alimentaria: 'Guía alimentaria', diabeticos: 'Guía alimentaria para diabéticos',
+    ansiedad: 'Guía adiós a la ansiedad', postres: 'Dulces y postres sin azúcar', airfryer: '55 recetas sin gluten para Airfryer'
   };
 
   function getBonusI18n() {
@@ -245,7 +284,7 @@
   function traduzirTituloPdf(pdf) {
     var chave = typeof pdf === 'object' ? pdf.key : pdf;
     var base = BONUS_TITULOS_I18N[chave] || (typeof pdf === 'object' ? pdf.titulo : String(pdf || ''));
-    return aplicarDialeto(base, getLangAtual());
+    return aplicarDialeto(base.replace(/\.pdf\s*$/i, ''), getLangAtual());
   }
 
   var LOGIN_I18N_BASE = {
@@ -691,16 +730,16 @@
 
   // ─── Sistema de abas: Clases / Bonos ─────────────────────────────────────
   var BONUS_PDFS = [
-    { key: 'lowcarb', coverKey: 'postres', titulo: 'REGALO - 100 recetas low carb.pdf', id: '15OyqooJVMaE9zvlZPNp62NKlEQ7jx8zk' },
-    { key: 'desafio21', coverKey: 'alimentaria', titulo: 'Plan alimentario - Reto de 21 días.pdf', id: '1t-9ZJxiJ_dbqkXSUML7gqpzaPINMWMAk' },
+    { key: 'desafio21', coverKey: 'alimentaria', titulo: 'Plan alimentario - Reto de 21 días', id: '1t-9ZJxiJ_dbqkXSUML7gqpzaPINMWMAk' },
+    { key: 'vitaminas', titulo: 'Vitaminas poderosas', id: '1NqdZUgen8c9sAeeqBGpuWVpyfdHm7oyR' },
+    { key: 'lowcarb', coverKey: 'postres', titulo: 'REGALO - 100 recetas low carb', id: '15OyqooJVMaE9zvlZPNp62NKlEQ7jx8zk' },
     { key: 'detox', titulo: 'Jugos detox saludables.pdf', id: '1p7fOIGVTfImSOuuZ6RQ9RTYNX2mtG35V' },
-    { key: 'vitaminas', titulo: 'Vitaminas poderosas.pdf', id: '1NqdZUgen8c9sAeeqBGpuWVpyfdHm7oyR' },
     { key: 'mounjaro', titulo: 'Té casero Mounjaro Natural.pdf', id: '1ouMQO8Zbo57qjLCuQec10I749pTAc_wT' },
     { key: 'alimentaria', titulo: 'Guía alimentaria.pdf', id: '1HE1Ku2DvutwffGTCQ0SQid3l2rWExQu8' },
-    { key: 'diabeticos', titulo: 'Guía alimentaria para diabéticos.pdf', id: '1wH72qqDPZWeJFXoAhq0m1RW7Xu2ElIo7' },
     { key: 'ansiedad', titulo: 'Guía adiós a la ansiedad.pdf', id: '1sY-3bLKVfozlSdv_1th1qeoMc8tRfoCo' },
     { key: 'postres', titulo: 'Dulces y postres sin azúcar.pdf', id: '1fODdS57zqgk3fsuG8UbWc14I84o9Okvh' },
-    { key: 'airfryer', titulo: '55 recetas sin gluten para Airfryer.pdf', id: '1McVSUU0grhMBP8NKSYXcO1C2U2HavOXa' }
+    { key: 'airfryer', titulo: '55 recetas sin gluten para Airfryer.pdf', id: '1McVSUU0grhMBP8NKSYXcO1C2U2HavOXa' },
+    { key: 'diabeticos', titulo: 'Guía alimentaria para diabéticos', id: '1wH72qqDPZWeJFXoAhq0m1RW7Xu2ElIo7' }
   ];
 
   function getViewUrl(id) {
@@ -943,6 +982,10 @@
     if (bonusLabel) bonusLabel.textContent = t.tabLabel;
     if (abaAtiva === 'bonus' && document.getElementById('pq-bonus-screen')) mostrarTelaBonus();
     document.querySelectorAll('#pq-cert-lock p').forEach(function (el) { el.textContent = textoIdioma('Bloqueado'); });
+    var blocoOferta = document.getElementById('pq-social-proof-faq');
+    if (blocoOferta) blocoOferta.removeAttribute('data-pq-lang');
+    montarDepoimentosEFAQ();
+    atualizarConviteIdioma();
   }
 
   window.addEventListener('pilates:lang', atualizarInterfaceAuxiliarPorIdioma);
@@ -1016,7 +1059,8 @@
   function atualizarTituloAulasDemo() {
     if (!MODO_TESTE) return;
     document.querySelectorAll('h2').forEach(function (titulo) {
-      if ((titulo.textContent || '').trim() === 'Mis Clases') titulo.textContent = 'Tus clases';
+      var texto = (titulo.textContent || '').trim();
+      if (texto === 'Mis Clases' || texto === 'Mis clases' || texto === 'Clases disponibles') titulo.textContent = textoIdioma('Tus clases');
     });
   }
 
@@ -1039,10 +1083,12 @@
     var oferta = document.getElementById('comprovante-block');
     if (!oferta) return;
     marcarPrecosOferta(oferta);
-    if (document.getElementById('pq-social-proof-faq')) return;
-    var t = OFERTA_EXTRA_I18N;
-    var bloco = document.createElement('div');
-    bloco.id = 'pq-social-proof-faq';
+    var lang = getLangAtual();
+    var t = regionalizarValor(JSON.parse(JSON.stringify(OFERTA_EXTRA_I18N)), lang);
+    var bloco = document.getElementById('pq-social-proof-faq');
+    if (!bloco) { bloco = document.createElement('div'); bloco.id = 'pq-social-proof-faq'; oferta.appendChild(bloco); }
+    if (bloco.getAttribute('data-pq-lang') === lang) return;
+    bloco.setAttribute('data-pq-lang', lang);
 
     var depoimentos = t.testimonials.map(function (item) {
       return '<article class="pq-testimonial-card">' +
@@ -1067,7 +1113,6 @@
         '<h3 class="pq-offer-extra-title" id="pq-faq-title">' + escapeHtml(t.faqTitle) + '</h3>' +
         '<div class="pq-faq-list">' + faq + '</div>' +
       '</section>';
-    oferta.appendChild(bloco);
   }
 
   function aplicarAjustesVisuaisSolicitados() {
@@ -1082,6 +1127,11 @@
       ajusteVisualTimer = window.setTimeout(aplicarAjustesVisuaisSolicitados, 80);
     });
     observadorAjustesVisuais.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('pilates:lang', function () {
+      var bloco = document.getElementById('pq-social-proof-faq');
+      if (bloco) bloco.removeAttribute('data-pq-lang');
+      aplicarAjustesVisuaisSolicitados();
+    });
     aplicarAjustesVisuaisSolicitados();
   }
 

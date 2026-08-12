@@ -1600,38 +1600,39 @@ body:has(#pq-bottom-nav) .fixed.bottom-6.right-4.z-50 > a[aria-label="WhatsApp"]
   align-items: center;
   justify-content: center;
   padding: 22px;
-  background: rgba(13, 7, 24, 0.68);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(57, 42, 62, 0.34);
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
 }
 
 .pq-language-confirm-card {
   width: min(100%, 390px);
-  padding: 25px 22px 20px;
-  border: 1px solid rgba(212, 175, 55, 0.34);
-  border-radius: 22px;
-  background: linear-gradient(155deg, #2a1a40, #1a1025);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.48);
+  padding: 28px 24px 22px;
+  border: 1px solid rgba(108, 78, 121, 0.2);
+  border-radius: 26px;
+  background: linear-gradient(145deg, #fff9fd 0%, #f6f8ee 100%);
+  box-shadow: 0 24px 65px rgba(48, 29, 55, 0.3);
   text-align: center;
 }
 
 .pq-language-confirm-card h2 {
   margin: 0 0 9px;
-  color: #d4af37;
-  font-size: 20px;
+  color: #35213e;
+  font-size: 21px;
   font-weight: 850;
 }
 
 .pq-language-confirm-card p {
   margin: 0 0 20px;
-  color: #e2d9f3;
+  color: #6d5d72;
   font-size: 15px;
   line-height: 1.5;
 }
 
 .pq-language-confirm-actions {
   display: grid;
-  gap: 9px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
 #pq-language-confirm-yes,
@@ -1652,9 +1653,18 @@ body:has(#pq-bottom-nav) .fixed.bottom-6.right-4.z-50 > a[aria-label="WhatsApp"]
 }
 
 #pq-language-confirm-no {
-  border: 1px solid rgba(212, 175, 55, 0.28);
-  color: #c9a8f0;
-  background: transparent;
+  border: 1px solid rgba(103, 70, 117, 0.28);
+  color: #5c4267;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+html.pq-demo-mode #comprovante-block {
+  margin-bottom: calc(6.75rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+html.pq-demo-mode #pq-social-proof-faq {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 /* Depoimentos e FAQ da oferta de demonstração. */

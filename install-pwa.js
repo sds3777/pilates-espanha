@@ -43,6 +43,24 @@
     return INSTALL_I18N[getCurrentLang()] || INSTALL_I18N['es-CO'];
   }
 
+  function installDialectText(text) {
+    var lang = getCurrentLang();
+    if (typeof text !== 'string') return text;
+    if (lang === 'es-ES') {
+      return text.replace(/\bcelular\b/gi, 'móvil').replace(/\bcomputadora\b/gi, 'ordenador');
+    }
+    if (lang === 'es-AR') {
+      return text.replace(/\bAbre\b/g, 'Abrí').replace(/\babre\b/g, 'abrí')
+        .replace(/\bToca\b/g, 'Tocá').replace(/\btoca\b/g, 'tocá')
+        .replace(/\bSelecciona\b/g, 'Seleccioná').replace(/\bselecciona\b/g, 'seleccioná')
+        .replace(/\bAgrega\b/g, 'Agregá').replace(/\bagrega\b/g, 'agregá')
+        .replace(/\bUsa\b/g, 'Usá').replace(/\busa\b/g, 'usá')
+        .replace(/\bInténtalo\b/g, 'Intentá').replace(/\binténtalo\b/g, 'intentá');
+    }
+    if (lang === 'es-CL') return text.replace(/\bToca\b/g, 'Presiona').replace(/\btoca\b/g, 'presiona');
+    return text;
+  }
+
   function aplicarIdiomaInstalacao() {
     var text = currentTexts();
     installBtn.textContent = text.button;
@@ -153,14 +171,14 @@
     var titleElement = installHelp.querySelector('h2');
     var subtitleElement = installHelp.querySelector('.pq-ios-sub');
     var stepsElement = installHelp.querySelector('.pq-ios-steps');
-    if (titleElement) titleElement.textContent = title;
-    if (subtitleElement) subtitleElement.textContent = subtitle;
+    if (titleElement) titleElement.textContent = installDialectText(title);
+    if (subtitleElement) subtitleElement.textContent = installDialectText(subtitle);
     if (stepsElement) {
       stepsElement.innerHTML = steps.map(function (step, index) {
         return '<div class="pq-ios-step">' +
           '<span class="pq-ios-step-num">' + (index + 1) + '</span>' +
           '<span class="pq-ios-step-icon">' + step.icon + '</span>' +
-          '<span class="pq-ios-step-text">' + step.text + '</span>' +
+          '<span class="pq-ios-step-text">' + installDialectText(step.text) + '</span>' +
         '</div>';
       }).join('');
     }

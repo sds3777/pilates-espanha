@@ -22,6 +22,83 @@
   };
 
   var stepCount = 6;
+  var baseTextNodes = new WeakMap();
+  var baseAttributes = new WeakMap();
+
+  function getDemoLang() {
+    var valid = ['es-ES', 'es-AR', 'es-MX', 'es-CO', 'es-PE', 'es-CL'];
+    try {
+      var saved = localStorage.getItem('pilates_lang');
+      if (valid.indexOf(saved) !== -1) return saved;
+    } catch (error) {}
+    return 'es-CO';
+  }
+
+  function demoDialectText(text, lang) {
+    if (typeof text !== 'string') return text;
+    var value = text;
+    function replaceWord(source, pattern, replacement) {
+      return source.replace(pattern, function (match) {
+        return match.charAt(0) === match.charAt(0).toUpperCase()
+          ? replacement.charAt(0).toUpperCase() + replacement.slice(1)
+          : replacement;
+      });
+    }
+    if (lang === 'es-ES') {
+      value = replaceWord(value, /celular/gi, 'móvil');
+      value = replaceWord(value, /computadora/gi, 'ordenador');
+      value = replaceWord(value, /jugos/gi, 'zumos');
+      return value.replace(/¿notaste/g, '¿has notado').replace(/que notaste/g, 'que has notado');
+    }
+    if (lang === 'es-AR') {
+      return value.replace(/\bcuéntanos\b/g, 'contanos').replace(/\bCuéntanos\b/g, 'Contanos')
+        .replace(/\bElige\b/g, 'Elegí').replace(/\belige\b/g, 'elegí')
+        .replace(/\bEscribe\b/g, 'Escribí').replace(/\bescribe\b/g, 'escribí')
+        .replace(/\bMira\b/g, 'Mirá').replace(/\bmira\b/g, 'mirá')
+        .replace(/\bConoce\b/g, 'Conocé').replace(/\bconoce\b/g, 'conocé')
+        .replace(/\bSientes\b/g, 'Sentís').replace(/\bsientes\b/g, 'sentís')
+        .replace(/\bTienes\b/g, 'Tenés').replace(/\btienes\b/g, 'tenés')
+        .replace(/\bPercibes\b/g, 'Percibís').replace(/\bpercibes\b/g, 'percibís')
+        .replace(/\bAcumulas\b/g, 'Acumulás').replace(/\bacumulas\b/g, 'acumulás')
+        .replace(/\bPuedes\b/g, 'Podés').replace(/\bpuedes\b/g, 'podés')
+        .replace(/\bContinuar\b/g, 'Continuar').replace(/\bAhora no\b/g, 'Ahora no');
+    }
+    value = replaceWord(value, /móvil/gi, 'celular');
+    value = replaceWord(value, /zumos/gi, 'jugos');
+    if (lang === 'es-MX') return value.replace(/No sabría decir/g, 'No estoy segura');
+    if (lang === 'es-CO') return value.replace(/No sabría decir/g, 'No sabría decirlo');
+    if (lang === 'es-PE') return value.replace(/No sabría decir/g, 'No estoy segura');
+    if (lang === 'es-CL') return value.replace(/Ahora no/g, 'Por ahora no').replace(/\bToca\b/g, 'Presiona').replace(/\btoca\b/g, 'presiona');
+    return value;
+  }
+
+  function localizeElement(root) {
+    if (!root) return;
+    var lang = getDemoLang();
+    var walker = document.createTreeWalker(root, (window.NodeFilter && window.NodeFilter.SHOW_TEXT) || 4);
+    var node;
+    while ((node = walker.nextNode())) {
+      if (!baseTextNodes.has(node)) baseTextNodes.set(node, node.nodeValue);
+      node.nodeValue = demoDialectText(baseTextNodes.get(node), lang);
+    }
+    root.querySelectorAll('[placeholder],[aria-label],[alt]').forEach(function (element) {
+      var stored = baseAttributes.get(element) || {};
+      ['placeholder', 'aria-label', 'alt'].forEach(function (attribute) {
+        if (!element.hasAttribute(attribute)) return;
+        if (!Object.prototype.hasOwnProperty.call(stored, attribute)) stored[attribute] = element.getAttribute(attribute);
+        element.setAttribute(attribute, demoDialectText(stored[attribute], lang));
+      });
+      baseAttributes.set(element, stored);
+    });
+  }
+
+  function setLocalizedText(element, baseText) {
+    if (!element) return;
+    element.textContent = baseText;
+    var textNode = element.firstChild;
+    if (textNode) baseTextNodes.set(textNode, baseText);
+    localizeElement(element);
+  }
 
   function escapeHtml(value) {
     return String(value || '').replace(/[&<>"']/g, function (character) {
@@ -124,6 +201,7 @@
     var back = overlay.querySelector('.pq-demo-back');
     var next = overlay.querySelector('.pq-demo-next');
     var error = overlay.querySelector('#pq-demo-error');
+    localizeElement(overlay);
 
     overlay.addEventListener('click', function (event) {
       var choice = event.target.closest('.pq-demo-option');
@@ -190,22 +268,22 @@
       var name = overlay.querySelector('#pq-demo-name').value.trim().replace(/\s+/g, ' ');
       var age = Number(overlay.querySelector('#pq-demo-age').value);
       var weight = Number(overlay.querySelector('#pq-demo-weight').value.replace(',', '.'));
-      if (name.length < 2) { error.textContent = 'Escribe tu nombre para continuar.'; return false; }
-      if (!Number.isFinite(age) || age < 18 || age > 110) { error.textContent = 'Escribe una edad válida.'; return false; }
-      if (!Number.isFinite(weight) || weight < 20 || weight > 300) { error.textContent = 'Escribe un peso válido.'; return false; }
+      if (name.length < 2) { setLocalizedText(error, 'Escribe tu nombre para continuar.'); return false; }
+      if (!Number.isFinite(age) || age < 18 || age > 110) { setLocalizedText(error, 'Escribe una edad válida.'); return false; }
+      if (!Number.isFinite(weight) || weight < 20 || weight > 300) { setLocalizedText(error, 'Escribe un peso válido.'); return false; }
       state.profile = { name: name, age: Math.round(age), weight: Math.round(weight * 10) / 10 };
-      overlay.querySelector('#pq-demo-age-question').textContent = age < 40
+      setLocalizedText(overlay.querySelector('#pq-demo-age-question'), age < 40
         ? 'En los últimos años, ¿notaste más dolores o mayor facilidad para subir de peso?'
-        : 'Después de los 40 años, ¿notaste más dolores o mayor facilidad para subir de peso?';
+        : 'Después de los 40 años, ¿notaste más dolores o mayor facilidad para subir de peso?');
       return true;
     }
     if (state.step === 1 && state.conditions.length === 0) {
-      error.textContent = 'Elige al menos una opción.';
+      setLocalizedText(error, 'Elige al menos una opción.');
       return false;
     }
     var keys = { 2: 'dailyDifficulty', 3: 'metabolism', 4: 'bodyFat', 5: 'ageChange' };
     if (keys[state.step] && !state[keys[state.step]]) {
-      error.textContent = 'Elige una opción para continuar.';
+      setLocalizedText(error, 'Elige una opción para continuar.');
       return false;
     }
     return true;
@@ -216,7 +294,7 @@
       section.classList.toggle('is-active', Number(section.getAttribute('data-step')) === state.step);
     });
     var percent = Math.round((state.step + 1) / stepCount * 100);
-    overlay.querySelector('#pq-demo-step-label').textContent = 'Paso ' + (state.step + 1) + ' de ' + stepCount;
+    setLocalizedText(overlay.querySelector('#pq-demo-step-label'), 'Paso ' + (state.step + 1) + ' de ' + stepCount);
     overlay.querySelector('#pq-demo-step-percent').textContent = percent + '%';
     var progress = overlay.querySelector('.pq-demo-quiz-progress');
     progress.setAttribute('aria-valuenow', String(percent));
@@ -225,7 +303,7 @@
     var actions = overlay.querySelector('.pq-demo-actions');
     actions.classList.toggle('is-first', state.step === 0);
     overlay.querySelector('.pq-demo-back').style.display = state.step === 0 ? 'none' : '';
-    overlay.querySelector('.pq-demo-next').textContent = state.step === stepCount - 1 ? 'Preparar mis clases' : 'Continuar';
+    setLocalizedText(overlay.querySelector('.pq-demo-next'), state.step === stepCount - 1 ? 'Preparar mis clases' : 'Continuar');
     var heading = overlay.querySelector('.pq-demo-step.is-active h1');
     if (heading) heading.id = 'pq-demo-current-title';
     overlay.querySelectorAll('.pq-demo-step:not(.is-active) h1').forEach(function (title) {
@@ -254,7 +332,7 @@
       percent.textContent = value + '%';
       bar.style.width = value + '%';
       track.setAttribute('aria-valuenow', String(value));
-      message.textContent = messages[messageIndex];
+      setLocalizedText(message, messages[messageIndex]);
       if (elapsed < 6000) {
         window.requestAnimationFrame(frame);
       } else {
@@ -328,6 +406,7 @@
         '</div>' +
       '</div>';
     document.body.appendChild(modal);
+    localizeElement(modal);
     document.body.style.overflow = 'hidden';
     modal.querySelector('#pq-teacher-intro-continue').addEventListener('click', openFirstPresentationVideo);
     modal.querySelector('#pq-teacher-intro-later').addEventListener('click', closeTeacherIntro);
@@ -371,4 +450,9 @@
   } else {
     mount();
   }
+
+  window.addEventListener('pilates:lang', function () {
+    localizeElement(document.getElementById('pq-demo-quiz'));
+    localizeElement(document.getElementById('pq-teacher-intro-modal'));
+  });
 })();
