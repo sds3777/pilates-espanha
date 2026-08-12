@@ -1658,13 +1658,30 @@ body:has(#pq-bottom-nav) .fixed.bottom-6.right-4.z-50 > a[aria-label="WhatsApp"]
   background: rgba(255, 255, 255, 0.72);
 }
 
-html.pq-demo-mode #comprovante-block {
-  margin-bottom: calc(6.75rem + env(safe-area-inset-bottom, 0px)) !important;
+/* Demo: esconde qualquer progresso legado mesmo se um bundle antigo ficar em cache. */
+html.pq-demo-mode #pq-global-progress,
+body:has(#comprovante-block) #pq-global-progress,
+html.pq-demo-mode #pq-lessons-heading > div:first-child > span,
+body:has(#comprovante-block) #pq-lessons-heading > div:first-child > span {
+  display: none !important;
 }
 
-html.pq-demo-mode #pq-social-proof-faq {
-  margin-bottom: 0 !important;
+/* O FAQ é o último conteúdo e recebe apenas a área segura dos controles fixos. */
+html.pq-demo-mode [data-pq-view="home"],
+body:has(#comprovante-block) [data-pq-view="home"] {
   padding-bottom: 0 !important;
+}
+
+html.pq-demo-mode #comprovante-block,
+body:has(#comprovante-block) #comprovante-block {
+  margin-bottom: 0 !important;
+}
+
+html.pq-demo-mode #pq-social-proof-faq,
+body:has(#comprovante-block) #pq-social-proof-faq {
+  box-sizing: border-box;
+  margin-bottom: 0 !important;
+  padding-bottom: calc(7rem + env(safe-area-inset-bottom, 0px)) !important;
 }
 
 /* Depoimentos e FAQ da oferta de demonstração. */
