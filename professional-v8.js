@@ -739,17 +739,16 @@
   }
 
   function ensureGreeting(home, profile, text) {
-    var journey = document.getElementById('pq-journey-card');
-    if (!journey) return;
-    var greeting = document.getElementById('pq-profile-greeting');
-    if (!greeting) {
-      greeting = document.createElement('section');
-      greeting.id = 'pq-profile-greeting';
-      greeting.setAttribute('aria-live', 'polite');
-      greeting.innerHTML =
-        '<div class="pq-greeting-icon" aria-hidden="true"></div>' +
-        '<div class="pq-greeting-copy"><h2></h2><p></p></div>';
-      journey.insertAdjacentElement('beforebegin', greeting);
+    // A saudação oficial é criada pelo React depois que o perfil é salvo.
+    // Criá-la aqui também abria uma condição de corrida: o script inseria
+    // uma cópia e, instantes depois, o React montava outra. Se uma versão
+    // antiga já deixou duas no DOM, preservamos a última (a nativa) e
+    // removemos as anteriores antes de aplicar o avatar e o acabamento.
+    var greetings = document.querySelectorAll('#pq-profile-greeting');
+    if (!greetings.length) return;
+    var greeting = greetings[greetings.length - 1];
+    for (var index = 0; index < greetings.length - 1; index += 1) {
+      greetings[index].remove();
     }
     var signature = getLang() + '|' + profile.nombre + '|' + (window.__pqFirstVisitGreeting ? 'first' : 'return');
     if (greeting.getAttribute('data-pq-copy-signature') === signature) return;

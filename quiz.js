@@ -221,6 +221,8 @@
   };
 
   var BONUS_TITULOS_I18N = {
+    lowcarb: 'REGALO - 100 recetas low carb.pdf',
+    desafio21: 'Plan alimentario - Reto de 21 días.pdf',
     detox: 'Jugos detox saludables.pdf',
     vitaminas: 'Vitaminas poderosas.pdf',
     mounjaro: 'Té casero Mounjaro Natural.pdf',
@@ -689,6 +691,8 @@
 
   // ─── Sistema de abas: Clases / Bonos ─────────────────────────────────────
   var BONUS_PDFS = [
+    { key: 'lowcarb', coverKey: 'postres', titulo: 'REGALO - 100 recetas low carb.pdf', id: '15OyqooJVMaE9zvlZPNp62NKlEQ7jx8zk' },
+    { key: 'desafio21', coverKey: 'alimentaria', titulo: 'Plan alimentario - Reto de 21 días.pdf', id: '1t-9ZJxiJ_dbqkXSUML7gqpzaPINMWMAk' },
     { key: 'detox', titulo: 'Jugos detox saludables.pdf', id: '1p7fOIGVTfImSOuuZ6RQ9RTYNX2mtG35V' },
     { key: 'vitaminas', titulo: 'Vitaminas poderosas.pdf', id: '1NqdZUgen8c9sAeeqBGpuWVpyfdHm7oyR' },
     { key: 'mounjaro', titulo: 'Té casero Mounjaro Natural.pdf', id: '1ouMQO8Zbo57qjLCuQec10I749pTAc_wT' },
@@ -853,7 +857,7 @@
         : ('onclick="window.__pqAbrirPdf(\'' + pdf.id + '\',\'' + tituloTraduzido.replace(/'/g, "\\'") + '\')"');
       return '<div ' + onClickAttr + ' style="cursor:pointer;background:#1a1035;border-radius:12px;overflow:hidden;border:1px solid rgba(212,175,55,0.15);transition:transform 0.15s;active:scale-95;position:relative;" onmousedown="this.style.transform=\'scale(0.97)\'" onmouseup="this.style.transform=\'scale(1)\'" ontouchstart="this.style.transform=\'scale(0.97)\'" ontouchend="this.style.transform=\'scale(1)\'">'
         + '<div style="width:100%;aspect-ratio:3/4;overflow:hidden;background:#2a1a40;position:relative;' + (bloqueado ? 'filter:blur(4px);' : '') + '">'
-        + '<img src="' + thumb + '" alt="' + tituloTraduzido + '" data-pq-pdf-id="' + pdf.id + '" data-pq-pdf-key="' + pdf.key + '" data-pq-fallback="0" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="window.__pqPdfThumbFallback(this,\'' + pdf.id + '\')">'
+        + '<img src="' + thumb + '" alt="' + tituloTraduzido + '" data-pq-pdf-id="' + pdf.id + '" data-pq-pdf-key="' + (pdf.coverKey || pdf.key) + '" data-pq-fallback="0" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;" onerror="window.__pqPdfThumbFallback(this,\'' + pdf.id + '\')">'
         + '<div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:linear-gradient(135deg,#2a1a40,#1a1035);flex-direction:column;gap:8px;">'
         + '<span style="font-size:40px">📄</span>'
         + '</div>'
