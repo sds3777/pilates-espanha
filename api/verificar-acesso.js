@@ -137,7 +137,7 @@ module.exports = async (req, res) => {
     return res.status(400).json({
       acesso: false,
       motivo: 'DADOS_INVALIDOS',
-      mensagem: 'Los datos informados no son válidos.',
+      mensagem: 'Los datos introducidos no son válidos.',
     });
   }
 
@@ -145,7 +145,7 @@ module.exports = async (req, res) => {
     return res.status(400).json({
       acesso: false,
       motivo: 'DADOS_INVALIDOS',
-      mensagem: 'Los datos informados no son válidos.',
+      mensagem: 'Los datos introducidos no son válidos.',
     });
   }
 
@@ -204,7 +204,7 @@ module.exports = async (req, res) => {
       return res.status(200).json({
         acesso: false,
         motivo: 'NOME_DUPLICADO',
-        mensagem: 'Existe más de un acceso con este nombre. Entra con el correo usado en la compra.',
+        mensagem: 'Existe más de un acceso con este nombre. Entra con el correo utilizado en la compra.',
       });
     }
   }

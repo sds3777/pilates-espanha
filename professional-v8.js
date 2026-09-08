@@ -262,7 +262,7 @@
       var saved = localStorage.getItem('pilates_lang');
       if (valid.indexOf(saved) !== -1) return saved;
     } catch (error) {}
-    return 'es-CO';
+    return 'es-ES';
   }
 
   function dialectText(text, lang) {
@@ -282,7 +282,8 @@
       return value.replace(/Completaste/g, 'Has completado').replace(/completaste/g, 'has completado')
         .replace(/Llegaste/g, 'Has llegado').replace(/llegaste/g, 'has llegado')
         .replace(/Practicaste/g, 'Has practicado').replace(/practicaste/g, 'has practicado')
-        .replace(/¡Felicidades!/g, '¡Enhorabuena!');
+        .replace(/¡Felicidades!/g, '¡Enhorabuena!')
+        .replace(/Nuevas clases en producción/g, 'Nuevas clases en preparación');
     }
     if (lang === 'es-AR') {
       return value.replace(/\bAprende\b/g, 'Aprendé').replace(/\baprende\b/g, 'aprendé')

@@ -31,7 +31,7 @@
       var saved = localStorage.getItem('pilates_lang');
       if (valid.indexOf(saved) !== -1) return saved;
     } catch (error) {}
-    return 'es-CO';
+    return 'es-ES';
   }
 
   function demoDialectText(text, lang) {
@@ -48,7 +48,14 @@
       value = replaceWord(value, /celular/gi, 'móvil');
       value = replaceWord(value, /computadora/gi, 'ordenador');
       value = replaceWord(value, /jugos/gi, 'zumos');
-      return value.replace(/¿notaste/g, '¿has notado').replace(/que notaste/g, 'que has notado');
+      value = replaceWord(value, /acostada/gi, 'tumbada');
+      return value.replace(/Hernia de disco/g, 'Hernia discal').replace(/hernia de disco/g, 'hernia discal')
+        .replace(/alguna condición de salud/g, 'algún problema de salud')
+        .replace(/Otra condición/g, 'Otro problema de salud')
+        .replace(/ni condiciones/g, 'ni problemas de salud')
+        .replace(/¿notaste/g, '¿has notado').replace(/que notaste/g, 'que has notado')
+        .replace(/No noté/g, 'No he notado').replace(/no noté/g, 'no he notado')
+        .replace(/bajar de peso/g, 'perder peso').replace(/subir de peso/g, 'ganar peso');
     }
     if (lang === 'es-AR') {
       return value.replace(/\bcuéntanos\b/g, 'contanos').replace(/\bCuéntanos\b/g, 'Contanos')

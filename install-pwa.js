@@ -36,18 +36,21 @@
       var lang = localStorage.getItem('pilates_lang');
       if (INSTALL_I18N[lang]) return lang;
     } catch (error) {}
-    return 'es-CO';
+    return 'es-ES';
   }
 
   function currentTexts() {
-    return INSTALL_I18N[getCurrentLang()] || INSTALL_I18N['es-CO'];
+    return INSTALL_I18N[getCurrentLang()] || INSTALL_I18N['es-ES'];
   }
 
   function installDialectText(text) {
     var lang = getCurrentLang();
     if (typeof text !== 'string') return text;
     if (lang === 'es-ES') {
-      return text.replace(/\bcelular\b/gi, 'móvil').replace(/\bcomputadora\b/gi, 'ordenador');
+      return text.replace(/\bcelular\b/gi, 'móvil')
+        .replace(/\bcomputadora\b/gi, 'ordenador')
+        .replace(/\bToca\b/g, 'Pulsa').replace(/\btoca\b/g, 'pulsa')
+        .replace(/\bAgregar\b/g, 'Añadir').replace(/\bagregar\b/g, 'añadir');
     }
     if (lang === 'es-AR') {
       return text.replace(/\bAbre\b/g, 'Abrí').replace(/\babre\b/g, 'abrí')

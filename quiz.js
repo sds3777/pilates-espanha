@@ -44,7 +44,7 @@
   var IDIOMAS_VALIDOS = ['es-ES', 'es-AR', 'es-MX', 'es-CO', 'es-PE', 'es-CL'];
 
   function getLangAtual() {
-    var lang = 'es-CO';
+    var lang = 'es-ES';
     try {
       var salvo = localStorage.getItem(LANG_KEY);
       if (IDIOMAS_VALIDOS.indexOf(salvo) !== -1) return salvo;
@@ -201,8 +201,16 @@
       return t.replace(/\bcelular\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Móvil' : 'móvil'; })
         .replace(/\bcomputadora\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Ordenador' : 'ordenador'; })
         .replace(/\bjugos\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Zumos' : 'zumos'; })
-        .replace(/Bonos Exclusivos/g, 'Extras exclusivos')
+        .replace(/Bonos Exclusivos/g, 'Extras exclusivos').replace(/bonos exclusivos/g, 'extras exclusivos')
         .replace(/Materiales extra/g, 'Material adicional')
+        .replace(/\bIngresa\b/g, 'Introduce').replace(/\bingresa\b/g, 'introduce')
+        .replace(/\bIngresar\b/g, 'Entrar')
+        .replace(/Clases en vivo/g, 'Clases en directo').replace(/clases en vivo/g, 'clases en directo')
+        .replace(/datos informados/g, 'datos introducidos')
+        .replace(/correo usado/g, 'correo utilizado')
+        .replace(/ya bajé 8 kilos/g, 'he perdido 8 kilos')
+        .replace(/algún equipo/g, 'algún material')
+        .replace(/equipos especiales/g, 'material especial')
         .replace(/^Bonos$/, 'Extras');
     }
     if (lang === 'es-AR') {
@@ -1068,8 +1076,8 @@
     oferta.querySelectorAll('span,p,strong,div').forEach(function (el) {
       if (el.children.length) return;
       var texto = (el.textContent || '').trim();
-      if (texto === '490 MXN') el.setAttribute('data-pq-old-price', '1');
-      if (texto === '150 MXN') el.setAttribute('data-pq-new-price', '1');
+      if (texto === '59,90 €') el.setAttribute('data-pq-old-price', '1');
+      if (texto === '14,90 €') el.setAttribute('data-pq-new-price', '1');
     });
     var garantia = oferta.querySelector('img[src*="garantia"]');
     if (garantia) {
