@@ -6,7 +6,7 @@
   var ACHIEVEMENTS_KEY = 'pilatesAchievements';
   var STREAK_KEY = 'pilatesStreak';
   var MODULE_GUIDE_KEY = 'pilates_module_guide_seen_v1';
-  var IS_DEMO = ['/teste', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
+  var IS_DEMO = ['/demo', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
   var TOTAL_CLASSES = 89;
   var AVATAR_COUNT = 20;
   var scheduled = false;

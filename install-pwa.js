@@ -14,7 +14,7 @@
   if (!installBtn || !installHelp || !installHelpClose || !installPopup ||
       !installAccept || !installDecline || !languagePopup || !languageConfirm) return;
 
-  var MODO_TESTE = ['/teste', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
+  var MODO_TESTE = ['/demo', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
   var LANGUAGE_DONE_KEY = 'pq_language_selected';
   var SESSION_DISMISS_KEY = 'pq_install_popup_dismissed';
   var installed = false;

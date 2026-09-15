@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var IS_DEMO = ['/teste', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
+  var IS_DEMO = ['/demo', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
   if (!IS_DEMO) return;
 
   var STORAGE_KEY = 'pilates_demo_quiz_v2';

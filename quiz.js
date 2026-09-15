@@ -4,14 +4,14 @@
   var LANG_KEY = 'pilates_lang';
   var LANG_CONFIRMED_KEY = 'pq_language_selected';
 
-  // ─── Modo demonstração (/teste) ──────────────────
-  // Na rota /teste o React já abre sozinho no modo DEMO nativo (aulas
+  // ─── Modo demonstração (/demo) ──────────────────
+  // Na rota /demo o React já abre sozinho no modo DEMO nativo (aulas
   // liberadas/bloqueadas e oferta tratadas dentro do próprio bundle).
   // Aqui apenas pulamos totalmente a tela de login e a checagem no
   // Supabase, liberando a nav bar (Clases/Bonos) direto — sem tocar em
   // mais nada do fluxo normal, que continua abaixo intacto para as
   // demais rotas.
-  var MODO_TESTE = ['/teste', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
+  var MODO_TESTE = ['/demo', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
   if (MODO_TESTE) document.documentElement.classList.add('pq-demo-mode');
 
   // Evita que as aulas protegidas apareçam por um instante antes da
