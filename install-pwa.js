@@ -14,7 +14,7 @@
   if (!installBtn || !installHelp || !installHelpClose || !installPopup ||
       !installAccept || !installDecline || !languagePopup || !languageConfirm) return;
 
-  var MODO_TESTE = window.location.pathname.replace(/\/+$/, '') === '/teste';
+  var MODO_TESTE = ['/teste', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
   var LANGUAGE_DONE_KEY = 'pq_language_selected';
   var SESSION_DISMISS_KEY = 'pq_install_popup_dismissed';
   var installed = false;
@@ -36,21 +36,18 @@
       var lang = localStorage.getItem('pilates_lang');
       if (INSTALL_I18N[lang]) return lang;
     } catch (error) {}
-    return 'es-ES';
+    return 'es-CO';
   }
 
   function currentTexts() {
-    return INSTALL_I18N[getCurrentLang()] || INSTALL_I18N['es-ES'];
+    return INSTALL_I18N[getCurrentLang()] || INSTALL_I18N['es-CO'];
   }
 
   function installDialectText(text) {
     var lang = getCurrentLang();
     if (typeof text !== 'string') return text;
     if (lang === 'es-ES') {
-      return text.replace(/\bcelular\b/gi, 'móvil')
-        .replace(/\bcomputadora\b/gi, 'ordenador')
-        .replace(/\bToca\b/g, 'Pulsa').replace(/\btoca\b/g, 'pulsa')
-        .replace(/\bAgregar\b/g, 'Añadir').replace(/\bagregar\b/g, 'añadir');
+      return text.replace(/\bcelular\b/gi, 'móvil').replace(/\bcomputadora\b/gi, 'ordenador');
     }
     if (lang === 'es-AR') {
       return text.replace(/\bAbre\b/g, 'Abrí').replace(/\babre\b/g, 'abrí')
@@ -153,7 +150,7 @@
   }
 
   function showInstallBtn() {
-    if (isAppInstalled()) {
+    if (MODO_TESTE || isAppInstalled()) {
       hideInstallBtn();
       return;
     }

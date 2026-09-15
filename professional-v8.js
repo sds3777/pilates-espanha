@@ -6,7 +6,7 @@
   var ACHIEVEMENTS_KEY = 'pilatesAchievements';
   var STREAK_KEY = 'pilatesStreak';
   var MODULE_GUIDE_KEY = 'pilates_module_guide_seen_v1';
-  var IS_DEMO = window.location.pathname.replace(/\/+$/, '') === '/teste';
+  var IS_DEMO = ['/teste', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
   var TOTAL_CLASSES = 89;
   var AVATAR_COUNT = 20;
   var scheduled = false;
@@ -262,7 +262,7 @@
       var saved = localStorage.getItem('pilates_lang');
       if (valid.indexOf(saved) !== -1) return saved;
     } catch (error) {}
-    return 'es-ES';
+    return 'es-CO';
   }
 
   function dialectText(text, lang) {
@@ -282,8 +282,7 @@
       return value.replace(/Completaste/g, 'Has completado').replace(/completaste/g, 'has completado')
         .replace(/Llegaste/g, 'Has llegado').replace(/llegaste/g, 'has llegado')
         .replace(/Practicaste/g, 'Has practicado').replace(/practicaste/g, 'has practicado')
-        .replace(/¡Felicidades!/g, '¡Enhorabuena!')
-        .replace(/Nuevas clases en producción/g, 'Nuevas clases en preparación');
+        .replace(/¡Felicidades!/g, '¡Enhorabuena!');
     }
     if (lang === 'es-AR') {
       return value.replace(/\bAprende\b/g, 'Aprendé').replace(/\baprende\b/g, 'aprendé')

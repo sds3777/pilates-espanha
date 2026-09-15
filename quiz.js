@@ -11,7 +11,7 @@
   // Supabase, liberando a nav bar (Clases/Bonos) direto — sem tocar em
   // mais nada do fluxo normal, que continua abaixo intacto para as
   // demais rotas.
-  var MODO_TESTE = window.location.pathname.replace(/\/+$/, '') === '/teste';
+  var MODO_TESTE = ['/teste', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
   if (MODO_TESTE) document.documentElement.classList.add('pq-demo-mode');
 
   // Evita que as aulas protegidas apareçam por um instante antes da
@@ -44,7 +44,8 @@
   var IDIOMAS_VALIDOS = ['es-ES', 'es-AR', 'es-MX', 'es-CO', 'es-PE', 'es-CL'];
 
   function getLangAtual() {
-    var lang = 'es-ES';
+    if (window.location.pathname.replace(/\/+$/, '') === '/demo-mx') return 'es-MX';
+    var lang = 'es-CO';
     try {
       var salvo = localStorage.getItem(LANG_KEY);
       if (IDIOMAS_VALIDOS.indexOf(salvo) !== -1) return salvo;
@@ -201,16 +202,8 @@
       return t.replace(/\bcelular\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Móvil' : 'móvil'; })
         .replace(/\bcomputadora\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Ordenador' : 'ordenador'; })
         .replace(/\bjugos\b/gi, function(m){ return m[0] === m[0].toUpperCase() ? 'Zumos' : 'zumos'; })
-        .replace(/Bonos Exclusivos/g, 'Extras exclusivos').replace(/bonos exclusivos/g, 'extras exclusivos')
+        .replace(/Bonos Exclusivos/g, 'Extras exclusivos')
         .replace(/Materiales extra/g, 'Material adicional')
-        .replace(/\bIngresa\b/g, 'Introduce').replace(/\bingresa\b/g, 'introduce')
-        .replace(/\bIngresar\b/g, 'Entrar')
-        .replace(/Clases en vivo/g, 'Clases en directo').replace(/clases en vivo/g, 'clases en directo')
-        .replace(/datos informados/g, 'datos introducidos')
-        .replace(/correo usado/g, 'correo utilizado')
-        .replace(/ya bajé 8 kilos/g, 'he perdido 8 kilos')
-        .replace(/algún equipo/g, 'algún material')
-        .replace(/equipos especiales/g, 'material especial')
         .replace(/^Bonos$/, 'Extras');
     }
     if (lang === 'es-AR') {
@@ -1076,8 +1069,8 @@
     oferta.querySelectorAll('span,p,strong,div').forEach(function (el) {
       if (el.children.length) return;
       var texto = (el.textContent || '').trim();
-      if (texto === '59,90 €') el.setAttribute('data-pq-old-price', '1');
-      if (texto === '14,90 €') el.setAttribute('data-pq-new-price', '1');
+      if (['490 MXN', '599 MXN', '59,90 €'].indexOf(texto) !== -1) el.setAttribute('data-pq-old-price', '1');
+      if (['150 MXN', '149 MXN', '14,90 €'].indexOf(texto) !== -1) el.setAttribute('data-pq-new-price', '1');
     });
     var garantia = oferta.querySelector('img[src*="garantia"]');
     if (garantia) {

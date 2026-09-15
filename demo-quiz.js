@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var IS_DEMO = window.location.pathname.replace(/\/+$/, '') === '/teste';
+  var IS_DEMO = ['/teste', '/demo-mx'].indexOf(window.location.pathname.replace(/\/+$/, '')) !== -1;
   if (!IS_DEMO) return;
 
   var STORAGE_KEY = 'pilates_demo_quiz_v2';
@@ -26,12 +26,13 @@
   var baseAttributes = new WeakMap();
 
   function getDemoLang() {
+    if (window.location.pathname.replace(/\/+$/, '') === '/demo-mx') return 'es-MX';
     var valid = ['es-ES', 'es-AR', 'es-MX', 'es-CO', 'es-PE', 'es-CL'];
     try {
       var saved = localStorage.getItem('pilates_lang');
       if (valid.indexOf(saved) !== -1) return saved;
     } catch (error) {}
-    return 'es-ES';
+    return 'es-CO';
   }
 
   function demoDialectText(text, lang) {
@@ -48,14 +49,7 @@
       value = replaceWord(value, /celular/gi, 'móvil');
       value = replaceWord(value, /computadora/gi, 'ordenador');
       value = replaceWord(value, /jugos/gi, 'zumos');
-      value = replaceWord(value, /acostada/gi, 'tumbada');
-      return value.replace(/Hernia de disco/g, 'Hernia discal').replace(/hernia de disco/g, 'hernia discal')
-        .replace(/alguna condición de salud/g, 'algún problema de salud')
-        .replace(/Otra condición/g, 'Otro problema de salud')
-        .replace(/ni condiciones/g, 'ni problemas de salud')
-        .replace(/¿notaste/g, '¿has notado').replace(/que notaste/g, 'que has notado')
-        .replace(/No noté/g, 'No he notado').replace(/no noté/g, 'no he notado')
-        .replace(/bajar de peso/g, 'perder peso').replace(/subir de peso/g, 'ganar peso');
+      return value.replace(/¿notaste/g, '¿has notado').replace(/que notaste/g, 'que has notado');
     }
     if (lang === 'es-AR') {
       return value.replace(/\bcuéntanos\b/g, 'contanos').replace(/\bCuéntanos\b/g, 'Contanos')
